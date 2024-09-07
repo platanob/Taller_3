@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Login from './frontend/src/screens/login'; 
+import HorasAgendadas from './frontend/src/screens/HorasAgendadas';
+import Login from './frontend/src/screens/login';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +16,10 @@ export default function App() {
           component={Login}
           options={{ title: 'Inicio de sesión' }}
         />
+        <Stack.Screen 
+        name="HorasAgendadas" 
+        component={HorasAgendadas} 
+        options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
