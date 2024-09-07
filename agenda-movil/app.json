@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "agenda-movil",
+    "slug": "agenda-movil",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./frontend/assets/img/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./frontend/assets/img/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./frontend/assets/img/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./frontend/assets/img/favicon.png"
+    }
+  }
+}
