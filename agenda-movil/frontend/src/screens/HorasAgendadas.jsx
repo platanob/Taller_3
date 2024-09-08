@@ -8,7 +8,7 @@ const HorasAgendadas = () => {
       <View style={styles.header}>
         {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
-          source={require('../assets/img/logo_tem.png')} 
+          source={require('../assets/img/logo_muni.jpg')} 
           style={styles.logo}
           resizeMode="contain"
         />
