@@ -1,13 +1,19 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
 
-export default function Login() {  
+export default function Login() {
   return (
     <ImageBackground
       source={require('../assets/img/fondo.jpg')}
       style={styles.background}
     >
       <View style={styles.overlay}>
+        {/* Integración del logo */}
+        <Image
+          source={require('../assets/img/logo_muni.jpg')}
+          style={styles.logo}
+        />
+
         <Text style={styles.title}>Inicio de sesión</Text>
 
         <Text style={styles.label}>RUT</Text>
@@ -48,9 +54,15 @@ const styles = StyleSheet.create({
   overlay: {
     padding: 20,
     borderRadius: 20,
-    backgroundColor: '#A9B4C2',
+    backgroundColor: 'rgba(240, 205, 117, 0.9),',
     width: '80%',
     alignItems: 'center',
+  },
+  logo: {
+    width: 150, 
+    height: 150,
+    resizeMode: 'contain',
+    marginBottom: 20, 
   },
   title: {
     fontSize: 30,

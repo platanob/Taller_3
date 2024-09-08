@@ -12,7 +12,7 @@ export default function App() {
         <Stack.Screen
           name="Login"
           component={Login}
-          options={{ title: 'Inicio de sesión' }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
