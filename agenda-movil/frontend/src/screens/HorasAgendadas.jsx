@@ -1,10 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const HorasAgendadas = () => {
+
+  const navegacion = useNavigation();
+
+  const handleInfoPress = (fecha, hora, lugar, servicio, profesional) => {
+    navegacion.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Sección superior */}
       <View style={styles.header}>
         {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
@@ -16,13 +22,15 @@ const HorasAgendadas = () => {
 
       <Text style={styles.title}>Horas agendadas</Text>
 
-      {/* Tarjetas de horas */}
       <View style={styles.card}>
-        <Text style={styles.timeText}>AMANECER</Text>
         <Text style={styles.dateText}>11/03/24</Text>
+        <Text style={styles.timeText}>AMANECER</Text>
         <Text style={styles.serviceText}>PELUQUERIA</Text>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.infoButton}>
+          <TouchableOpacity 
+            style={styles.infoButton} 
+            onPress={() => handleInfoPress('11/03/24', '08:00', 'AMANECER', 'PELUQUERIA', 'Dr. Benjamin Carrasco')}
+          >
             <Text style={styles.buttonText}>INFORMACION</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton}>
@@ -31,12 +39,16 @@ const HorasAgendadas = () => {
         </View>
       </View>
 
+      {/* Tarjeta 2 */}
       <View style={styles.card}>
-        <Text style={styles.timeText}>AMANECER</Text>
         <Text style={styles.dateText}>13/03/24</Text>
+        <Text style={styles.placeText}>AMANECER</Text>
         <Text style={styles.serviceText}>PODOLOGIA</Text>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.infoButton}>
+          <TouchableOpacity 
+            style={styles.infoButton} 
+            onPress={() => handleInfoPress('13/03/24', '10:20', 'AMANECER', 'PODOLOGIA', 'Dr. Jose Ignacio Delpino')}
+          >
             <Text style={styles.buttonText}>INFORMACION</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton}>
@@ -73,7 +85,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   title: {
-    fontSize: 30,
+    fontSize: 35,
     fontWeight: 'bold',
     color: 'black',
     marginVertical: 20,
@@ -99,6 +111,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   timeText: {
+    position: 'absolute', 
+    top: 15, 
+    right: 15, 
+    color: 'red',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  placeText: {
     position: 'absolute', 
     top: 15, 
     right: 15, 
