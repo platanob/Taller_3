@@ -1,11 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 
 const HoraDetalle = ({ route, navigation }) => {
   const { fecha, hora, lugar, servicio, profesional } = route.params;
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.header}>
+        {/* Logo de Temuco en la esquina superior derecha */}
+        <Image 
+          source={require('../assets/img/logo_muni.jpg')} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
       <Text style={styles.title}>Detalles de la Cita</Text>
 
       <View style={styles.card}>
@@ -19,22 +27,39 @@ const HoraDetalle = ({ route, navigation }) => {
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.buttonText}>Volver</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#55A9F9',
     alignItems: 'center',
     padding: 20,
+    paddingTop: 100,
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#260e86',
+    height: 100,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    padding: 10,
+    zIndex: 1,
+  },
+  logo: {
+    width: 100,
+    height: 40,
   },
   title: {
-    fontSize: 30,
+    fontSize: 35,
     fontWeight: 'bold',
     color: 'black',
-    marginBottom: 20,
+    marginVertical: 20,
   },
   card: {
     backgroundColor: '#81C3FF',
@@ -52,7 +77,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   detailText: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 5,
   },
@@ -65,10 +90,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    height: 50,
+    width: 100
   },
   buttonText: {
     color: 'black',
     fontWeight: 'bold',
+    fontSize: 24
   },
 });
 
