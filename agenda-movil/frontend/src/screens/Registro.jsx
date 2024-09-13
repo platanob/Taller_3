@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Registro() {
+  const navigation = useNavigation();
   return (
     <ImageBackground
       source={require('../assets/img/fondo.jpg')}
@@ -58,7 +60,8 @@ export default function Registro() {
           <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button}
+         onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>CANCELAR</Text>
         </TouchableOpacity>
       </View>
