@@ -1,9 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
-export default function Login() {
-  const navigation = useNavigation();
+export default function Registro() {
   return (
     <ImageBackground
       source={require('../assets/img/fondo.jpg')}
@@ -16,12 +14,27 @@ export default function Login() {
           style={styles.logo}
         />
 
-        <Text style={styles.title}>Inicio de sesión</Text>
+        <Text style={styles.title}>Registro de Usuario</Text>
+
+        <Text style={styles.label}>Nombre Completo</Text>
+        <TextInput
+          placeholder="Nombre Completo"
+          placeholderTextColor="#000"
+          style={styles.input}
+        />
 
         <Text style={styles.label}>RUT</Text>
         <TextInput
           placeholder="RUT"
           placeholderTextColor="#000"
+          style={styles.input}
+        />
+
+        <Text style={styles.label}>Correo Electrónico</Text>
+        <TextInput
+          placeholder="Correo Electrónico"
+          placeholderTextColor="#000"
+          keyboardType="email-address"
           style={styles.input}
         />
 
@@ -33,17 +46,21 @@ export default function Login() {
           style={styles.input}
         />
 
+        <Text style={styles.label}>Confirmar Contraseña</Text>
+        <TextInput
+          placeholder="Confirmar Contraseña"
+          placeholderTextColor="#000"
+          secureTextEntry
+          style={styles.input}
+        />
+
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>INGRESAR</Text>
+          <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Registro')}
-        >
-          <Text style={styles.buttonText}>REGISTRO</Text>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>CANCELAR</Text>
         </TouchableOpacity>
-
       </View>
     </ImageBackground>
   );
@@ -60,7 +77,7 @@ const styles = StyleSheet.create({
   overlay: {
     padding: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(240, 205, 117, 0.9),',
+    backgroundColor: 'rgba(240, 205, 117, 0.9)',
     width: '80%',
     alignItems: 'center',
   },
@@ -110,4 +127,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
