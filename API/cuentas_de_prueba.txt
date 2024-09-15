@@ -1,0 +1,20 @@
+{
+    "rut": "12.345.678-9",
+    "contraseña": "miPassword123!",
+    "nombre": "Juan Pérez"
+  },
+  {
+    "rut": "11.234.567-8",
+    "contraseña": "securePass456",
+    "nombre": "María González"
+  },
+  {
+    "rut": "10.123.456-7",
+    "contraseña": "password789!",
+    "nombre": "Pedro Ramírez"
+  },
+  {
+    "rut": "19.876.543-2",
+    "contraseña": "passWord890!",
+    "nombre": "Ana Fernández"
+  },

@@ -11,8 +11,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Conexión a MongoDB
-client = MongoClient('mongodb://localhost:27017/')  # Cambia esto si usas una URL de MongoDB en la nube
-db = client['mi_base_de_datos']  # Nombre de la base de datos
+client = MongoClient('mongodb+srv://benja:benja@cluster0.qzervft.mongodb.net/')  # Cambia esto si usas una URL de MongoDB en la nube
+db = client['APP']  # Nombre de la base de datos
 users_collection = db['usuarios']  # Colección donde se almacenan los usuarios
 
 # Clase de usuario con Flask-Login
@@ -34,8 +34,8 @@ def load_user(user_id):
 def register():
     data = request.get_json()
     rut = data.get('rut')
-    password = data.get('password')
-    name = data.get('name')
+    password = data.get('contraseña')
+    name = data.get('nombre')
 
     if not rut or not password or not name:
         return jsonify({"error": "RUT, nombre y contraseña son requeridos"}), 400
@@ -59,7 +59,7 @@ def register():
 def login():
     data = request.get_json()
     rut = data.get('rut')
-    password = data.get('password')
+    password = data.get('contraseña')
 
     if not rut or not password:
         return jsonify({"error": "RUT y contraseña son requeridos"}), 400
