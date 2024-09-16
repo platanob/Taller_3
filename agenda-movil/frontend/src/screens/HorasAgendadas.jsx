@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -52,7 +52,13 @@ const HorasAgendadas = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Cargando citas...</Text>
+        <Image 
+          source={require('../assets/img/fondo.jpg')} 
+          style={styles.backgroundImage} 
+          resizeMode="cover"
+        />
+        <ActivityIndicator size="large" color="#260e86" />
+        <Text style={styles.loadingText}>Cargando citas...</Text>
       </View>
     );
   }
@@ -196,6 +202,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F0F8FF',
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#260e86',
+    marginTop: 10,
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    opacity: 0.1,
   },
 });
 
