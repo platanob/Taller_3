@@ -29,7 +29,7 @@ const HorasAgendadas = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.infoButton} 
-            onPress={() => handleInfoPress('11/03/24', '08:00', 'AMANECER', 'PELUQUERIA', 'Dr. Benjamin Carrasco')}
+            onPress={() => handleInfoPress('11/03/24', '08:00', 'AMANECER', 'PELUQUERIA', 'Dr. Jose Perez')}
           >
             <Text style={styles.buttonText}>INFORMACION</Text>
           </TouchableOpacity>
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 100,
-    height: 40,
+    height: 80,
   },
   title: {
     fontSize: 35,
