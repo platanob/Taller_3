@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const HoraDetalle = ({ route, navigation }) => {
   const { fecha, hora, lugar, servicio, profesional } = route.params;
@@ -7,6 +8,11 @@ const HoraDetalle = ({ route, navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+        {/* Botón de Volver en la esquina superior izquierda */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={30} color="black" />
+        </TouchableOpacity>
+
         {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
           source={require('../assets/img/logo_muni.jpg')} 
@@ -14,6 +20,7 @@ const HoraDetalle = ({ route, navigation }) => {
           resizeMode="contain"
         />
       </View>
+
       <Text style={styles.title}>Detalles de la Cita</Text>
 
       <View style={styles.card}>
@@ -23,10 +30,6 @@ const HoraDetalle = ({ route, navigation }) => {
         <Text style={styles.detailText}><Text style={styles.label}>Servicio: </Text>{servicio}</Text>
         <Text style={styles.detailText}><Text style={styles.label}>Profesional a Cargo: </Text>{profesional}</Text>
       </View>
-
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.buttonText}>Volver</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -46,12 +49,15 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#260e86',
     height: 100,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 10,
     zIndex: 1,
   },
   logo: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
     width: 100,
     height: 80,
   },
@@ -86,17 +92,12 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   backButton: {
-    backgroundColor: '#fff',
+    position: 'absolute',
+    borderRadius: 10,
+    top: 10,
+    left: 10,
+    backgroundColor: '#81C3FF',
     padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    height: 50,
-    width: 100
-  },
-  buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
-    fontSize: 24
   },
 });
 

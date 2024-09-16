@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Picker } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+//import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Horarios = () => {
   const navegacion = useNavigation();
@@ -62,6 +63,10 @@ const Horarios = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+        {/* Botón de Volver en la esquina superior izquierda */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
+          <Icon name="arrow-back" size={30} color="black" />
+        </TouchableOpacity>
         <Image 
           source={require('../assets/img/logo_muni.jpg')} 
           style={styles.logo}
@@ -284,6 +289,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 8,
+  },
+  backButton: {
+    position: 'absolute',
+    borderRadius: 10,
+    top: 10,
+    left: 10,
+    backgroundColor: '#81C3FF',
+    padding: 10,
   },
 });
 

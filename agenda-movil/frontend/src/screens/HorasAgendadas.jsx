@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const HorasAgendadas = () => {
 
@@ -12,6 +13,10 @@ const HorasAgendadas = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+        {/* Botón de Volver en la esquina superior izquierda */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
+          <Icon name="arrow-back" size={30} color="black" />
+        </TouchableOpacity>
         {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
           source={require('../assets/img/logo_muni.jpg')} 
@@ -153,6 +158,14 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
     fontWeight: 'bold',
+  },
+  backButton: {
+    position: 'absolute',
+    borderRadius: 10,
+    top: 10,
+    left: 10,
+    backgroundColor: '#81C3FF',
+    padding: 10,
   },
 });
 
