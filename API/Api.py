@@ -115,6 +115,19 @@ def nuevashoras():
     # Retornar la información de la cita creada con el ID generado por MongoDB
     return jsonify({'cita_id': str(result.inserted_id)}), 201
 
+@app.route('/api/citas_disponibles', methods=['GET'])
+@login_required  # Requiere que el usuario haya iniciado sesión
+def citas_disponibles():
+    # Obtener todas las citas que están disponibles
+    citas = citas_collection.find({'disponible': True})
+
+    # Convertir los resultados a una lista de diccionarios
+    citas_list = []
+    for cita in citas:
+        cita['_id'] = str(cita['_id'])  # Convertir ObjectId a string para JSON
+        citas_list.append(cita)
+
+    return jsonify({'citas_disponibles': citas_list}), 200
 
 
 @app.route('/api/agendar', methods=['POST'])
