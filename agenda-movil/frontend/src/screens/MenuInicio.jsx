@@ -1,9 +1,35 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Asegúrate de haber instalado este paquete
 
 const MenuInicio = () => {
   const navigation = useNavigation();
+const handleLogout = async () => {
+  try {
+    const token = await AsyncStorage.getItem('access_token'); // Obtén el token almacenado
+
+    const response = await fetch('http://127.0.0.1:5000/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Incluye el token en el encabezado
+      },
+      credentials: 'include', // Solo si tu backend requiere cookies, de lo contrario, puedes eliminar esta línea
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      Alert.alert('Éxito', 'Has cerrado sesión exitosamente');
+      await AsyncStorage.removeItem('access_token'); // Elimina el token del almacenamiento local
+      navigation.navigate('Login');
+    } else {
+      Alert.alert('Error', data.message || 'Error al cerrar sesión');
+    }
+  } catch (error) {
+    Alert.alert('Error', 'Hubo un problema con la conexión.');
+  }
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -19,7 +45,7 @@ const MenuInicio = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('HorariosDisponibles')} // Pantalla aun no desarrollada
+        onPress={() => navigation.navigate('HorariosDisponibles')} // Pantalla aún no desarrollada
       >
         <Text style={styles.buttonText}>Horarios Disponibles</Text>
       </TouchableOpacity>
@@ -30,8 +56,12 @@ const MenuInicio = () => {
       >
         <Text style={styles.buttonText}>Horas Agendadas</Text>
       </TouchableOpacity>
+
+      {/* Botón para cerrar sesión */}
       <TouchableOpacity
-        style={styles.button}>
+        style={styles.button}
+        onPress={handleLogout}
+      >
         <Text style={styles.buttonText}>Cerrar Sesión</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -45,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 100,
-    },
+  },
   header: {
     position: 'absolute',
     top: 0,
@@ -57,17 +87,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     padding: 10,
     zIndex: 1,
-    },
+  },
   logo: {
     width: 100,
     height: 80,
-    },
+  },
   title: {
     fontSize: 35,
     fontWeight: 'bold',
     color: 'black',
     marginVertical: 20,
-      },
+  },
   button: {
     backgroundColor: '#81C3FF', 
     padding: 15,

@@ -1,9 +1,48 @@
-import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa AsyncStorage para guardar el token
 
 export default function Login() {
   const navigation = useNavigation();
+  
+  // Definir estado para rut y contraseña por separado
+  const [rut, setRut] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    if (!rut || !password) {
+      Alert.alert('Error', 'Por favor, ingresa tu RUT y contraseña.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rut: rut,
+          contraseña: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Guarda el token en AsyncStorage
+        await AsyncStorage.setItem('access_token', data.access_token);
+        Alert.alert('Éxito', 'Inicio de sesión exitoso');
+        navigation.navigate('MenuInicio');
+      } else {
+        Alert.alert('Error', data.message || 'Error al iniciar sesión');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Hubo un problema con la conexión.');
+    }
+  };
+
   return (
     <ImageBackground
       source={require('../assets/img/fondo.jpg')}
@@ -23,6 +62,8 @@ export default function Login() {
           placeholder="RUT"
           placeholderTextColor="#000"
           style={styles.input}
+          value={rut}
+          onChangeText={setRut}  // Actualiza el estado con lo que escriba el usuario
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -31,9 +72,11 @@ export default function Login() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}  // Actualiza el estado con lo que escriba el usuario
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>INGRESAR</Text>
         </TouchableOpacity>
 
@@ -43,7 +86,6 @@ export default function Login() {
         >
           <Text style={styles.buttonText}>REGISTRO</Text>
         </TouchableOpacity>
-
       </View>
     </ImageBackground>
   );
@@ -60,7 +102,7 @@ const styles = StyleSheet.create({
   overlay: {
     padding: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(240, 205, 117, 0.9),',
+    backgroundColor: 'rgba(240, 205, 117, 0.9)', // Corregido
     width: '80%',
     alignItems: 'center',
   },
@@ -110,4 +152,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
