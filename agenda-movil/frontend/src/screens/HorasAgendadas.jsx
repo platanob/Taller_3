@@ -1,23 +1,68 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const HorasAgendadas = () => {
+  const navigation = useNavigation();
+  const [citas, setCitas] = useState([]); // Estado para almacenar las citas
+  const [loading, setLoading] = useState(true); // Para manejar el estado de carga
 
-  const navegacion = useNavigation();
+  useEffect(() => {
+    // Función para obtener las citas desde la API
+    const obtenerCitas = async () => {
+      try {
+        // Obtener el token desde AsyncStorage
+        const token = await AsyncStorage.getItem('access_token');
+        if (!token) {
+          Alert.alert('Error', 'No se encontró el token de autenticación.');
+          return;
+        }
+
+        // Solicitud GET a la API
+        const response = await fetch('http://localhost:5000/api/mis_citas', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setCitas(data.citas); // Almacenar las citas en el estado
+        } else {
+          Alert.alert('Error', data.error || 'Error al obtener las citas');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+      } finally {
+        setLoading(false); // Desactivar el estado de carga
+      }
+    };
+
+    obtenerCitas();
+  }, []);
 
   const handleInfoPress = (fecha, hora, lugar, servicio, profesional) => {
-    navegacion.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
+    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Cargando citas...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        {/* Botón de Volver en la esquina superior izquierda */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={30} color="black" />
         </TouchableOpacity>
-        {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
           source={require('../assets/img/logo_muni.jpg')} 
           style={styles.logo}
@@ -27,40 +72,28 @@ const HorasAgendadas = () => {
 
       <Text style={styles.title}>Horas agendadas</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.dateText}>11/03/24</Text>
-        <Text style={styles.timeText}>AMANECER</Text>
-        <Text style={styles.serviceText}>PELUQUERIA</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.infoButton} 
-            onPress={() => handleInfoPress('11/03/24', '08:00', 'AMANECER', 'PELUQUERIA', 'Dr. Jose Perez')}
-          >
-            <Text style={styles.buttonText}>INFORMACION</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton}>
-            <Text style={styles.buttonText}>CANCELAR</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Tarjeta 2 */}
-      <View style={styles.card}>
-        <Text style={styles.dateText}>13/03/24</Text>
-        <Text style={styles.placeText}>AMANECER</Text>
-        <Text style={styles.serviceText}>PODOLOGIA</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.infoButton} 
-            onPress={() => handleInfoPress('13/03/24', '10:20', 'AMANECER', 'PODOLOGIA', 'Dr. Jose Ignacio Delpino')}
-          >
-            <Text style={styles.buttonText}>INFORMACION</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton}>
-            <Text style={styles.buttonText}>CANCELAR</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {citas.length > 0 ? (
+        citas.map((cita) => (
+          <View key={cita._id} style={styles.card}>
+            <Text style={styles.dateText}>{cita.fecha}</Text>
+            <Text style={styles.timeText}>{cita.locacion}</Text>
+            <Text style={styles.serviceText}>{cita.servicio}</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.infoButton} 
+                onPress={() => handleInfoPress(cita.fecha, cita.hora, cita.locacion, cita.servicio, cita.colaborador)}
+              >
+                <Text style={styles.buttonText}>INFORMACIÓN</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton}>
+                <Text style={styles.buttonText}>CANCELAR</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))
+      ) : (
+        <Text>No tienes citas agendadas.</Text>
+      )}
     </ScrollView>
   );
 };
@@ -123,14 +156,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
-  placeText: {
-    position: 'absolute', 
-    top: 15, 
-    right: 15, 
-    color: 'red',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
   serviceText: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -166,6 +191,11 @@ const styles = StyleSheet.create({
     left: 10,
     backgroundColor: '#81C3FF',
     padding: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
