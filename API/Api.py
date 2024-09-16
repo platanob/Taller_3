@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -14,6 +16,7 @@ login_manager.init_app(app)
 client = MongoClient('mongodb+srv://benja:benja@cluster0.qzervft.mongodb.net/')  # Cambia esto si usas una URL de MongoDB en la nube
 db = client['APP']  # Nombre de la base de datos
 users_collection = db['usuarios']  # Colección donde se almacenan los usuarios
+citas_collection = db['citas']
 
 # Clase de usuario con Flask-Login
 class User(UserMixin):
@@ -85,6 +88,94 @@ def logout():
 @login_required
 def protected():
     return jsonify({"message": f"Acceso permitido. Bienvenido, {current_user.name}!"}), 200
+
+
+@app.route('/api/nuevashoras', methods=['POST'])
+def nuevashoras():
+    # Obtener los datos enviados en el cuerpo de la solicitud
+    data = request.get_json()
+    # Asegurar que se reciban todos los campos necesarios
+    required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador', 'disponible']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Faltan datos necesarios'}), 400
+
+    # Crear un objeto cita
+    cita = {
+        'fecha': data['fecha'],
+        'hora': data['hora'],
+        'locacion': data['locacion'],
+        'servicio': data['servicio'],
+        'colaborador': data['colaborador'],
+        'disponible': True
+    }
+
+    # Insertar la cita en la colección de MongoDB
+    result = citas_collection.insert_one(cita)
+
+    # Retornar la información de la cita creada con el ID generado por MongoDB
+    return jsonify({'cita_id': str(result.inserted_id)}), 201
+
+
+
+@app.route('/api/agendar', methods=['POST'])
+@login_required  # Requiere que el usuario haya iniciado sesión
+def agendar_cita():
+    data = request.get_json()
+
+    # Aseguramos que el campo 'cita_id' esté presente en los datos
+    if 'cita_id' not in data:
+        return jsonify({'error': 'Se requiere el ID de la cita'}), 400
+
+    # Convertimos el cita_id a ObjectId
+    cita_id = data['cita_id']
+
+    try:
+        cita_object_id = ObjectId(cita_id)
+    except:
+        return jsonify({'error': 'ID de cita no válido'}), 400
+
+    # Buscamos la cita en la base de datos
+    cita = citas_collection.find_one({'_id': cita_object_id})
+
+    if not cita:
+        return jsonify({'error': 'Cita no encontrada'}), 404
+
+    # Verificamos si la cita ya está agendada (no disponible)
+    if not cita.get('disponible', True):
+        return jsonify({'error': 'La cita ya está agendada'}), 400
+
+    # Modificar el estado de la cita a 'no disponible' y agregar el ID del usuario que la agendó
+    update_result = citas_collection.update_one(
+        {'_id': cita_object_id},
+        {
+            '$set': {
+                'disponible': False,
+                'usuario_id': str(current_user.get_id())  # Asignar el ID del usuario que agendó la cita
+            }
+        }
+    )
+
+    # Verificamos si la actualización fue exitosa
+    if update_result.modified_count == 1:
+        return jsonify({'message': 'Cita agendada correctamente', 'cita_id': cita_id, 'usuario_id': str(current_user.get_id())}), 200
+    else:
+        return jsonify({'error': 'No se pudo agendar la cita'}), 500
+
+@app.route('/api/mis_citas', methods=['GET'])
+@login_required  # Requiere que el usuario haya iniciado sesión
+def mis_citas():
+    # Obtener el RUT del usuario autenticado
+    usuario_rut = current_user.get_id()
+    # Buscar citas en la base de datos que coincidan con el RUT del usuario
+    citas = citas_collection.find({'usuario_id': usuario_rut})
+
+    # Convertir los resultados a una lista de diccionarios
+    citas_list = []
+    for cita in citas:
+        cita['_id'] = str(cita['_id'])  # Convertir ObjectId a string para JSON
+        citas_list.append(cita)
+
+    return jsonify({'citas': citas_list}), 200
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
