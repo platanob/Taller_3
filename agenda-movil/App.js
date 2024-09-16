@@ -6,7 +6,7 @@ import HorasAgendadas from './frontend/src/screens/HorasAgendadas';
 import HoraDetalle from './frontend/src/screens/HoraDetalle';
 import Login from './frontend/src/screens/login';
 import Registro from './frontend/src/screens/Registro'; 
-
+import Horarios from './frontend/src/screens/HorariosDisponibles';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +31,11 @@ export default function App() {
         <Stack.Screen 
         name="HorasAgendadas" 
         component={HorasAgendadas} 
+        options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+        name="HorariosDisponibles" 
+        component={Horarios}
         options={{ headerShown: false }} 
         />
         <Stack.Screen 
