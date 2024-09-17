@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIn
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient'; // Asegúrate de tener esto instalado
+import { LinearGradient } from 'expo-linear-gradient'; 
 
 const HorasAgendadas = () => {
   const navigation = useNavigation();
@@ -109,7 +109,7 @@ const HorasAgendadas = () => {
           resizeMode="cover"
         />
         <ActivityIndicator size="large" color="#260e86" />
-        <Text style={styles.loadingText}>Cargando citas...</Text>
+        <Text style={styles.loadingText}>CARGANDO CITAS...</Text>
       </View>
     );
   }
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 35,
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
     color: 'Black',
     marginVertical: 20,
   },
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
   },
   timeText: {
     position: 'absolute', 
@@ -223,13 +223,13 @@ const styles = StyleSheet.create({
     right: 15, 
     color: 'red',
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
     fontSize: 18,
   },
   serviceText: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
     marginVertical: 10,
   },
   buttonContainer: {
@@ -238,6 +238,7 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     backgroundColor: '#fff',
+    fontSize: 22,
     padding: 10,
     borderRadius: 5,
     flex: 1,
@@ -246,6 +247,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: '#fff',
+    fontSize: 22,
     padding: 10,
     borderRadius: 5,
     flex: 1,
@@ -254,7 +256,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontSize: 18,
+    fontFamily: 'Roboto',
   },
   backButton: {
     position: 'absolute',
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#260e86',
     marginTop: 10,
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
   },
   backgroundImage: {
     position: 'absolute',

@@ -48,13 +48,12 @@ export default function Login() {
       style={styles.background}
     >
       <View style={styles.overlay}>
-        {/* Integración del logo */}
         <Image
           source={require('../assets/img/logo_muni.jpg')}
           style={styles.logo}
         />
 
-        <Text style={styles.title}>Inicio de sesión</Text>
+        <Text style={styles.title}>Inicio de Sesión</Text>
 
         <Text style={styles.label}>RUT</Text>
         <TextInput
@@ -101,7 +100,7 @@ const styles = StyleSheet.create({
   overlay: {
     padding: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(240, 205, 117, 0.9)', // Corregido
+    backgroundColor: 'rgba(240, 205, 117, 0.9)', 
     width: '80%',
     alignItems: 'center',
   },
@@ -141,7 +140,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 40,
-    backgroundColor: '#00CFFF',
+    backgroundColor: '#81C3FF',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,

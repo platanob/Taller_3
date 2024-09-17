@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } fr
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { LinearGradient } from 'expo-linear-gradient'; 
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importa los iconos
+import Icon from 'react-native-vector-icons/FontAwesome'; 
 
 
 const MenuInicio = () => {

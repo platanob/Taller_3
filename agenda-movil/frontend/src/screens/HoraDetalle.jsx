@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient'; // Asegúrate de tener esto instalado
+import { LinearGradient } from 'expo-linear-gradient';
 
 const HoraDetalle = ({ route, navigation }) => {
   const { fecha, hora, lugar, servicio, profesional } = route.params;
@@ -13,12 +13,10 @@ const HoraDetalle = ({ route, navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          {/* Botón de Volver en la esquina superior izquierda */}
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={30} color="black" />
           </TouchableOpacity>
 
-          {/* Logo de Temuco en la esquina superior derecha */}
           <Image 
             source={require('../assets/img/logo_muni.jpg')} 
             style={styles.logo}
@@ -72,7 +70,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 35,
     fontWeight: 'bold',
-    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    fontFamily: 'Roboto', 
     color: 'black',
     marginVertical: 20,
   },
@@ -93,7 +91,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 24,
-    fontWeight: 'bold',
     fontFamily: 'Roboto',
     marginVertical: 5,
   },
