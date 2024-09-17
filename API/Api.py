@@ -157,5 +157,28 @@ def mis_citas():
         citas_list.append(cita)
     return jsonify({'citas': citas_list}), 200
 
+@app.route('/api/cancelar_cita/<cita_id>', methods=['PUT'])
+@jwt_required()
+def cancelar_cita(cita_id):
+    usuario_rut = get_jwt_identity()
+    
+    # Busca la cita por su ID y verifica que el usuario esté asociado a ella
+    cita = citas_collection.find_one({'_id': ObjectId(cita_id), 'usuario_id': usuario_rut})
+    
+    if not cita:
+        return jsonify({'error': 'Cita no encontrada o el usuario no está asociado a la cita'}), 404
+
+    # Actualiza la cita, eliminando el usuario_id para dejarla disponible
+    result = citas_collection.update_one(
+        {'_id': ObjectId(cita_id)},
+        {'$unset': {'usuario_id': ""}} , # Elimina el campo usuario_id
+        {'disponible' : True}
+    )
+    
+    if result.modified_count == 1:
+        return jsonify({'message': 'Cita cancelada y ahora está disponible'}), 200
+    else:
+        return jsonify({'error': 'No se pudo cancelar la cita'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
