@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Picker } f
 //import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Horarios = () => {
   const navegacion = useNavigation();
@@ -61,121 +62,128 @@ const Horarios = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        {/* Botón de Volver en la esquina superior izquierda */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
-          <Icon name="arrow-back" size={30} color="black" />
-        </TouchableOpacity>
-        <Image 
-          source={require('../assets/img/logo_muni.jpg')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        
-      </View>
-
-      <Text style={styles.title}>Horarios</Text>
-
-      {/* Filtros */}
-      <View style={styles.filtrosContainer}>
-        {/* Filtro por Fecha Desde */}
-        <TouchableOpacity onPress={() => setMostrarFechaDesde(true)} style={styles.filtro}>
-          <Text style={styles.filtroTexto}>Desde: {fechaDesde.toLocaleDateString('es-CL')}</Text>
-        </TouchableOpacity>
-        {mostrarFechaDesde && (
-          <DateTimePicker
-            value={fechaDesde}
-            mode="date"
-            display="default"
-            onChange={onChangeFechaDesde}
+    <LinearGradient
+    colors={['#55A9F9', '#003B88']}
+    style={styles.gradientContainer}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          {/* Botón de Volver en la esquina superior izquierda */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
+            <Icon name="arrow-back" size={30} color="black" />
+          </TouchableOpacity>
+          <Image 
+            source={require('../assets/img/logo_muni.jpg')} 
+            style={styles.logo}
+            resizeMode="contain"
           />
-        )}
-
-        {/* Filtro por Fecha Hasta */}
-        <TouchableOpacity onPress={() => setMostrarFechaHasta(true)} style={styles.filtro}>
-          <Text style={styles.filtroTexto}>Hasta: {fechaHasta.toLocaleDateString('es-CL')}</Text>
-        </TouchableOpacity>
-        {mostrarFechaHasta && (
-          <DateTimePicker
-            value={fechaHasta}
-            mode="date"
-            display="default"
-            onChange={onChangeFechaHasta}
-          />
-        )}
-
-        {/* Filtro por Servicio */}
-        <View style={styles.pickerContainer}>
-          <Text style={styles.filtroTexto}>Servicio:</Text>
-          <Picker
-            selectedValue={servicio}
-            style={styles.picker}
-            onValueChange={(itemValue) => setServicio(itemValue)}
-          >
-            <Picker.Item label="Todos" value="" />
-            <Picker.Item label="Atención Social" value="Atención Social" />
-            <Picker.Item label="Asesoría Jurídica" value="Asesoría Jurídica" />
-            <Picker.Item label="Psicología" value="Psicología" />
-            <Picker.Item label="Kinesiología" value="Kinesiología" />
-            <Picker.Item label="Peluquería" value="Peluquería" />
-          </Picker>
+          
         </View>
 
-        {/* Filtro por Ubicación */}
-        <View style={styles.pickerContainer}>
-          <Text style={styles.filtroTexto}>Comuna:</Text>
-          <Picker
-            selectedValue={ubicacion}
-            style={styles.picker}
-            onValueChange={(itemValue) => setUbicacion(itemValue)}
-          >
-            <Picker.Item label="Todas" value="" />
-            <Picker.Item label="Temuco" value="Temuco" />
-            <Picker.Item label="Padre Las Casas" value="Padre Las Casas" />
-            <Picker.Item label="La Branza" value="La Branza" />
-          </Picker>
-        </View>
+        <Text style={styles.title}>Horarios</Text>
 
-        {/* Botón Filtrar */}
-        <TouchableOpacity style={styles.button} onPress={filtrarHorarios}>
-          <Text style={styles.buttonText}>FILTRAR</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Filtros */}
+        <View style={styles.filtrosContainer}>
+          {/* Filtro por Fecha Desde */}
+          <TouchableOpacity onPress={() => setMostrarFechaDesde(true)} style={styles.filtro}>
+            <Text style={styles.filtroTexto}>Desde: {fechaDesde.toLocaleDateString('es-CL')}</Text>
+          </TouchableOpacity>
+          {mostrarFechaDesde && (
+            <DateTimePicker
+              value={fechaDesde}
+              mode="date"
+              display="default"
+              onChange={onChangeFechaDesde}
+            />
+          )}
 
-      {/* Lista de Horarios */}
-      {horarios.map((horario) => (
-        <View key={horario.id} style={styles.card}>
-          <Text style={styles.dateText}>{horario.fecha}</Text>
-          <Text style={styles.timeText}>{horario.hora}</Text>
-          <Text style={styles.serviceText}>{horario.servicio}</Text>
-          <Text style={styles.placeText}>{horario.comuna}</Text>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={styles.infoButton} 
-              onPress={() => navegacion.navigate('HoraDetalle', { 
-                fecha: horario.fecha, 
-                hora: horario.hora, 
-                comuna: horario.comuna, 
-                servicio: horario.servicio 
-              })}
+          {/* Filtro por Fecha Hasta */}
+          <TouchableOpacity onPress={() => setMostrarFechaHasta(true)} style={styles.filtro}>
+            <Text style={styles.filtroTexto}>Hasta: {fechaHasta.toLocaleDateString('es-CL')}</Text>
+          </TouchableOpacity>
+          {mostrarFechaHasta && (
+            <DateTimePicker
+              value={fechaHasta}
+              mode="date"
+              display="default"
+              onChange={onChangeFechaHasta}
+            />
+          )}
+
+          {/* Filtro por Servicio */}
+          <View style={styles.pickerContainer}>
+            <Text style={styles.filtroTexto}>Servicio:</Text>
+            <Picker
+              selectedValue={servicio}
+              style={styles.picker}
+              onValueChange={(itemValue) => setServicio(itemValue)}
             >
-              <Text style={styles.buttonText}>INFORMACIÓN</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.agendarButton}>
-              <Text style={styles.buttonText}>AGENDAR</Text>
-            </TouchableOpacity>
+              <Picker.Item label="Todos" value="" />
+              <Picker.Item label="Atención Social" value="Atención Social" />
+              <Picker.Item label="Asesoría Jurídica" value="Asesoría Jurídica" />
+              <Picker.Item label="Psicología" value="Psicología" />
+              <Picker.Item label="Kinesiología" value="Kinesiología" />
+              <Picker.Item label="Peluquería" value="Peluquería" />
+            </Picker>
           </View>
+
+          {/* Filtro por Ubicación */}
+          <View style={styles.pickerContainer}>
+            <Text style={styles.filtroTexto}>Comuna:</Text>
+            <Picker
+              selectedValue={ubicacion}
+              style={styles.picker}
+              onValueChange={(itemValue) => setUbicacion(itemValue)}
+            >
+              <Picker.Item label="Todas" value="" />
+              <Picker.Item label="Temuco" value="Temuco" />
+              <Picker.Item label="Padre Las Casas" value="Padre Las Casas" />
+              <Picker.Item label="La Branza" value="La Branza" />
+            </Picker>
+          </View>
+
+          {/* Botón Filtrar */}
+          <TouchableOpacity style={styles.button} onPress={filtrarHorarios}>
+            <Text style={styles.buttonText}>FILTRAR</Text>
+          </TouchableOpacity>
         </View>
-      ))}
-    </ScrollView>
+
+        {/* Lista de Horarios */}
+        {horarios.map((horario) => (
+          <View key={horario.id} style={styles.card}>
+            <Text style={styles.dateText}>{horario.fecha}</Text>
+            <Text style={styles.timeText}>{horario.hora}</Text>
+            <Text style={styles.serviceText}>{horario.servicio}</Text>
+            <Text style={styles.placeText}>{horario.comuna}</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.infoButton} 
+                onPress={() => navegacion.navigate('HoraDetalle', { 
+                  fecha: horario.fecha, 
+                  hora: horario.hora, 
+                  comuna: horario.comuna, 
+                  servicio: horario.servicio 
+                })}
+              >
+                <Text style={styles.buttonText}>INFORMACIÓN</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.agendarButton}>
+                <Text style={styles.buttonText}>AGENDAR</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: '#55A9F9',
     alignItems: 'center',
     padding: 20,
     paddingTop: 100,
@@ -279,24 +287,33 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   infoButton: {
-    backgroundColor: '#00CFFF',
+    backgroundColor: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 8,
   },
   agendarButton: {
-    backgroundColor: '#00CFFF',
+    backgroundColor: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 8,
   },
   backButton: {
     position: 'absolute',
-    borderRadius: 10,
     top: 10,
     left: 10,
-    backgroundColor: '#81C3FF',
-    padding: 10,
+    padding: 12,
+    backgroundColor: '#55A9F9', 
+    borderRadius: 50, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8, 
+  },
+  backButtonIcon: {
+    color: 'white', 
+    fontSize: 25, 
   },
 });
 

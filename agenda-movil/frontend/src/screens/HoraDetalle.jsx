@@ -1,43 +1,51 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient'; // Asegúrate de tener esto instalado
 
 const HoraDetalle = ({ route, navigation }) => {
   const { fecha, hora, lugar, servicio, profesional } = route.params;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        {/* Botón de Volver en la esquina superior izquierda */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={30} color="black" />
-        </TouchableOpacity>
+    <LinearGradient
+    colors={['#55A9F9', '#003B88']}
+    style={styles.gradientContainer}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          {/* Botón de Volver en la esquina superior izquierda */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={30} color="black" />
+          </TouchableOpacity>
 
-        {/* Logo de Temuco en la esquina superior derecha */}
-        <Image 
-          source={require('../assets/img/logo_muni.jpg')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+          {/* Logo de Temuco en la esquina superior derecha */}
+          <Image 
+            source={require('../assets/img/logo_muni.jpg')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-      <Text style={styles.title}>Detalles de la Cita</Text>
+        <Text style={styles.title}>Detalles de la Cita</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.detailText}><Text style={styles.label}>Fecha: </Text>{fecha} </Text>
-        <Text style={styles.detailText}><Text style={styles.label}>Hora: </Text>{hora} </Text>
-        <Text style={styles.detailText}><Text style={styles.label}>Lugar de Atención: </Text>{lugar}</Text>
-        <Text style={styles.detailText}><Text style={styles.label}>Servicio: </Text>{servicio}</Text>
-        <Text style={styles.detailText}><Text style={styles.label}>Profesional a Cargo: </Text>{profesional}</Text>
-      </View>
-    </ScrollView>
+        <View style={styles.card}>
+          <Text style={styles.detailText}><Text style={styles.label}>Fecha: </Text>{fecha} </Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Hora: </Text>{hora} </Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Lugar de Atención: </Text>{lugar}</Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Servicio: </Text>{servicio}</Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Profesional a Cargo: </Text>{profesional}</Text>
+        </View>
+      </ScrollView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: '#55A9F9',
     alignItems: 'center',
     padding: 20,
     paddingTop: 100,
@@ -64,6 +72,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 35,
     fontWeight: 'bold',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
     color: 'black',
     marginVertical: 20,
   },
@@ -85,6 +94,7 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 24,
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
     marginVertical: 5,
   },
   label: {
@@ -93,11 +103,20 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    borderRadius: 10,
     top: 10,
     left: 10,
-    backgroundColor: '#81C3FF',
-    padding: 10,
+    padding: 12,
+    backgroundColor: '#55A9F9', 
+    borderRadius: 50, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8, 
+  },
+  backButtonIcon: {
+    color: 'white', 
+    fontSize: 25, 
   },
 });
 

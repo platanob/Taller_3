@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
   label: {
     fontSize: 18,
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 5,
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
   input: {
     width: '100%',
@@ -128,5 +130,6 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
 });

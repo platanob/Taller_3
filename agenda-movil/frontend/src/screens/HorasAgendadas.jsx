@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform  } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient'; // Asegúrate de tener esto instalado
 
 const HorasAgendadas = () => {
   const navigation = useNavigation();
-  const [citas, setCitas] = useState([]); // Estado para almacenar las citas
-  const [loading, setLoading] = useState(true); // Para manejar el estado de carga
+  const [citas, setCitas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Función para obtener las citas desde la API
     const obtenerCitas = async () => {
       try {
-        // Obtener el token desde AsyncStorage
         const token = await AsyncStorage.getItem('access_token');
         if (!token) {
           Alert.alert('Error', 'No se encontró el token de autenticación.');
           return;
         }
 
-        // Solicitud GET a la API
         const response = await fetch('http://localhost:5000/api/mis_citas', {
           method: 'GET',
           headers: {
@@ -32,14 +30,14 @@ const HorasAgendadas = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setCitas(data.citas); // Almacenar las citas en el estado
+          setCitas(data.citas);
         } else {
           Alert.alert('Error', data.error || 'Error al obtener las citas');
         }
       } catch (error) {
         Alert.alert('Error', 'Hubo un problema al conectar con la API.');
       } finally {
-        setLoading(false); // Desactivar el estado de carga
+        setLoading(false);
       }
     };
 
@@ -53,7 +51,7 @@ const HorasAgendadas = () => {
   const handleCancelPress = (citaId) => {
     if (Platform.OS === 'web') {
       window.alert(`¿Estás seguro de que quieres cancelar esta cita?`);
-      cancelarCita(citaId); // Podrías omitir la confirmación para pruebas en web
+      cancelarCita(citaId);
     } else {
       Alert.alert(
         'Confirmación de cancelación',
@@ -75,14 +73,12 @@ const HorasAgendadas = () => {
   
   const cancelarCita = async (citaId) => {
     try {
-      // Obtener el token desde AsyncStorage
       const token = await AsyncStorage.getItem('access_token');
       if (!token) {
         Alert.alert('Error', 'No se encontró el token de autenticación.');
         return;
       }
   
-      // Solicitud PUT a la API para cancelar la cita
       const response = await fetch(`http://localhost:5000/api/cancelar_cita/${citaId}`, {
         method: 'PUT',
         headers: {
@@ -95,7 +91,7 @@ const HorasAgendadas = () => {
   
       if (response.ok) {
         Alert.alert('Éxito', 'La cita ha sido cancelada.');
-        setCitas(citas.filter(cita => cita._id !== citaId)); // Elimina la cita de la lista en pantalla
+        setCitas(citas.filter(cita => cita._id !== citaId));
       } else {
         Alert.alert('Error', data.error || 'No se pudo cancelar la cita.');
       }
@@ -119,53 +115,60 @@ const HorasAgendadas = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={30} color="black" />
-        </TouchableOpacity>
-        <Image 
-          source={require('../assets/img/logo_muni.jpg')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+    <LinearGradient
+      colors={['#55A9F9', '#003B88']}
+      style={styles.gradientContainer}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={30} color="black" />
+          </TouchableOpacity>
+          <Image 
+            source={require('../assets/img/logo_muni.jpg')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-      <Text style={styles.title}>Horas agendadas</Text>
+        <Text style={styles.title}>Horas Agendadas</Text>
 
-      {citas.length > 0 ? (
-        citas.map((cita) => (
-          <View key={cita._id} style={styles.card}>
-            <Text style={styles.dateText}>{cita.fecha}</Text>
-            <Text style={styles.timeText}>{cita.locacion}</Text>
-            <Text style={styles.serviceText}>{cita.servicio}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={styles.infoButton} 
-                onPress={() => handleInfoPress(cita.fecha, cita.hora, cita.locacion, cita.servicio, cita.colaborador)}
-              >
-                <Text style={styles.buttonText}>INFORMACIÓN</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.cancelButton} 
-                onPress={() => handleCancelPress(cita._id)}
-              >
-                <Text style={styles.buttonText}>CANCELAR</Text>
-              </TouchableOpacity>
+        {citas.length > 0 ? (
+          citas.map((cita) => (
+            <View key={cita._id} style={styles.card}>
+              <Text style={styles.dateText}>{cita.fecha}</Text>
+              <Text style={styles.timeText}>{cita.locacion}</Text>
+              <Text style={styles.serviceText}>{cita.servicio}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity 
+                  style={styles.infoButton} 
+                  onPress={() => handleInfoPress(cita.fecha, cita.hora, cita.locacion, cita.servicio, cita.colaborador)}
+                >
+                  <Text style={styles.buttonText}>INFORMACIÓN</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.cancelButton} 
+                  onPress={() => handleCancelPress(cita._id)}
+                >
+                  <Text style={styles.buttonText}>CANCELAR</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))
-      ) : (
-        <Text>No tienes citas agendadas.</Text>
-      )}
-    </ScrollView>
+          ))
+        ) : (
+          <Text style={styles.noAppointmentsText}>No tienes citas agendadas.</Text>
+        )}
+      </ScrollView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: '#55A9F9',
     alignItems: 'center',
     padding: 20,
     paddingTop: 100,
@@ -189,7 +192,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 35,
     fontWeight: 'bold',
-    color: 'black',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
+    color: 'Black',
     marginVertical: 20,
   },
   card: {
@@ -211,6 +215,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
   },
   timeText: {
     position: 'absolute', 
@@ -218,11 +223,13 @@ const styles = StyleSheet.create({
     right: 15, 
     color: 'red',
     fontWeight: 'bold',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
     fontSize: 18,
   },
   serviceText: {
     fontSize: 22,
     fontWeight: 'bold',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
     marginVertical: 10,
   },
   buttonContainer: {
@@ -247,14 +254,24 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
     fontWeight: 'bold',
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
   },
   backButton: {
     position: 'absolute',
-    borderRadius: 10,
     top: 10,
     left: 10,
-    backgroundColor: '#81C3FF',
-    padding: 10,
+    padding: 12,
+    backgroundColor: '#55A9F9', 
+    borderRadius: 50, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8, 
+  },
+  backButtonIcon: {
+    color: 'white', 
+    fontSize: 25, 
   },
   loadingContainer: {
     flex: 1,
@@ -267,6 +284,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#260e86',
     marginTop: 10,
+    fontFamily: 'Roboto', // Se aplica la fuente Roboto
   },
   backgroundImage: {
     position: 'absolute',

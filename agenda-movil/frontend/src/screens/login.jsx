@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
+    fontFamily: 'Roboto',
     color: '#000',
     marginBottom: 20,
     textAlign: 'center',
@@ -120,6 +121,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
+    fontFamily: 'Roboto',
     color: '#000',
     alignSelf: 'flex-start',
     marginBottom: 5,
@@ -148,6 +150,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#000',
     fontSize: 18,
+    fontFamily: 'Roboto',
     fontWeight: 'bold',
   },
 });
