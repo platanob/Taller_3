@@ -12,7 +12,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 CORS(app, resources={
     r"/api/*": {
         "origins": "http://localhost:8081",  
-        "methods": ["GET", "POST"],
+        "methods": ["GET", "POST", "PUT"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True  # Permite el envío de credenciales
     }
@@ -171,8 +171,7 @@ def cancelar_cita(cita_id):
     # Actualiza la cita, eliminando el usuario_id para dejarla disponible
     result = citas_collection.update_one(
         {'_id': ObjectId(cita_id)},
-        {'$unset': {'usuario_id': ""}} , # Elimina el campo usuario_id
-        {'disponible' : True}
+        {'$unset': {'usuario_id': ""}, '$set': {'disponible': True}} 
     )
     
     if result.modified_count == 1:

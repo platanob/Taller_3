@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform  } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -49,6 +50,60 @@ const HorasAgendadas = () => {
     navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
   };
 
+  const handleCancelPress = (citaId) => {
+    if (Platform.OS === 'web') {
+      window.alert(`¿Estás seguro de que quieres cancelar esta cita?`);
+      cancelarCita(citaId); // Podrías omitir la confirmación para pruebas en web
+    } else {
+      Alert.alert(
+        'Confirmación de cancelación',
+        '¿Estás seguro de que quieres cancelar esta cita?',
+        [
+          {
+            text: 'No',
+            style: 'cancel',
+          },
+          {
+            text: 'Sí',
+            onPress: () => cancelarCita(citaId),
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  };
+  
+  const cancelarCita = async (citaId) => {
+    try {
+      // Obtener el token desde AsyncStorage
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('Error', 'No se encontró el token de autenticación.');
+        return;
+      }
+  
+      // Solicitud PUT a la API para cancelar la cita
+      const response = await fetch(`http://localhost:5000/api/cancelar_cita/${citaId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        Alert.alert('Éxito', 'La cita ha sido cancelada.');
+        setCitas(citas.filter(cita => cita._id !== citaId)); // Elimina la cita de la lista en pantalla
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo cancelar la cita.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -91,7 +146,10 @@ const HorasAgendadas = () => {
               >
                 <Text style={styles.buttonText}>INFORMACIÓN</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton}>
+              <TouchableOpacity 
+                style={styles.cancelButton} 
+                onPress={() => handleCancelPress(cita._id)}
+              >
                 <Text style={styles.buttonText}>CANCELAR</Text>
               </TouchableOpacity>
             </View>
