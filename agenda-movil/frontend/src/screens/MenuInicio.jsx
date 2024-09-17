@@ -55,7 +55,7 @@ const MenuInicio = () => {
           style={styles.button}
           onPress={() => navigation.navigate('HorariosDisponibles')}
         > 
-          <Icon name="calendar" size={20} color="#fff" style={styles.icon} /> 
+          <Icon name="calendar" size={20} color="black" style={styles.icon} /> 
           <Text style={styles.buttonText}>Horarios Disponibles</Text>
         </TouchableOpacity>
 
@@ -63,7 +63,7 @@ const MenuInicio = () => {
           style={styles.button}
           onPress={() => navigation.navigate('HorasAgendadas')}
         >
-          <Icon name="clock-o" size={20} color="#fff" style={styles.icon} />
+          <Icon name="clock-o" size={20} color="black" style={styles.icon} />
           <Text style={styles.buttonText}>Horas Agendadas</Text>
         </TouchableOpacity>
 
@@ -71,7 +71,7 @@ const MenuInicio = () => {
           style={styles.button}
           onPress={handleLogout}
         >
-          <Icon name="sign-out" size={20} color="#fff" style={styles.icon} />
+          <Icon name="sign-out" size={20} color="black" style={styles.icon} />
           <Text style={styles.buttonText}>Cerrar Sesión</Text>
         </TouchableOpacity>
       </ScrollView>
