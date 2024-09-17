@@ -67,7 +67,10 @@ const Horarios = () => {
     style={styles.gradientContainer}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
+        <LinearGradient
+              colors={['#260e86', '#003B88']} // Degradado para el header
+              style={styles.header}
+            >
           {/* Botón de Volver en la esquina superior izquierda */}
           <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
             <Icon name="arrow-back" size={30} color="black" />
@@ -77,8 +80,7 @@ const Horarios = () => {
             style={styles.logo}
             resizeMode="contain"
           />
-          
-        </View>
+        </LinearGradient>
 
         <Text style={styles.title}>Horarios</Text>
 
@@ -202,7 +204,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 100,
-    height: 40,
+    height: 80,
   },
   title: {
     fontSize: 35,

@@ -12,7 +12,10 @@ const HoraDetalle = ({ route, navigation }) => {
     style={styles.gradientContainer}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
+        <LinearGradient
+              colors={['#260e86', '#003B88']} // Degradado para el header
+              style={styles.header}
+            >
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={30} color="black" />
           </TouchableOpacity>
@@ -22,7 +25,7 @@ const HoraDetalle = ({ route, navigation }) => {
             style={styles.logo}
             resizeMode="contain"
           />
-        </View>
+        </LinearGradient>
 
         <Text style={styles.title}>Detalles de la Cita</Text>
 

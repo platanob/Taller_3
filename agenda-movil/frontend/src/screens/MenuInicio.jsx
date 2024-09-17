@@ -42,13 +42,16 @@ const MenuInicio = () => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
+        <LinearGradient
+          colors={['#260e86', '#003B88']} // Degradado para el header
+          style={styles.header}
+        >
           <Image
             source={require('../assets/img/logo_muni.jpg')}
             style={styles.logo}
             resizeMode="contain"
           />
-        </View>
+        </LinearGradient>
         <Text style={styles.title}>Menu de Inicio</Text>
 
         <TouchableOpacity
