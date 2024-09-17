@@ -34,7 +34,6 @@ const handleLogout = async () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        {/* Logo de Temuco en la esquina superior derecha */}
         <Image 
           source={require('../assets/img/logo_muni.jpg')} 
           style={styles.logo}
@@ -45,7 +44,7 @@ const handleLogout = async () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('HorariosDisponibles')} // Pantalla aún no desarrollada
+        onPress={() => navigation.navigate('HorariosDisponibles')} 
       >
         <Text style={styles.buttonText}>Horarios Disponibles</Text>
       </TouchableOpacity>
