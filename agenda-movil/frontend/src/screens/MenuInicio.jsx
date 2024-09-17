@@ -15,7 +15,7 @@ const handleLogout = async () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`, // Incluye el token en el encabezado
       },
-      credentials: 'include', // Solo si tu backend requiere cookies, de lo contrario, puedes eliminar esta línea
+      credentials: 'include', 
     });
 
     const data = await response.json();

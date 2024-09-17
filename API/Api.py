@@ -11,7 +11,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 # Configuración de CORS
 CORS(app, resources={
     r"/api/*": {
-        "origins": "http://localhost:8081",  # Reemplaza con tu origen frontend
+        "origins": "http://localhost:8081",  
         "methods": ["GET", "POST"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True  # Permite el envío de credenciales

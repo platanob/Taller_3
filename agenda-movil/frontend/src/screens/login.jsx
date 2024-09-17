@@ -15,7 +15,6 @@ export default function Login() {
       Alert.alert('Error', 'Por favor, ingresa tu RUT y contraseña.');
       return;
     }
-
     try {
       const response = await fetch('http://127.0.0.1:5000/api/login', {
         method: 'POST',
