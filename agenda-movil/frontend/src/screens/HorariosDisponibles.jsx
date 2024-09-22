@@ -44,8 +44,8 @@ const Horarios = () => {
     obtenerHorarios();
   }, []);
 
-  const handleInfoPress = (fecha, hora, lugar, servicio) => {
-    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio });
+  const handleInfoPress = (fecha, hora, lugar, servicio, profesional) => {
+    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
   };
 
   const handleAgendarPress = (citaId) => {
@@ -145,7 +145,7 @@ const Horarios = () => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity 
                   style={styles.infoButton} 
-                  onPress={() => handleInfoPress(horario.fecha, horario.hora, horario.locacion, horario.servicio)}
+                  onPress={() => handleInfoPress(horario.fecha, horario.hora, horario.locacion, horario.servicio, horario.colaborador)}
                 >
                   <Text style={styles.buttonText}>INFORMACIÓN</Text>
                 </TouchableOpacity>
@@ -203,34 +203,36 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
+    marginBottom: 20,
+    position: 'relative', 
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4,
   },
   dateText: {
-    fontSize: 16,
-    color: 'black',
+    fontSize: 18,
     fontWeight: 'bold',
-  },
-  timeText: {
-    fontSize: 14,
-    color: 'black',
-  },
-  serviceText: {
-    fontSize: 14,
-    color: 'black',
-    marginTop: 10,
+    fontFamily: 'Roboto', 
   },
   placeText: {
-    fontSize: 14,
-    color: 'black',
-    marginBottom: 10,
+    position: 'absolute', 
+    top: 15, 
+    right: 15, 
+    color: 'red',
+    fontWeight: 'bold',
+    fontFamily: 'Roboto', 
+    fontSize: 18,
+  },
+  serviceText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: 'Roboto', 
+    marginVertical: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -238,15 +240,26 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    fontSize: 22,
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
   },
   agendarButton: {
     backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    fontSize: 22,
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 18,
+    fontFamily: 'Roboto',
   },
   backButton: {
     position: 'absolute',
