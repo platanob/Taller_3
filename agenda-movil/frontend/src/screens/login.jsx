@@ -10,7 +10,7 @@ export default function Login() {
   const [rut, setRut] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+  const login = async () => {
     if (!rut || !password) {
       Alert.alert('Error', 'Por favor, ingresa tu RUT y contraseña.');
       return;
@@ -74,7 +74,7 @@ export default function Login() {
           onChangeText={setPassword}  // Actualiza el estado con lo que escriba el usuario
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity style={styles.button} onPress={login}>
           <Text style={styles.buttonText}>INGRESAR</Text>
         </TouchableOpacity>
 

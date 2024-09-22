@@ -10,7 +10,7 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleRegister = () => {
+  const Registrar = () => {
     // Validar que todos los campos estén llenos
     if (!nombre || !rut || !correo || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor, completa todos los campos');
@@ -118,12 +118,12 @@ export default function Registro() {
           onChangeText={setConfirmPassword}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <TouchableOpacity style={styles.button} onPress={Registrar}>
           <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.buttonText}>CANCELAR</Text>
+          <Text style={styles.buttonText}>INICIO DE SESION</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

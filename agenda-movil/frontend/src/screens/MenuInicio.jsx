@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const MenuInicio = () => {
   const navigation = useNavigation();
 
-  const handleLogout = async () => {
+  const Logout = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token'); // Obtén el token almacenado
 
@@ -72,7 +72,7 @@ const MenuInicio = () => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={handleLogout}
+          onPress={Logout}
         >
           <Icon name="sign-out" size={20} color="black" style={styles.icon} />
           <Text style={styles.buttonText}>Cerrar Sesión</Text>

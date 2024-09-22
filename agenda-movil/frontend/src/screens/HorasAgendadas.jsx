@@ -44,11 +44,11 @@ const HorasAgendadas = () => {
     obtenerCitas();
   }, []);
 
-  const handleInfoPress = (fecha, hora, lugar, servicio, profesional) => {
+  const InfoDetalle = (fecha, hora, lugar, servicio, profesional) => {
     navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
   };
 
-  const handleCancelPress = (citaId) => {
+  const CancelPress = (citaId) => {
     if (Platform.OS === 'web') {
       window.alert(`¿Estás seguro de que quieres cancelar esta cita?`);
       cancelarCita(citaId);
@@ -145,13 +145,13 @@ const HorasAgendadas = () => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity 
                   style={styles.infoButton} 
-                  onPress={() => handleInfoPress(cita.fecha, cita.hora, cita.locacion, cita.servicio, cita.colaborador)}
+                  onPress={() => InfoDetalle(cita.fecha, cita.hora, cita.locacion, cita.servicio, cita.colaborador)}
                 >
                   <Text style={styles.buttonText}>INFORMACIÓN</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.cancelButton} 
-                  onPress={() => handleCancelPress(cita._id)}
+                  onPress={() => CancelPress(cita._id)}
                 >
                   <Text style={styles.buttonText}>CANCELAR</Text>
                 </TouchableOpacity>
