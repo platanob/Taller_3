@@ -1,9 +1,61 @@
-import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Registro() {
   const navigation = useNavigation();
+  const [nombre, setNombre] = useState('');
+  const [rut, setRut] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleRegister = () => {
+    // Validar que todos los campos estén llenos
+    if (!nombre || !rut || !correo || !password || !confirmPassword) {
+      Alert.alert('Error', 'Por favor, completa todos los campos');
+      return;
+    }
+
+    // Verificar que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      return;
+    }
+
+    // Aquí puedes agregar validaciones adicionales, como formato de correo, formato de RUT, etc.
+
+    // Realizar la petición de registro al servidor
+    fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nombre: nombre,
+        rut: rut,
+        correo: correo,
+        contraseña: password,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          // Mostrar mensaje de error en caso de problemas con la API
+          Alert.alert('Error', data.error);
+        } else {
+          // Registro exitoso
+          Alert.alert('Éxito', 'Usuario registrado con éxito');
+          navigation.navigate('Login'); // Redirigir al login después del registro
+        }
+      })
+      .catch(error => {
+        // En caso de error en la comunicación con el servidor
+        Alert.alert('Error', 'No se pudo completar el registro. Inténtalo nuevamente más tarde.');
+        console.error(error);
+      });
+  };
+
   return (
     <ImageBackground
       source={require('../assets/img/fondo.jpg')}
@@ -23,6 +75,8 @@ export default function Registro() {
           placeholder="Nombre Completo"
           placeholderTextColor="#000"
           style={styles.input}
+          value={nombre}
+          onChangeText={setNombre}
         />
 
         <Text style={styles.label}>RUT</Text>
@@ -30,6 +84,8 @@ export default function Registro() {
           placeholder="RUT"
           placeholderTextColor="#000"
           style={styles.input}
+          value={rut}
+          onChangeText={setRut}
         />
 
         <Text style={styles.label}>Correo Electrónico</Text>
@@ -38,6 +94,8 @@ export default function Registro() {
           placeholderTextColor="#000"
           keyboardType="email-address"
           style={styles.input}
+          value={correo}
+          onChangeText={setCorreo}
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -46,6 +104,8 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}
         />
 
         <Text style={styles.label}>Confirmar Contraseña</Text>
@@ -54,14 +114,15 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}
-         onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>CANCELAR</Text>
         </TouchableOpacity>
       </View>
