@@ -1,78 +1,130 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Picker } from 'react-native';
-//import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient'; 
 
 const Horarios = () => {
-  const navegacion = useNavigation();
-  
-  // Estado para los filtros
-  const [fechaDesde, setFechaDesde] = useState(new Date());
-  const [fechaHasta, setFechaHasta] = useState(new Date());
-  const [mostrarFechaDesde, setMostrarFechaDesde] = useState(false);
-  const [mostrarFechaHasta, setMostrarFechaHasta] = useState(false);
-  const [servicio, setServicio] = useState('');
-  const [ubicacion, setUbicacion] = useState('');
+  const navigation = useNavigation();
+  const [horarios, setHorarios] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Datos de ejemplo
-  const horarios = [
-    { id: 1, fecha: '15-08-2024', hora: '09:00', servicio: 'Psicología', comuna: 'Temuco' },
-    { id: 2, fecha: '20-08-2024', hora: '11:00', servicio: 'Peluquería', comuna: 'Padre Las Casas' },
-    { id: 3, fecha: '25-08-2024', hora: '14:00', servicio: 'Kinesiología', comuna: 'La Branza' },
-    { id: 4, fecha: '10-09-2024', hora: '10:30', servicio: 'Asesoría Jurídica', comuna: 'Temuco' },
-    { id: 5, fecha: '18-09-2024', hora: '16:00', servicio: 'Atención Social', comuna: 'Padre Las Casas' },
-  ];
+  useEffect(() => {
+    const obtenerHorarios = async () => {
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        if (!token) {
+          Alert.alert('Error', 'No se encontró el token de autenticación.');
+          return;
+        }
 
-  // Función para manejar la selección de fecha
-  const onChangeFechaDesde = (event, selectedDate) => {
-    const currentDate = selectedDate || fechaDesde;
-    setMostrarFechaDesde(false);
-    setFechaDesde(currentDate);
+        const response = await fetch('http://localhost:5000/api/citas_disponibles', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setHorarios(data.citas_disponibles);
+        } else {
+          Alert.alert('Error', data.error || 'Error al obtener los horarios disponibles');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    obtenerHorarios();
+  }, []);
+
+  const handleInfoPress = (fecha, hora, lugar, servicio) => {
+    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio });
   };
 
-  const onChangeFechaHasta = (event, selectedDate) => {
-    const currentDate = selectedDate || fechaHasta;
-    setMostrarFechaHasta(false);
-    setFechaHasta(currentDate);
-  };
-
-  // Función para filtrar horarios
-  const filtrarHorarios = () => {
-    let horariosFiltrados = horarios;
-
-    // Filtrar por rango de fechas
-    horariosFiltrados = horariosFiltrados.filter(h => {
-      const fechaHorario = new Date(h.fecha.split('-').reverse().join('-'));
-      return fechaHorario >= fechaDesde && fechaHorario <= fechaHasta;
-    });
-
-    // Filtrar por servicio
-    if (servicio) {
-      horariosFiltrados = horariosFiltrados.filter(h => h.servicio === servicio);
+  const handleAgendarPress = (citaId) => {
+    if (Platform.OS === 'web') {
+      window.alert(`¿Estás seguro de que quieres agendar esta cita?`);
+      agendarCita(citaId);
+    } else {
+      Alert.alert(
+        'Confirmación de agendar',
+        '¿Estás seguro de que quieres agendar esta cita?',
+        [
+          {
+            text: 'No',
+            style: 'cancel',
+          },
+          {
+            text: 'Sí',
+            onPress: () => agendarCita(citaId),
+          },
+        ],
+        { cancelable: false }
+      );
     }
-
-    // Filtrar por ubicación
-    if (ubicacion) {
-      horariosFiltrados = horariosFiltrados.filter(h => h.comuna === ubicacion);
-    }
-
-    console.log('Horarios Filtrados:', horariosFiltrados);
   };
+
+  const agendarCita = async (citaId) => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('Error', 'No se encontró el token de autenticación.');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/agendar/${citaId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Éxito', 'La cita ha sido agendada exitosamente.');
+        setHorarios(horarios.filter(horario => horario._id !== citaId));
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo agendar la cita.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Image 
+          source={require('../assets/img/fondo.jpg')} 
+          style={styles.backgroundImage} 
+          resizeMode="cover"
+        />
+        <ActivityIndicator size="large" color="#260e86" />
+        <Text style={styles.loadingText}>CARGANDO HORARIOS DISPONIBLES...</Text>
+      </View>
+    );
+  }
 
   return (
     <LinearGradient
-    colors={['#55A9F9', '#003B88']}
-    style={styles.gradientContainer}
+      colors={['#55A9F9', '#003B88']}
+      style={styles.gradientContainer}
     >
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
-              colors={['#260e86', '#003B88']} // Degradado para el header
-              style={styles.header}
-            >
-          {/* Botón de Volver en la esquina superior izquierda */}
-          <TouchableOpacity style={styles.backButton} onPress={() => navegacion.goBack()}>
+            colors={['#260e86', '#003B88']} 
+            style={styles.header}
+          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={30} color="black" />
           </TouchableOpacity>
           <Image 
@@ -82,99 +134,33 @@ const Horarios = () => {
           />
         </LinearGradient>
 
-        <Text style={styles.title}>Horarios</Text>
+        <Text style={styles.title}>Horarios Disponibles</Text>
 
-        {/* Filtros */}
-        <View style={styles.filtrosContainer}>
-          {/* Filtro por Fecha Desde */}
-          <TouchableOpacity onPress={() => setMostrarFechaDesde(true)} style={styles.filtro}>
-            <Text style={styles.filtroTexto}>Desde: {fechaDesde.toLocaleDateString('es-CL')}</Text>
-          </TouchableOpacity>
-          {mostrarFechaDesde && (
-            <DateTimePicker
-              value={fechaDesde}
-              mode="date"
-              display="default"
-              onChange={onChangeFechaDesde}
-            />
-          )}
-
-          {/* Filtro por Fecha Hasta */}
-          <TouchableOpacity onPress={() => setMostrarFechaHasta(true)} style={styles.filtro}>
-            <Text style={styles.filtroTexto}>Hasta: {fechaHasta.toLocaleDateString('es-CL')}</Text>
-          </TouchableOpacity>
-          {mostrarFechaHasta && (
-            <DateTimePicker
-              value={fechaHasta}
-              mode="date"
-              display="default"
-              onChange={onChangeFechaHasta}
-            />
-          )}
-
-          {/* Filtro por Servicio */}
-          <View style={styles.pickerContainer}>
-            <Text style={styles.filtroTexto}>Servicio:</Text>
-            <Picker
-              selectedValue={servicio}
-              style={styles.picker}
-              onValueChange={(itemValue) => setServicio(itemValue)}
-            >
-              <Picker.Item label="Todos" value="" />
-              <Picker.Item label="Atención Social" value="Atención Social" />
-              <Picker.Item label="Asesoría Jurídica" value="Asesoría Jurídica" />
-              <Picker.Item label="Psicología" value="Psicología" />
-              <Picker.Item label="Kinesiología" value="Kinesiología" />
-              <Picker.Item label="Peluquería" value="Peluquería" />
-            </Picker>
-          </View>
-
-          {/* Filtro por Ubicación */}
-          <View style={styles.pickerContainer}>
-            <Text style={styles.filtroTexto}>Comuna:</Text>
-            <Picker
-              selectedValue={ubicacion}
-              style={styles.picker}
-              onValueChange={(itemValue) => setUbicacion(itemValue)}
-            >
-              <Picker.Item label="Todas" value="" />
-              <Picker.Item label="Temuco" value="Temuco" />
-              <Picker.Item label="Padre Las Casas" value="Padre Las Casas" />
-              <Picker.Item label="La Branza" value="La Branza" />
-            </Picker>
-          </View>
-
-          {/* Botón Filtrar */}
-          <TouchableOpacity style={styles.button} onPress={filtrarHorarios}>
-            <Text style={styles.buttonText}>FILTRAR</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Lista de Horarios */}
-        {horarios.map((horario) => (
-          <View key={horario.id} style={styles.card}>
-            <Text style={styles.dateText}>{horario.fecha}</Text>
-            <Text style={styles.timeText}>{horario.hora}</Text>
-            <Text style={styles.serviceText}>{horario.servicio}</Text>
-            <Text style={styles.placeText}>{horario.comuna}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={styles.infoButton} 
-                onPress={() => navegacion.navigate('HoraDetalle', { 
-                  fecha: horario.fecha, 
-                  hora: horario.hora, 
-                  comuna: horario.comuna, 
-                  servicio: horario.servicio 
-                })}
-              >
-                <Text style={styles.buttonText}>INFORMACIÓN</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.agendarButton}>
-                <Text style={styles.buttonText}>AGENDAR</Text>
-              </TouchableOpacity>
+        {horarios.length > 0 ? (
+          horarios.map((horario) => (
+            <View key={horario._id} style={styles.card}>
+              <Text style={styles.dateText}>{horario.fecha}</Text>
+              <Text style={styles.serviceText}>{horario.servicio}</Text>
+              <Text style={styles.placeText}>{horario.locacion}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity 
+                  style={styles.infoButton} 
+                  onPress={() => handleInfoPress(horario.fecha, horario.hora, horario.locacion, horario.servicio)}
+                >
+                  <Text style={styles.buttonText}>INFORMACIÓN</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.agendarButton} 
+                  onPress={() => handleAgendarPress(horario._id)}
+                >
+                  <Text style={styles.buttonText}>AGENDAR</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          ))
+        ) : (
+          <Text style={styles.noAppointmentsText}>No hay horarios disponibles.</Text>
+        )}
       </ScrollView>
     </LinearGradient>
   );
@@ -211,44 +197,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginVertical: 20,
-  },
-  filtrosContainer: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  filtro: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  filtroTexto: {
-    fontSize: 16,
-    color: 'black',
-  },
-  pickerContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: 10,
-    padding: 5,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  button: {
-    width: '100%',
-    height: 40,
-    backgroundColor: '#00CFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   card: {
     backgroundColor: '#81C3FF',
