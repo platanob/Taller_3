@@ -1,59 +1,27 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function Registro() {
   const navigation = useNavigation();
-  const [nombre, setNombre] = useState('');
-  const [rut, setRut] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pdfFile, setPdfFile] = useState(null);
 
-  const Registrar = () => {
-    // Validar que todos los campos estén llenos
-    if (!nombre || !rut || !correo || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor, completa todos los campos');
-      return;
-    }
-
-    // Verificar que las contraseñas coincidan
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
-
-    // Aquí puedes agregar validaciones adicionales, como formato de correo, formato de RUT, etc.
-
-    // Realizar la petición de registro al servidor
-    fetch('http://localhost:5000/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        nombre: nombre,
-        rut: rut,
-        correo: correo,
-        contraseña: password,
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          // Mostrar mensaje de error en caso de problemas con la API
-          Alert.alert('Error', data.error);
-        } else {
-          // Registro exitoso
-          Alert.alert('Éxito', 'Usuario registrado con éxito');
-          navigation.navigate('Login'); // Redirigir al login después del registro
-        }
-      })
-      .catch(error => {
-        // En caso de error en la comunicación con el servidor
-        Alert.alert('Error', 'No se pudo completar el registro. Inténtalo nuevamente más tarde.');
-        console.error(error);
+  const handlePdfUpload = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
       });
+      if (result.type === "success") {
+        setPdfFile(result);
+        console.log("Archivo seleccionado:", result);
+      } else {
+        console.log('Selección cancelada');
+      }
+    } catch (err) {
+      console.error('Error en la selección de archivo:', err);
+      Alert.alert('Error', 'Hubo un error seleccionando el archivo. Por favor, inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -62,7 +30,6 @@ export default function Registro() {
       style={styles.background}
     >
       <View style={styles.overlay}>
-        {/* Integración del logo */}
         <Image
           source={require('../assets/img/logo_muni.jpg')}
           style={styles.logo}
@@ -75,8 +42,6 @@ export default function Registro() {
           placeholder="Nombre Completo"
           placeholderTextColor="#000"
           style={styles.input}
-          value={nombre}
-          onChangeText={setNombre}
         />
 
         <Text style={styles.label}>RUT</Text>
@@ -84,8 +49,6 @@ export default function Registro() {
           placeholder="RUT"
           placeholderTextColor="#000"
           style={styles.input}
-          value={rut}
-          onChangeText={setRut}
         />
 
         <Text style={styles.label}>Correo Electrónico</Text>
@@ -94,8 +57,6 @@ export default function Registro() {
           placeholderTextColor="#000"
           keyboardType="email-address"
           style={styles.input}
-          value={correo}
-          onChangeText={setCorreo}
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -104,8 +65,6 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
-          value={password}
-          onChangeText={setPassword}
         />
 
         <Text style={styles.label}>Confirmar Contraseña</Text>
@@ -114,16 +73,23 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
         />
 
-        <TouchableOpacity style={styles.button} onPress={Registrar}>
+        {/* Botón para subir archivo PDF */}
+        <TouchableOpacity style={styles.button} onPress={handlePdfUpload}>
+          <Text style={styles.buttonText}>Subir archivo PDF</Text>
+        </TouchableOpacity>
+
+        {pdfFile && (
+          <Text style={styles.pdfFileName}>Archivo seleccionado: {pdfFile.name}</Text>
+        )}
+
+        <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.buttonText}>INICIO DE SESION</Text>
+          <Text style={styles.buttonText}>CANCELAR</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -146,10 +112,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 150, 
+    width: 150,
     height: 150,
     resizeMode: 'contain',
-    marginBottom: 20, 
+    marginBottom: 20,
   },
   title: {
     fontSize: 30,
@@ -157,7 +123,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     fontWeight: 'bold',
-    fontFamily: 'Roboto',
   },
   label: {
     fontSize: 18,
@@ -165,7 +130,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 5,
     fontWeight: 'bold',
-    fontFamily: 'Roboto',
   },
   input: {
     width: '100%',
@@ -181,7 +145,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 40,
-    backgroundColor: '#81C3FF',
+    backgroundColor: '#00CFFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -191,6 +155,10 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'Roboto',
+  },
+  pdfFileName: {
+    marginTop: 10,
+    color: '#000',
+    fontSize: 16,
   },
 });
