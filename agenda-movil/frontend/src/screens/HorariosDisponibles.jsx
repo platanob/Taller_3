@@ -265,6 +265,25 @@ const styles = StyleSheet.create({
     color: 'white', 
     fontSize: 25, 
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0F8FF',
+  },
+  loadingText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#260e86',
+    marginTop: 10,
+    fontFamily: 'Roboto', 
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    opacity: 0.1,
+  },
 });
 
 export default Horarios;
