@@ -1,0 +1,55 @@
+{
+    "fecha": "2024-09-16",
+    "hora": "10:00 AM",
+    "locacion": "Oficina Central",
+    "servicio": "Consulta Médica",
+    "colaborador": "Dr. Pérez",
+    "disponible": true
+}
+
+{
+    "fecha": "2024-09-17",
+    "hora": "09:30 AM",
+    "locacion": "Clínica Norte",
+    "servicio": "Terapia Física",
+    "colaborador": "Lic. García",
+    "disponible": true
+}
+
+{
+    "fecha": "2024-09-18",
+    "hora": "11:00 AM",
+    "locacion": "Oficina Central",
+    "servicio": "Consulta Pediátrica",
+    "colaborador": "Dra. Gómez",
+    "disponible": false
+}
+
+{
+    "fecha": "2024-09-19",
+    "hora": "02:00 PM",
+    "locacion": "Centro Médico Sur",
+    "servicio": "Evaluación Nutricional",
+    "colaborador": "Lic. Martínez",
+    "disponible": true
+}
+
+
+{
+    "fecha": "2024-09-20",
+    "hora": "08:00 AM",
+    "locacion": "Hospital General",
+    "servicio": "Chequeo General",
+    "colaborador": "Dr. Sánchez",
+    "disponible": false
+}
+
+{
+    "fecha": "2024-09-21",
+    "hora": "03:30 PM",
+    "locacion": "Clínica Norte",
+    "servicio": "Consulta Médica",
+    "colaborador": "Dra. Rivera",
+    "disponible": true
+}
+
