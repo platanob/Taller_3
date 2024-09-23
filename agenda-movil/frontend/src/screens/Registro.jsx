@@ -5,7 +5,53 @@ import * as DocumentPicker from 'expo-document-picker';
 
 export default function Registro() {
   const navigation = useNavigation();
+  const [nombre, setNombre] = useState('');
+  const [rut, setRut] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
+
+  const handleRegister = () => {
+    // Validar que todos los campos estén llenos
+    if (!nombre || !rut || !correo || !password || !confirmPassword) {
+      Alert.alert('Error', 'Por favor, completa todos los campos');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      return;
+    }
+
+    // Realizar la petición de registro al servidor
+    fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nombre: nombre,
+        rut: rut,
+        correo: correo,
+        contraseña: password,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          Alert.alert('Error', data.error);
+        } else {
+          // Registro exitoso
+          Alert.alert('Éxito', 'Usuario registrado con éxito');
+          navigation.navigate('Login'); 
+        }
+      })
+      .catch(error => {
+        Alert.alert('Error', 'No se pudo completar el registro. Inténtalo nuevamente más tarde.');
+        console.error(error);
+      });
+  };
 
   const handlePdfUpload = async () => {
     try {
@@ -42,6 +88,8 @@ export default function Registro() {
           placeholder="Nombre Completo"
           placeholderTextColor="#000"
           style={styles.input}
+          value={nombre}
+          onChangeText={setNombre}
         />
 
         <Text style={styles.label}>RUT</Text>
@@ -49,6 +97,8 @@ export default function Registro() {
           placeholder="RUT"
           placeholderTextColor="#000"
           style={styles.input}
+          value={rut}
+          onChangeText={setRut}
         />
 
         <Text style={styles.label}>Correo Electrónico</Text>
@@ -57,6 +107,8 @@ export default function Registro() {
           placeholderTextColor="#000"
           keyboardType="email-address"
           style={styles.input}
+          value={correo}
+          onChangeText={setCorreo}
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -65,6 +117,8 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}
         />
 
         <Text style={styles.label}>Confirmar Contraseña</Text>
@@ -73,18 +127,20 @@ export default function Registro() {
           placeholderTextColor="#000"
           secureTextEntry
           style={styles.input}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
 
-        {/* Botón para subir archivo PDF */}
-        <TouchableOpacity style={styles.button} onPress={handlePdfUpload}>
+         {/* Botón para subir archivo PDF */}
+         <TouchableOpacity style={styles.button} onPress={handlePdfUpload}>
           <Text style={styles.buttonText}>Subir archivo PDF</Text>
         </TouchableOpacity>
 
         {pdfFile && (
           <Text style={styles.pdfFileName}>Archivo seleccionado: {pdfFile.name}</Text>
         )}
-
-        <TouchableOpacity style={styles.button}>
+        
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>REGISTRARME</Text>
         </TouchableOpacity>
 
@@ -112,10 +168,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 150,
+    width: 150, 
     height: 150,
     resizeMode: 'contain',
-    marginBottom: 20,
+    marginBottom: 20, 
   },
   title: {
     fontSize: 30,
@@ -123,6 +179,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
   label: {
     fontSize: 18,
@@ -130,6 +187,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 5,
     fontWeight: 'bold',
+    fontFamily: 'Roboto',
   },
   input: {
     width: '100%',
@@ -145,7 +203,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 40,
-    backgroundColor: '#00CFFF',
+    backgroundColor: '#81C3FF',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -155,10 +213,6 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  pdfFileName: {
-    marginTop: 10,
-    color: '#000',
-    fontSize: 16,
+    fontFamily: 'Roboto',
   },
 });
