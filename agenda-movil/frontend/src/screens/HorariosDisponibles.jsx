@@ -11,92 +11,79 @@ const Horarios = () => {
   const [horarios, setHorarios] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const obtenerHorarios = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        if (!token) {
-          Alert.alert('Error', 'No se encontró el token de autenticación.');
-          return;
-        }
-
-        const response = await fetch('http://localhost:5000/api/citas_disponibles', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setHorarios(data.citas_disponibles);
-        } else {
-          Alert.alert('Error', data.error || 'Error al obtener los horarios disponibles');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'Hubo un problema al conectar con la API.');
-      } finally {
+  const obtenerHorarios = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      
+      if (!token) {
+        Alert.alert("Error", "Usuario no autenticado.");
+        return;
+      }
+  
+      const response = await fetch('http://localhost:5000/api/citas_disponibles', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,  // Incluye el token de acceso en la solicitud
+        },
+      });
+  
+      const result = await response.json();
+      
+      if (response.status === 200) {
+        setHorarios(result.citas_disponibles);
+        setLoading(false);
+      } else {
+        Alert.alert("Error", result.error || "No se pudieron obtener los horarios disponibles");
         setLoading(false);
       }
-    };
-
-    obtenerHorarios();
-  }, []);
-
-  const handleInfoPress = (fecha, hora, lugar, servicio, profesional) => {
-    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
-  };
-
-  const handleAgendarPress = (citaId) => {
-    if (Platform.OS === 'web') {
-      window.alert(`¿Estás seguro de que quieres agendar esta cita?`);
-      agendarCita(citaId);
-    } else {
-      Alert.alert(
-        'Confirmación de agendar',
-        '¿Estás seguro de que quieres agendar esta cita?',
-        [
-          {
-            text: 'No',
-            style: 'cancel',
-          },
-          {
-            text: 'Sí',
-            onPress: () => agendarCita(citaId),
-          },
-        ],
-        { cancelable: false }
-      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Hubo un problema al obtener los horarios disponibles.");
+      setLoading(false);
     }
   };
 
-  const agendarCita = async (citaId) => {
+  useEffect(() => {
+    obtenerHorarios();
+  }, []);  
+
+  const infoPress = (fecha, hora, lugar, servicio, profesional) => {
+    navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
+  };
+
+  const agendarPress = async (cita_id) => {
     try {
+      const confirmar = window.confirm("¿Estás seguro de que quieres agendar esta cita?");
+      
+      if (!confirmar) return;
+
       const token = await AsyncStorage.getItem('access_token');
+      
       if (!token) {
-        Alert.alert('Error', 'No se encontró el token de autenticación.');
+        Alert.alert("Error", "Usuario no autenticado.");
         return;
       }
-
-      const response = await fetch(`http://localhost:5000/api/agendar/${citaId}`, {
+      
+      const response = await fetch('http://localhost:5000/api/agendar', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  // Token para la solicitud
         },
+        body: JSON.stringify({ cita_id }),  // Manda el ID de la cita
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert('Éxito', 'La cita ha sido agendada exitosamente.');
-        setHorarios(horarios.filter(horario => horario._id !== citaId));
+  
+      const result = await response.json();
+  
+      if (response.status === 200) {
+        Alert.alert("Éxito", "Cita agendada correctamente");
+        obtenerHorarios();
       } else {
-        Alert.alert('Error', data.error || 'No se pudo agendar la cita.');
+        Alert.alert("Error", result.error || "No se pudo agendar la cita");
       }
     } catch (error) {
-      Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+      console.error(error);
+      Alert.alert("Error", "Hubo un problema al agendar la cita.");
     }
   };
 
@@ -145,13 +132,13 @@ const Horarios = () => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity 
                   style={styles.infoButton} 
-                  onPress={() => handleInfoPress(horario.fecha, horario.hora, horario.locacion, horario.servicio, horario.colaborador)}
+                  onPress={() => infoPress(horario.fecha, horario.hora, horario.locacion, horario.servicio, horario.colaborador)}
                 >
                   <Text style={styles.buttonText}>INFORMACIÓN</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.agendarButton} 
-                  onPress={() => handleAgendarPress(horario._id)}
+                  onPress={() => agendarPress(horario._id)}
                 >
                   <Text style={styles.buttonText}>AGENDAR</Text>
                 </TouchableOpacity>

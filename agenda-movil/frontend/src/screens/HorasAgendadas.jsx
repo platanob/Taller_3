@@ -50,7 +50,9 @@ const HorasAgendadas = () => {
 
   const CancelPress = (citaId) => {
     if (Platform.OS === 'web') {
-      window.alert(`¿Estás seguro de que quieres cancelar esta cita?`);
+      const confirmar = window.confirm("¿Estás seguro de que quieres cancelar esta cita?");
+      if (!confirmar) return;
+
       cancelarCita(citaId);
     } else {
       Alert.alert(
