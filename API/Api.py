@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
+import re
+import gridfs
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
@@ -27,28 +29,53 @@ client = MongoClient('mongodb+srv://benja:benja@cluster0.qzervft.mongodb.net/')
 db = client['APP']
 users_collection = db['usuarios']
 citas_collection = db['citas']
+fs = gridfs.GridFS(db)
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    rut = data.get('rut')
-    password = data.get('contraseña')
-    name = data.get('nombre')
+    try:
+        data = request.form  # Los datos de texto vienen en request.form cuando se sube un archivo
+        nombre = data.get('nombre')
+        rut = data.get('rut')
+        correo = data.get('correo')
+        password = data.get('contrasena')
 
-    if not rut or not password or not name:
-        return jsonify({"error": "RUT, nombre y contraseña son requeridos"}), 400
+        if not nombre or not rut or not correo or not password:
+            return jsonify({"error": "Todos los campos (nombre, rut, correo, contraseña) son requeridos"}), 400
 
-    if users_collection.find_one({"rut": rut}):
-        return jsonify({"error": "El usuario ya existe"}), 400
+        if users_collection.find_one({"correo": correo}):
+            return jsonify({"error": "El correo ya está registrado"}), 400
 
-    hashed_password = generate_password_hash(password)
-    users_collection.insert_one({
-        "rut": rut,
-        "password": hashed_password,
-        "name": name
-    })
+        if users_collection.find_one({"rut": rut}):
+            return jsonify({"error": "El usuario ya existe"}), 400
 
-    return jsonify({"message": "Usuario registrado con éxito"}), 201
+        if 'archivo' not in request.files:
+            return jsonify({"error": "El archivo PDF es requerido"}), 400
+
+        archivo_pdf = request.files['archivo']
+
+
+        if archivo_pdf.filename == '' or not archivo_pdf.filename.endswith('.pdf'):
+            return jsonify({"error": "Debes subir un archivo PDF válido"}), 400
+
+
+        pdf_id = fs.put(archivo_pdf, filename=archivo_pdf.filename)
+
+        hashed_password = generate_password_hash(password)
+
+
+        users_collection.insert_one({
+            "rut": rut,
+            "password": hashed_password,
+            "nombre": nombre,
+            "correo": correo,
+            "pdf_id": pdf_id  
+        })
+
+        return jsonify({"message": "Usuario registrado con éxito"}), 201
+    
+    except Exception as e:
+        return jsonify({"error": f"Se produjo un error: {str(e)}"}), 500
 
 @app.route('/api/login', methods=['POST'])
 def login():
