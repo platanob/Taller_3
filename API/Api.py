@@ -29,47 +29,72 @@ client = MongoClient('mongodb+srv://benja:benja@cluster0.qzervft.mongodb.net/')
 db = client['APP']
 users_collection = db['usuarios']
 citas_collection = db['citas']
+usuarios_nuevos = db['usuarios_nuevos']
 fs = gridfs.GridFS(db)
 
 @app.route('/api/register', methods=['POST'])
 def register():
     try:
-        data = request.form  # Los datos de texto vienen en request.form cuando se sube un archivo
+        data = request.form  
         nombre = data.get('nombre')
         rut = data.get('rut')
         correo = data.get('correo')
         password = data.get('contrasena')
 
+        # Verificar que los campos de texto están presentes
         if not nombre or not rut or not correo or not password:
             return jsonify({"error": "Todos los campos (nombre, rut, correo, contraseña) son requeridos"}), 400
 
+        # Verificar que no exista un usuario con el mismo correo o rut
         if users_collection.find_one({"correo": correo}):
             return jsonify({"error": "El correo ya está registrado"}), 400
 
         if users_collection.find_one({"rut": rut}):
             return jsonify({"error": "El usuario ya existe"}), 400
 
+        # Verificar que se haya subido el archivo PDF
         if 'archivo' not in request.files:
             return jsonify({"error": "El archivo PDF es requerido"}), 400
 
         archivo_pdf = request.files['archivo']
 
-
+        # Verificar el archivo PDF
         if archivo_pdf.filename == '' or not archivo_pdf.filename.endswith('.pdf'):
             return jsonify({"error": "Debes subir un archivo PDF válido"}), 400
 
-
+        # Guardar el archivo PDF en GridFS
         pdf_id = fs.put(archivo_pdf, filename=archivo_pdf.filename)
 
+        # Verificar que se suban las imágenes
+        if 'carnet_frontal' not in request.files or 'carnet_trasero' not in request.files:
+            return jsonify({"error": "Las imágenes de carnet frontal y carnet trasero son requeridas"}), 400
+
+        carnet_frontal = request.files['carnet_frontal']
+        carnet_trasero = request.files['carnet_trasero']
+
+        # Verificar que las imágenes sean válidas (puedes agregar más validaciones si es necesario)
+        if carnet_frontal.filename == '' or not carnet_frontal.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            return jsonify({"error": "Debes subir una imagen válida para el carnet frontal"}), 400
+
+        if carnet_trasero.filename == '' or not carnet_trasero.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            return jsonify({"error": "Debes subir una imagen válida para el carnet trasero"}), 400
+
+        # Guardar las imágenes en GridFS
+        carnet_frontal_id = fs.put(carnet_frontal, filename=carnet_frontal.filename)
+        carnet_trasero_id = fs.put(carnet_trasero, filename=carnet_trasero.filename)
+
+        # Hashear la contraseña
         hashed_password = generate_password_hash(password)
 
-
-        users_collection.insert_one({
+        # Insertar los datos del nuevo usuario en la base de datos
+        usuarios_nuevos.insert_one({
             "rut": rut,
             "password": hashed_password,
             "nombre": nombre,
             "correo": correo,
-            "pdf_id": pdf_id  
+            "pdf_id": pdf_id,  # ID del archivo PDF en GridFS
+            "carnet_frontal_id": carnet_frontal_id,  # ID de la imagen de carnet frontal
+            "carnet_trasero_id": carnet_trasero_id   # ID de la imagen de carnet trasero
         })
 
         return jsonify({"message": "Usuario registrado con éxito"}), 201
