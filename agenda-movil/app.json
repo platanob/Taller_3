@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "permissions": ["MEDIA_LIBRARY", "READ_EXTERNAL_STORAGE"],
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -12,55 +12,59 @@ export default function Registro() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
 
-  const handleRegister = () => {
-    // Validar que todos los campos estén llenos
+  const register = async () => {
     if (!nombre || !rut || !correo || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor, completa todos los campos');
       return;
     }
-
+  
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Las contraseñas no coinciden');
       return;
     }
+  
+    if (!pdfFile || pdfFile.canceled || !pdfFile.assets || pdfFile.assets.length === 0) {
+      Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido');
+      return;
+    }
+  
+    const selectedFile = pdfFile.assets[0]; 
+    const file = selectedFile.file; 
 
-    // Realizar la petición de registro al servidor
-    fetch('http://localhost:5000/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        nombre: nombre,
-        rut: rut,
-        correo: correo,
-        contraseña: password,
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          Alert.alert('Error', data.error);
-        } else {
-          // Registro exitoso
-          Alert.alert('Éxito', 'Usuario registrado con éxito');
-          navigation.navigate('Login'); 
-        }
-      })
-      .catch(error => {
-        Alert.alert('Error', 'No se pudo completar el registro. Inténtalo nuevamente más tarde.');
-        console.error(error);
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('rut', rut);
+    formData.append('correo', correo);
+    formData.append('contrasena', password);
+    formData.append('archivo', file)
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        body: formData,
       });
+  
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Error en la solicitud');
+      }
+  
+      console.log('Registro exitoso', result);
+    } catch (error) {
+      console.error('Error detallado del servidor:', error.message);
+    }
   };
 
-  const handlePdfUpload = async () => {
+
+  const selectPdf = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
+        type: 'application/pdf',
       });
-      if (result.type === "success") {
+  
+      if (result.type !== 'cancel') {
         setPdfFile(result);
-        console.log("Archivo seleccionado:", result);
+        console.log('Archivo seleccionado:', result);
       } else {
         console.log('Selección cancelada');
       }
@@ -75,83 +79,86 @@ export default function Registro() {
       source={require('../assets/img/fondo.jpg')}
       style={styles.background}
     >
-      <View style={styles.overlay}>
-        <Image
-          source={require('../assets/img/logo_muni.jpg')}
-          style={styles.logo}
-        />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.overlay}>
+          <Image
+            source={require('../assets/img/logo_muni.jpg')}
+            style={styles.logo}
+          />
 
-        <Text style={styles.title}>Registro de Usuario</Text>
+          <Text style={styles.title}>Registro de Usuario</Text>
 
-        <Text style={styles.label}>Nombre Completo</Text>
-        <TextInput
-          placeholder="Nombre Completo"
-          placeholderTextColor="#000"
-          style={styles.input}
-          value={nombre}
-          onChangeText={setNombre}
-        />
+          {/* Campos de texto */}
+          <Text style={styles.label}>Nombre Completo</Text>
+          <TextInput
+            placeholder="Nombre Completo"
+            placeholderTextColor="#000"
+            style={styles.input}
+            value={nombre}
+            onChangeText={setNombre}
+          />
 
-        <Text style={styles.label}>RUT</Text>
-        <TextInput
-          placeholder="RUT"
-          placeholderTextColor="#000"
-          style={styles.input}
-          value={rut}
-          onChangeText={setRut}
-        />
+          <Text style={styles.label}>RUT</Text>
+          <TextInput
+            placeholder="RUT"
+            placeholderTextColor="#000"
+            style={styles.input}
+            value={rut}
+            onChangeText={setRut}
+          />
 
-        <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          placeholder="Correo Electrónico"
-          placeholderTextColor="#000"
-          keyboardType="email-address"
-          style={styles.input}
-          value={correo}
-          onChangeText={setCorreo}
-        />
+          <Text style={styles.label}>Correo Electrónico</Text>
+          <TextInput
+            placeholder="Correo Electrónico"
+            placeholderTextColor="#000"
+            keyboardType="email-address"
+            style={styles.input}
+            value={correo}
+            onChangeText={setCorreo}
+          />
 
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          placeholder="Contraseña"
-          placeholderTextColor="#000"
-          secureTextEntry
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-        />
+          <Text style={styles.label}>Contraseña</Text>
+          <TextInput
+            placeholder="Contraseña"
+            placeholderTextColor="#000"
+            secureTextEntry
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <Text style={styles.label}>Confirmar Contraseña</Text>
-        <TextInput
-          placeholder="Confirmar Contraseña"
-          placeholderTextColor="#000"
-          secureTextEntry
-          style={styles.input}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
+          <Text style={styles.label}>Confirmar Contraseña</Text>
+          <TextInput
+            placeholder="Confirmar Contraseña"
+            placeholderTextColor="#000"
+            secureTextEntry
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
 
-         {/* Botón para subir archivo PDF */}
-         <TouchableOpacity style={styles.button} onPress={handlePdfUpload}>
-          <Text style={styles.buttonText}>Subir archivo PDF</Text>
-        </TouchableOpacity>
+          {/* Sección para subir archivo PDF */}
+          <View style={styles.fileUploadContainer}>
+            <TouchableOpacity style={styles.fileButton} onPress={selectPdf}>
+              <Text style={styles.fileButtonText}>Seleccionar archivo PDF</Text>
+            </TouchableOpacity>
+            <Text style={styles.pdfFileName}>
+              {pdfFile && pdfFile.assets ? pdfFile.assets[0].name : 'Ningún archivo seleccionado'}
+            </Text>
+          </View>
 
-        {pdfFile && (
-          <Text style={styles.pdfFileName}>Archivo seleccionado: {pdfFile.name}</Text>
-        )}
-        
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>REGISTRARME</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={register}>
+            <Text style={styles.buttonText}>REGISTRARME</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.buttonText}>CANCELAR</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.buttonText}>CANCELAR</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -160,11 +167,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   overlay: {
     padding: 20,
     borderRadius: 20,
     backgroundColor: 'rgba(240, 205, 117, 0.9)',
-    width: '80%',
+    width: '100%',
     alignItems: 'center',
   },
   logo: {
@@ -214,5 +226,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'Roboto',
+  },
+  fileUploadContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+  },
+  fileButton: {
+    backgroundColor: '#ddd',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  fileButtonText: {
+    color: '#000',
+    fontSize: 16,
+  },
+  pdfFileName: {
+    flex: 1,
+    color: '#000',
+    fontSize: 16,
   },
 });
