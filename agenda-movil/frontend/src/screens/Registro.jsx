@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     width: '100%',
     position: 'relative', 
-    marginBottom: 20,
+    marginBottom: 5,
   },
   passwordInput: {
     width: '100%',
