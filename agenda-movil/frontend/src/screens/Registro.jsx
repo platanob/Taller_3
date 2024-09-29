@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Registro() {
   const navigation = useNavigation();
@@ -11,6 +12,19 @@ export default function Registro() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
+  const [carnetFrontal, setCarnetFrontal] = useState(null);
+  const [carnetTrasero, setCarnetTrasero] = useState(null);
+
+  function base64ToBlob(base64Data, contentType = 'image/jpeg') {
+    const byteCharacters = atob(base64Data.split(',')[1]);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: contentType });
+  }
+  
 
   const register = async () => {
     if (!nombre || !rut || !correo || !password || !confirmPassword) {
@@ -27,6 +41,11 @@ export default function Registro() {
       Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido');
       return;
     }
+
+    if (!carnetFrontal || !carnetTrasero) {
+      Alert.alert('Error', 'Por favor, selecciona ambas imágenes del carnet (frontal y trasero)');
+      return;
+    }
   
     const selectedFile = pdfFile.assets[0]; 
     const file = selectedFile.file; 
@@ -37,7 +56,13 @@ export default function Registro() {
     formData.append('correo', correo);
     formData.append('contrasena', password);
     formData.append('archivo', file)
-    
+     // Convertir URI base64 a Blob
+    const carnetFrontalBlob = base64ToBlob(carnetFrontal.assets[0].uri, 'image/png');
+    const carnetTraseroBlob = base64ToBlob(carnetTrasero.assets[0].uri, 'image/png');
+    // Imagen carnet frontal (en formato Blob)
+    formData.append('carnet_frontal', carnetFrontalBlob, 'carnet_frontal.png');
+    formData.append('carnet_trasero', carnetTraseroBlob, 'carnet_trasero.png');
+      
     try {
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
@@ -48,13 +73,17 @@ export default function Registro() {
       if (!response.ok) {
         throw new Error(result.error || 'Error en la solicitud');
       }
-  
       console.log('Registro exitoso', result);
+
+      if (Platform.OS === 'web') {
+        window.alert('¡Registro exitoso!');
+      } else {
+        Alert.alert('Éxito', '¡Registro exitoso!');
+      }
     } catch (error) {
       console.error('Error detallado del servidor:', error.message);
     }
   };
-
 
   const selectPdf = async () => {
     try {
@@ -73,6 +102,43 @@ export default function Registro() {
       Alert.alert('Error', 'Hubo un error seleccionando el archivo. Por favor, inténtalo de nuevo.');
     }
   };
+
+  const selectCarnetFrontal = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setCarnetFrontal(result);
+        console.log('Carnet frontal seleccionado:', result);
+      }
+    } catch (err) {
+      console.error('Error en la selección de imagen:', err);
+      Alert.alert('Error', 'Hubo un error seleccionando la imagen. Por favor, inténtalo de nuevo.');
+    }
+  };
+
+  const selectCarnetTrasero = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setCarnetTrasero(result);
+        console.log('Carnet trasero seleccionado:', result);
+      }
+    } catch (err) {
+      console.error('Error en la selección de imagen:', err);
+      Alert.alert('Error', 'Hubo un error seleccionando la imagen. Por favor, inténtalo de nuevo.');
+    }
+  };
+
 
   return (
     <ImageBackground
@@ -147,12 +213,32 @@ export default function Registro() {
             </Text>
           </View>
 
+           {/* Sección para seleccionar imagen del carnet frontal */}
+          <View style={styles.fileUploadContainer}>
+            <TouchableOpacity style={styles.fileButton} onPress={selectCarnetFrontal}>
+              <Text style={styles.fileButtonText}>Seleccionar Carnet Frontal</Text>
+            </TouchableOpacity>
+            <Text style={styles.pdfFileName}>
+              {carnetFrontal && carnetFrontal.assets ? carnetFrontal.assets[0].fileName : 'Ninguna imagen seleccionada'}
+            </Text>
+          </View>
+
+          {/* Sección para seleccionar imagen del carnet trasero */}
+          <View style={styles.fileUploadContainer}>
+            <TouchableOpacity style={styles.fileButton} onPress={selectCarnetTrasero}>
+              <Text style={styles.fileButtonText}>Seleccionar Carnet Trasero</Text>
+            </TouchableOpacity>
+            <Text style={styles.pdfFileName}>
+              {carnetTrasero && carnetFrontal.assets ? carnetTrasero.assets[0].fileName : 'Ninguna imagen seleccionada'}
+            </Text>
+          </View>
+
           <TouchableOpacity style={styles.button} onPress={register}>
             <Text style={styles.buttonText}>REGISTRARME</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.buttonText}>CANCELAR</Text>
+            <Text style={styles.buttonText}>INICIO DE SESION</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -176,7 +262,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     backgroundColor: 'rgba(240, 205, 117, 0.9)',
-    width: '100%',
+    width: '90%',
     alignItems: 'center',
   },
   logo: {
@@ -227,9 +313,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Roboto',
   },
+  fileButtonText: {
+    color: '#000',
+    fontSize: 13,
+    fontWeight: "bold",
+  },
   fileUploadContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column', // Cambiado a 'column'
+    alignItems: 'center',     // Centra los elementos
     marginBottom: 20,
     width: '100%',
   },
@@ -237,15 +328,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     padding: 10,
     borderRadius: 5,
-    marginRight: 10,
-  },
-  fileButtonText: {
-    color: '#000',
-    fontSize: 16,
+    marginBottom: 5, // Añade un espacio entre el botón y el nombre
   },
   pdfFileName: {
-    flex: 1,
     color: '#000',
-    fontSize: 16,
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center', // Alinea el texto en el centro
   },
 });
