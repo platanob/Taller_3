@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView, Platform } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,6 +12,8 @@ export default function Registro() {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
   const [carnetFrontal, setCarnetFrontal] = useState(null);
   const [carnetTrasero, setCarnetTrasero] = useState(null);
@@ -184,24 +187,44 @@ export default function Registro() {
           />
 
           <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            placeholder="Contraseña"
-            placeholderTextColor="#000"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              placeholder="Contraseña"
+              placeholderTextColor="#000"
+              secureTextEntry={!passwordVisible}
+              style={[styles.input, styles.passwordInput]}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}
+              style={styles.iconContainer}>
+              <Icon
+                name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color="#000"
+              />
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>Confirmar Contraseña</Text>
-          <TextInput
-            placeholder="Confirmar Contraseña"
-            placeholderTextColor="#000"
-            secureTextEntry
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              placeholder="Confirmar Contraseña"
+              placeholderTextColor="#000"
+              secureTextEntry={!confirmPasswordVisible}
+              style={[styles.input, styles.passwordInput]}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+              style={styles.iconContainer}>
+              <Icon
+                name={confirmPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color="#000"
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Sección para subir archivo PDF */}
           <View style={styles.fileUploadContainer}>
@@ -319,8 +342,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   fileUploadContainer: {
-    flexDirection: 'column', // Cambiado a 'column'
-    alignItems: 'center',     // Centra los elementos
+    flexDirection: 'column', 
+    alignItems: 'center',     
     marginBottom: 20,
     width: '100%',
   },
@@ -328,12 +351,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 5, // Añade un espacio entre el botón y el nombre
+    marginBottom: 5, 
   },
   pdfFileName: {
     color: '#000',
     fontSize: 13,
     fontWeight: 'bold',
-    textAlign: 'center', // Alinea el texto en el centro
+    textAlign: 'center', 
+  },
+  passwordContainer: {
+    width: '100%',
+    position: 'relative', 
+    marginBottom: 20,
+  },
+  passwordInput: {
+    width: '100%',
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 10,
+    paddingRight: 40,  
+    borderRadius: 10,
+    fontSize: 18,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  iconContainer: {
+    position: 'absolute',
+    right: 10,  
+    top: 8,     
   },
 });
