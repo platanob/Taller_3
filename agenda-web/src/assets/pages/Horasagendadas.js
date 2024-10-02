@@ -1,7 +1,7 @@
-// VerHorasDisponibles.js
+// HorasAgendadas.js
 import React from 'react';
 
-function VerHorasDisponibles() {
+function HorasAgendadas() {
   return (
     <div>
       <h1>Ver Horas Disponibles</h1>
@@ -10,4 +10,4 @@ function VerHorasDisponibles() {
   );
 }
 
-export default VerHorasDisponibles;
+export default HorasAgendadas;

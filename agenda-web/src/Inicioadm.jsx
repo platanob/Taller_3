@@ -1,12 +1,11 @@
 import React from 'react';
 import './assets/css/AdminU.css'; // Importa tu archivo de CSS
-import Logo from './assets/css/logo_muni.jpg'
 
-const AdminU = () => {
+const InicioAdmin = () => {
   return (
     <div className="container">
       <header className="header">
-        <img src= {Logo} alt="Logo" className="logo" />
+        <img src="logo.png" alt="Logo" className="logo" />
         <div className="nav-buttons">
           <button>ADMINISTRAR COLABORADORES</button>
           <button>ADMINISTRAR USUARIOS</button>
@@ -41,7 +40,4 @@ const AdminU = () => {
   );
 };
 
-export default AdminU;
-
-
-
+export default InicioAdmin;
