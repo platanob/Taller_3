@@ -5,7 +5,7 @@ const InicioAdmin = () => {
   return (
     <div className="container">
       <header className="header">
-        <img src="logo.png" alt="Logo" className="logo" />
+        <img src= {Logo} alt="Logo" className="logo" />
         <div className="nav-buttons">
           <button>ADMINISTRAR COLABORADORES</button>
           <button>ADMINISTRAR USUARIOS</button>
