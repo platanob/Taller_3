@@ -1,7 +1,7 @@
 import React from 'react';
 import './assets/css/AdminU.css'; // Importa tu archivo de CSS
 
-const App = () => {
+const InicioAdmin = () => {
   return (
     <div className="container">
       <header className="header">
@@ -40,4 +40,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default InicioAdmin;

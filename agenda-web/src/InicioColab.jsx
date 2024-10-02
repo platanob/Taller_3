@@ -7,7 +7,7 @@ import CrearCitas from './assets/pages/Crearcitas';
 import HistorialCitas from './assets/pages/HistorialCitas';
 import HorasAgendadas from './assets/pages/Horasagendadas';
 
-function Inicio() {
+function InicioColaborador() {
   return (
     <Router>
       <div>
@@ -23,4 +23,4 @@ function Inicio() {
   );
 }
 
-export default Inicio;
+export default InicioColaborador;
