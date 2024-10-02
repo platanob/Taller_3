@@ -1,79 +1,82 @@
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #87CEEB; /* Fondo azul */
-  }
-  
-  .container {
-    text-align: center;
-  }
-  
-  .header {
-    background-color: #2B0059;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .logo {
-    width: 150px; /* Ajusta el tamaño del logo */
-  }
-  
-  .nav-buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .nav-buttons button {
-    background-color: #FFD700;
-    border: none;
-    padding: 10px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .logout-button {
-    background-color: #87CEEB;
-  }
-  
-  main h1 {
-    margin-top: 20px;
-    font-size: 32px;
-    color: black;
-  }
-  
-  .appointment-card {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .card {
-    background-color: #A9D0F5;
-    border-radius: 10px;
-    padding: 20px;
-    width: 200px;
-    text-align: left;
-  }
-  
-  .clinic {
-    color: red;
-  }
-  
-  button {
-    background-color: white;
-    border: 1px solid black;
-    margin: 5px 0;
-    cursor: pointer;
-    padding: 5px;
-    width: 100%;
-    border-radius: 5px;
-  }
-  
-  button:hover {
-    background-color: #ddd;
-  }
-  
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #68c9f0; /* Fondo azul */
+}
+
+.container {
+  text-align: center;
+}
+
+.header {
+  background-color: #160285;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+
+  width: 100px; /* Ajusta el tamaño del logo */
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-buttons button {
+  background-color: #f3dc5a;
+  border: none;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.logout-button {
+  background-color: #87CEEB;
+}
+
+main h1 {
+  margin-top: 20px;
+  font-size: 32px;
+  color: black;
+}
+
+.appointment-card {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  background-color: #81C3FF;
+  border-radius: 10px;
+  padding: 20px;
+  width: 200px;
+  text-align: left;
+}
+
+
+
+
+.clinic {
+  color: red;
+}
+
+button {
+  background-color: white;
+  border: 1px solid black;
+  margin: 5px 0;
+  cursor: pointer;
+  padding: 5px;
+  width: 100%;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #ddd;
+}
