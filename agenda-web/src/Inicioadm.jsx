@@ -1,5 +1,6 @@
 import React from 'react';
 import './assets/css/AdminU.css'; // Importa tu archivo de CSS
+import Logo from '.assets/img/logo_muni.jpg'
 
 const InicioAdmin = () => {
   return (
