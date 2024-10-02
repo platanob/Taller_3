@@ -1,5 +1,5 @@
 import React from 'react';
-import './AdminU.css'; // Importa tu archivo de CSS
+import './assets/css/AdminU.css'; // Importa tu archivo de CSS
 
 const App = () => {
   return (
