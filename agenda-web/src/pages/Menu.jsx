@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './assets/css/index.css';
+import './assets/css/Menu.css';
 
 function Menu() {
   return (
