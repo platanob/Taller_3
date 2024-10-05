@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from './pages/login.jsx'
 import CrearCitasAdm from "./pages/CrearCitasAdmin.jsx";
+import HorasDisponibles from "./pages/HorasDispo.jsx";
 
 function App() {
     return (
