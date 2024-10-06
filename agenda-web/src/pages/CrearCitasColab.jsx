@@ -1,7 +1,7 @@
 // CrearCitas.js
 import React from 'react';
 
-function CrearCitas() {
+function Crearcitascolab() {
   return (
     <div>
       <h1>Crear Citas</h1>
@@ -10,4 +10,4 @@ function CrearCitas() {
   );
 }
 
-export default CrearCitas;
+export default Crearcitascolab;
