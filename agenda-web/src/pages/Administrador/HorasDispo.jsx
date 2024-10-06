@@ -13,8 +13,15 @@ function HorasDisponibles() {
   return (
     <div
       className="min-h-screen bg-gray-100 flex flex-col items-center p-10"
+      style={{
+        backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)), url("/img/fondo.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
-      <h1 className="text-4xl font-bold mb-10 text-black">HORAS DISPONIBLES</h1>
+      <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
+        <h1 className="text-4xl font-bold text-white drop-shadow-lg">HORAS DISPONIBLES</h1>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {citas.map((cita, index) => (

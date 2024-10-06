@@ -2,7 +2,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Menu from './Menucolab';
-
 import Crearcitascolab from './CrearCitasColab';
 import HistorialCitas from './HistorialCitas';
 import HorasAgendadas from './Horasagendadas';

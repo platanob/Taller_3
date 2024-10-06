@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import InicioColaborador from "./pages/InicioColab.jsx";
-import InicioAdmin from "./pages/Inicioadm.jsx";
+import { useState } from "react";
+import InicioColaborador from "./pages/Colaborador/InicioColab.jsx";
+import InicioAdmin from "./pages/Administrador/Inicioadm.jsx";
 
 function App() {
   const [role, setRole] = useState(null); 
