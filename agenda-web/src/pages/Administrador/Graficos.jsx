@@ -1,13 +1,13 @@
 // Adminusers.js
 import React from 'react';
 
-function Administrarhoras() {
+function VisualizarGraficos() {
   return (
     <div>
       <h1>Usurios</h1>
-      <p>administrar usuarios.</p>
+      <p>Graficos</p>
     </div>
   );
 }
 
-export default Administrarhoras;
+export default VisualizarGraficos;

@@ -12,8 +12,9 @@ function Menu2() {
         <Link to="/" className="text-[#005baa] font-medium hover:text-[#00cfff]">Inicio</Link>
         <Link to="/administrar-colaboradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Colaboradores</Link>
         <Link to="/administrar-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Usuarios</Link>
-        <Link to="/crear-citas-administradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear citas</Link> 
-        <Link to="/visualizar-graficos" className="text-[#005baa] font-medium hover:text-[#00cfff]">Visualizar Graficos</Link> 
+        <Link to="/crear-citas-administradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link> 
+        <Link to="/visualizar-graficos" className="text-[#005baa] font-medium hover:text-[#00cfff]">Visualizar Graficos</Link>
+        <Link to="/admision-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Admision Usuarios</Link>
       </div>
 
       <div className="flex space-x-4">
