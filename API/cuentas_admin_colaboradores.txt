@@ -1,0 +1,21 @@
+  {
+    "nombre": "María Gómez",
+    "rut": "98.765.432-1",
+    "password": "securePass!456",
+    "admin": true,
+    "especialidad": ""
+  }
+  {
+    "nombre": "Ana Castillo",
+    "rut": "11.223.344-5",
+    "password": "AnaCasti12*",
+    "admin": false,
+    "especialidad": ""
+  }
+  {
+    "nombre": "Juan Pérez",
+    "rut": "12.345.678-9",
+    "password": "password123",
+    "admin": true,
+    "especialidad": "Ingeniería Civil Informática"
+  }

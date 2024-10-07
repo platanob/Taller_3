@@ -30,6 +30,7 @@ db = client['APP']
 users_collection = db['usuarios']
 citas_collection = db['citas']
 usuarios_nuevos = db['usuarios_nuevos']
+cuentas_admin = db['cuentas_admin']
 fs = gridfs.GridFS(db)
 
 @app.route('/api/register', methods=['POST'])
@@ -231,5 +232,65 @@ def cancelar_cita(cita_id):
     else:
         return jsonify({'error': 'No se pudo cancelar la cita'}), 500
 
+#Funciones parte web 
+
+
+
+@app.route('/api/agregar_web', methods=['POST'])
+def agregar_cuenta():
+    data = request.get_json()
+    
+    nombre = data.get('nombre')
+    rut = data.get('rut')
+    password = data.get('password')
+    admin = data.get('admin')
+    especialidad = data.get('especialidad', '')  
+    
+    if not nombre or not rut or not password:
+        return jsonify({'error': 'Faltan campos obligatorios'}), 400
+    
+
+    password_hash = generate_password_hash(password)
+
+    cuenta = {
+        "nombre": nombre,
+        "rut": rut,
+        "password": password_hash,
+        "admin": admin,
+        "especialidad": especialidad
+    }
+    
+    cuentas_admin.insert_one(cuenta)
+    
+    return jsonify({'mensaje': 'Cuenta agregada exitosamente'}), 201
+
+
+# Ruta para iniciar sesión
+@app.route('/api/login_web', methods=['POST'])
+def iniciar_sesion():
+    data = request.get_json()
+
+    rut = data.get('rut')
+    password = data.get('password')
+
+    if not rut or not password:
+        return jsonify({'error': 'Faltan campos obligatorios'}), 400
+
+    cuenta = cuentas_admin.find_one({"rut": rut})
+
+    if not cuenta:
+        return jsonify({'error': 'Usuario no encontrado'}), 404
+
+
+    if not check_password_hash(cuenta['password'], password):
+        return jsonify({'error': 'Contraseña incorrecta'}), 401
+
+    access_token = create_access_token(identity={'rut': rut, 'admin': cuenta['admin']})
+
+    return jsonify({
+        'mensaje': 'Inicio de sesión exitoso',
+        'token': access_token,
+        'admin': cuenta['admin']
+    }), 200
 if __name__ == '__main__':
     app.run(debug=True)
