@@ -22,14 +22,14 @@ function HorasDisponibles() {
 
   // Función para editar una cita
   const handleEdit = (index) => {
-    setSelectedCita(citas[index]);
+    setSelectedCita({ ...citas[index], index });
     setIsEditMode(true);
     document.getElementById('info_modal').showModal();
   };
 
   const handleEditSubmit = () => {
-    const updatedCitas = citas.map((cita) =>
-      cita === selectedCita ? selectedCita : cita
+    const updatedCitas = citas.map((cita, i) =>
+      i === selectedCita.index ? { ...selectedCita } : cita
     );
     setCitas(updatedCitas);
     closeModal();
@@ -43,7 +43,7 @@ function HorasDisponibles() {
   };
 
   const handleDeleteConfirm = () => {
-    const updatedCitas = citas.filter((cita) => cita !== selectedCita);
+    const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
     setCitas(updatedCitas);
     closeModal();
   };
