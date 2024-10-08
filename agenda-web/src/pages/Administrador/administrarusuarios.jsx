@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 const AdminUsers = () => {
@@ -9,29 +8,53 @@ const AdminUsers = () => {
     { id: 3, name: 'Pedro Sánchez', rut: '11.223.344-5' },
   ]);
 
-  // Función para borrar un usuario
-  const handleDelete = (id) => {
-    const updatedUsers = users.filter((user) => user.id !== id);
-    setUsers(updatedUsers);
-  };
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
 
   // Función para mostrar información del usuario
   const handleInfo = (id) => {
     const user = users.find((user) => user.id === id);
-    alert(`Información del usuario:\nNombre: ${user.name}\nRUT: ${user.rut}`);
+    setSelectedUser(user);
+    document.getElementById('info_modal').showModal();
   };
 
-  // Función para editar un usuario (no confirmada aún)
+  // Función para cerrar el modal
+  const closeModal = () => {
+    setSelectedUser(null);
+    setIsEditMode(false);
+    setIsDeleteMode(false);
+    document.getElementById('info_modal').close();
+  };
+
+  // Función para editar un usuario
   const handleEdit = (id) => {
     const user = users.find((user) => user.id === id);
-    const newName = prompt(`Editar usuario:\n\nNombre actual: ${user.name}\n\nIngresa el nuevo nombre:`, user.name);
-    const newRut = prompt(`Editar RUT:\n\nRUT actual: ${user.rut}\n\nIngresa el nuevo RUT:`, user.rut);
-    if (newName && newRut) {
-      const updatedUsers = users.map((user) =>
-        user.id === id ? { ...user, name: newName, rut: newRut } : user
-      );
-      setUsers(updatedUsers);
-    }
+    setSelectedUser(user);
+    setIsEditMode(true);
+    document.getElementById('info_modal').showModal();
+  };
+
+  const handleEditSubmit = () => {
+    const updatedUsers = users.map((user) =>
+      user.id === selectedUser.id ? selectedUser : user
+    );
+    setUsers(updatedUsers);
+    closeModal();
+  };
+
+  // Función para eliminar un usuario
+  const handleDelete = (id) => {
+    const user = users.find((user) => user.id === id);
+    setSelectedUser(user);
+    setIsDeleteMode(true);
+    document.getElementById('info_modal').showModal();
+  };
+
+  const handleDeleteConfirm = () => {
+    const updatedUsers = users.filter((user) => user.id !== selectedUser.id);
+    setUsers(updatedUsers);
+    closeModal();
   };
 
   return (
@@ -90,6 +113,57 @@ const AdminUsers = () => {
           )}
         </tbody>
       </table>
+
+      {/* Modal */}
+      <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          {selectedUser && !isEditMode && !isDeleteMode && (
+            <>
+              <h3 className="font-bold text-lg">Información del Usuario</h3>
+              <p className="py-4">Nombre: {selectedUser.name}</p>
+              <p className="py-4">RUT: {selectedUser.rut}</p>
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={closeModal}>Cerrar</button>
+              </div>
+            </>
+          )}
+
+          {selectedUser && isEditMode && (
+            <>
+              <h3 className="font-bold text-lg">Editar Usuario</h3>
+              <input
+                type="text"
+                className="input input-bordered w-full my-2"
+                placeholder="Nombre"
+                value={selectedUser.name}
+                onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+              />
+              <input
+                type="text"
+                className="input input-bordered w-full my-2"
+                placeholder="RUT"
+                value={selectedUser.rut}
+                onChange={(e) => setSelectedUser({ ...selectedUser, rut: e.target.value })}
+              />
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>
+                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
+              </div>
+            </>
+          )}
+
+          {selectedUser && isDeleteMode && (
+            <>
+              <h3 className="font-bold text-lg">Confirmar Eliminación</h3>
+              <p className="py-4">¿Estás seguro que deseas eliminar a {selectedUser.name}?</p>
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={handleDeleteConfirm}>Eliminar</button>
+                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
+              </div>
+            </>
+          )}
+        </div>
+      </dialog>
     </div>
   );
 };

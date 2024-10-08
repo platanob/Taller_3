@@ -1,38 +1,59 @@
 import React, { useState } from 'react';
 
 const AdministradorColab = () => {
-  // Estado para manejar los colaboradores
   const [colaboradores, setColaboradores] = useState([
-    { id: 1, name: 'Carlos Rodríguez', rut: '12.345.678-9', especialidad: 'Terapia física' },
-    { id: 2, name: 'Ana Martínez', rut: '98.765.432-1', especialidad: 'Podología' },
-    { id: 3, name: 'Luis González', rut: '11.223.344-5', especialidad: 'Fisioterapia' },
+    { id: 1, name: 'Carlos Rodríguez', rut: '12.345.678-9', especialidad: 'Terapia física'},
+    { id: 2, name: 'Ana Martínez', rut: '98.765.432-1', especialidad: 'Podología'},
+    { id: 3, name: 'Luis González', rut: '11.223.344-5', especialidad: 'Fisioterapia'},
   ]);
 
-  // Función para borrar un colaborador
-  const handleDelete = (id) => {
-    const updatedColaboradores = colaboradores.filter((colaborador) => colaborador.id !== id);
-    setColaboradores(updatedColaboradores);
-  };
+  const [selectedColaborador, setSelectedColaborador] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
 
   // Función para mostrar información del colaborador
   const handleInfo = (id) => {
     const colaborador = colaboradores.find((colaborador) => colaborador.id === id);
-    alert(`Información del colaborador:\nNombre: ${colaborador.name}\nRUT: ${colaborador.rut}\nEspecialidad: ${colaborador.especialidad}`);
+    setSelectedColaborador(colaborador);
+    document.getElementById('info_modal').showModal();
   };
 
-  // Función para editar un colaborador (no confirmada aún)
+  // Función para cerrar el modal
+  const closeModal = () => {
+    setSelectedColaborador(null);
+    setIsEditMode(false);
+    setIsDeleteMode(false);
+    document.getElementById('info_modal').close();
+  };
+
+  // Función para editar un colaborador
   const handleEdit = (id) => {
     const colaborador = colaboradores.find((colaborador) => colaborador.id === id);
-    const newName = prompt(`Editar colaborador:\n\nNombre actual: ${colaborador.name}\n\nIngresa el nuevo nombre:`, colaborador.name);
-    const newRut = prompt(`Editar RUT:\n\nRUT actual: ${colaborador.rut}\n\nIngresa el nuevo RUT:`, colaborador.rut);
-    const newEspecialidad = prompt(`Editar Especialidad:\n\nEspecialidad actual: ${colaborador.especialidad}\n\nIngresa la nueva especialidad:`, colaborador.especialidad);
+    setSelectedColaborador(colaborador);
+    setIsEditMode(true);
+    document.getElementById('info_modal').showModal();
+  };
 
-    if (newName && newRut && newEspecialidad) {
-      const updatedColaboradores = colaboradores.map((colaborador) =>
-        colaborador.id === id ? { ...colaborador, name: newName, rut: newRut, especialidad: newEspecialidad } : colaborador
-      );
-      setColaboradores(updatedColaboradores);
-    }
+  const handleEditSubmit = () => {
+    const updatedColaboradores = colaboradores.map((colaborador) =>
+      colaborador.id === selectedColaborador.id ? selectedColaborador : colaborador
+    );
+    setColaboradores(updatedColaboradores);
+    closeModal();
+  };
+
+  // Función para eliminar un colaborador
+  const handleDelete = (id) => {
+    const colaborador = colaboradores.find((colaborador) => colaborador.id === id);
+    setSelectedColaborador(colaborador);
+    setIsDeleteMode(true);
+    document.getElementById('info_modal').showModal();
+  };
+
+  const handleDeleteConfirm = () => {
+    const updatedColaboradores = colaboradores.filter((colaborador) => colaborador.id !== selectedColaborador.id);
+    setColaboradores(updatedColaboradores);
+    closeModal();
   };
 
   return (
@@ -93,6 +114,65 @@ const AdministradorColab = () => {
           )}
         </tbody>
       </table>
+
+      {/* Modal */}
+      <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          {selectedColaborador && !isEditMode && !isDeleteMode && (
+            <>
+              <h3 className="font-bold text-lg">Información del Colaborador</h3>
+              <p className="py-4">Nombre: {selectedColaborador.name}</p>
+              <p className="py-4">RUT: {selectedColaborador.rut}</p>
+              <p className="py-4">Especialidad: {selectedColaborador.especialidad}</p>
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={closeModal}>Cerrar</button>
+              </div>
+            </>
+          )}
+
+          {selectedColaborador && isEditMode && (
+            <>
+              <h3 className="font-bold text-lg">Editar Colaborador</h3>
+              <input
+                type="text"
+                className="input input-bordered w-full my-2"
+                placeholder="Nombre"
+                value={selectedColaborador.name}
+                onChange={(e) => setSelectedColaborador({ ...selectedColaborador, name: e.target.value })}
+              />
+              <input
+                type="text"
+                className="input input-bordered w-full my-2"
+                placeholder="RUT"
+                value={selectedColaborador.rut}
+                onChange={(e) => setSelectedColaborador({ ...selectedColaborador, rut: e.target.value })}
+              />
+              <input
+                type="text"
+                className="input input-bordered w-full my-2"
+                placeholder="Especialidad"
+                value={selectedColaborador.especialidad}
+                onChange={(e) => setSelectedColaborador({ ...selectedColaborador, especialidad: e.target.value })}
+              />
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>
+                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
+              </div>
+            </>
+          )}
+
+          {selectedColaborador && isDeleteMode && (
+            <>
+              <h3 className="font-bold text-lg">Confirmar Eliminación</h3>
+              <p className="py-4">¿Estás seguro que deseas eliminar a {selectedColaborador.name}?</p>
+              <div className="modal-action">
+                <button className="btn btn-outline" onClick={handleDeleteConfirm}>Eliminar</button>
+                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
+              </div>
+            </>
+          )}
+        </div>
+      </dialog>
     </div>
   );
 };
