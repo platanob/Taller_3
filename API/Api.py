@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
-import re
+from functools import wraps
 import gridfs
 
 app = Flask(__name__)
@@ -252,6 +252,15 @@ def cancelar_cita(cita_id):
 ██║░░░░░██║░░██║██║░░██║░░░██║░░░███████╗  ░░╚██╔╝░╚██╔╝░███████╗██████╦╝
 ╚═╝░░░░░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝  ░░░╚═╝░░░╚═╝░░╚══════╝╚═════╝░
 """
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        cuenta = get_jwt_identity()
+        # Verifica si el usuario es admin
+        if not cuenta['admin']:
+            return jsonify({'mensaje': 'No tienes permiso para acceder a esta ruta'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 @app.route('/api/agregar_web', methods=['POST'])
 def agregar_cuenta():
@@ -309,5 +318,12 @@ def iniciar_sesion():
         'token': access_token,
         'admin': cuenta['admin']
     }), 200
+
+@app.route('/api/prueba', methods=['POST'])
+@jwt_required()
+@admin_required  # Este decorador valida si el usuario es admin
+def prueba():
+    return jsonify({'mensaje': 'Es ADMIN'})
+
 if __name__ == '__main__':
     app.run(debug=True)
