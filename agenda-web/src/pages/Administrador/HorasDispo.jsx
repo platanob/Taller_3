@@ -20,7 +20,7 @@ function HorasDisponibles() {
       }}
     >
       <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
-        <h1 className="text-4xl font-bold text-white drop-shadow-lg">HORAS DISPONIBLES</h1>
+        <h1 className="text-4xl font-bold text-white drop-shadow-lg">Citas Disponibles</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

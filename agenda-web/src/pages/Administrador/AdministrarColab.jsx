@@ -43,9 +43,9 @@ const AdministradorColab = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
-  >
-      <h2 className="text-3xl font-bold bg-gray-200 bg-opacity-50 p-4 rounded-md mb-10">Administrar Colaboradores</h2>
-
+  >   <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
+      <h2 className="text-3xl font-bold text-white drop-shadow-lg">Administrar Colaboradores</h2>
+      </div>
       <table className="table-auto bg-gray-200 shadow-lg rounded-lg w-full max-w-4xl">
         <thead>
           <tr className="bg-gray-200 border border-black">
