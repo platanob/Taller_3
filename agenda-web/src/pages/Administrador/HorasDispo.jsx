@@ -1,19 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 
 function HorasDisponibles() {
-  const [citas, setCitas] = useState([
-    { fecha: '2024-09-17', servicio: 'Terapia física', locacion: 'Clínica norte', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-    { fecha: '2024-09-17', servicio: 'Podología', locacion: 'Clínica norte', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-    { fecha: '2024-09-18', servicio: 'Odontología', locacion: 'Clínica central', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-    { fecha: '2024-09-19', servicio: 'Psicología', locacion: 'Clínica este', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-    { fecha: '2024-09-20', servicio: 'Nutrición', locacion: 'Clínica sur', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-    { fecha: '2024-09-21', servicio: 'Control médico', locacion: 'Hospital Temuco', hora: '10:00 AM', colaborador: 'Dr. Perez' },
-  ]);
-
-  const [selectedCita, setSelectedCita] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
-
+    const [citas, setCitas] = useState([]);
+    const [selectedCita, setSelectedCita] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [isDeleteMode, setIsDeleteMode] = useState(false);
+  
+    // Fetch para obtener las citas desde la API
+    useEffect(() => {
+      fetch('http://localhost:5000/api/citas_disponibles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`  // JWT para autenticación
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.citas_disponibles) {
+            setCitas(data.citas_disponibles);
+          }
+        })
+        .catch(error => {
+          console.error('Error al obtener las citas:', error);
+        });
+    }, []);
+  
   // Función para mostrar información de la cita
   const handleInfo = (index) => {
     setSelectedCita(citas[index]);
