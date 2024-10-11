@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [rut, setRut] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Hook para navegación
+  const navigate = useNavigate();  // Hook para navegar
 
   const login = async () => {
     if (!rut || !password) {
@@ -27,10 +27,10 @@ const Login = () => {
 
         if (data.admin) {
           window.alert('Éxito: Bienvenido Administrador');
-          navigate('/admin'); // Redirige a la página de administrador
+          navigate('/admin');  // Redirige a la página de administrador
         } else {
           window.alert('Éxito: Bienvenido Colaborador');
-          navigate('/colaborador'); // Redirige a la página de colaborador
+          navigate('/colaborador');  // Redirige a la página de colaborador
         }
       } else {
         window.alert('Error: ' + (data.message || 'Error al iniciar sesión'));
