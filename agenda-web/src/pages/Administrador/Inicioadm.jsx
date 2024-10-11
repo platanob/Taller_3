@@ -7,6 +7,7 @@ import CrearCitasAdm from './CrearCitasAdmin';
 import HorasDisponibles from './HorasDispo';
 import VisualizarGraficos from './Graficos';
 import AdmisionUsuarios from './AdmisionUsuarios';
+import UsuarioInfo from './UsuarioInfo';
 
 const InicioAdmin = () => {
   return (
@@ -20,6 +21,7 @@ const InicioAdmin = () => {
           <Route path="/crear-citas-administradores" element={<CrearCitasAdm />} />
           <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
           <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
+          <Route path="/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
         </Routes>
       </div>
     </Router>

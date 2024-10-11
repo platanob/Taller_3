@@ -13,7 +13,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 # Configuración de CORS
 CORS(app, resources={
     r"/api/*": {
-        "origins": "http://localhost:8081",  
+        "origins": "*",  
         "methods": ["GET", "POST", "PUT", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True  # Permite el envío de credenciales
@@ -166,7 +166,6 @@ def nuevashoras():
     return jsonify({'cita_id': str(result.inserted_id)}), 201
 
 @app.route('/api/citas_disponibles', methods=['GET'])
-@jwt_required()
 def citas_disponibles():
     citas = citas_collection.find({'disponible': True})
     citas_list = []
