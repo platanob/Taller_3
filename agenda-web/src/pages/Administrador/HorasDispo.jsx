@@ -6,14 +6,17 @@ function HorasDisponibles() {
     const [selectedCita, setSelectedCita] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
+    const token = localStorage.getItem('token');
   
     // Fetch para obtener las citas desde la API
     useEffect(() => {
+      const token = localStorage.getItem('token');  
+    
       fetch('http://localhost:5000/api/citas_disponibles', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`  // JWT para autenticación
+          'Authorization': `Bearer ${token}`  // JWT para autenticación
         }
       })
         .then(response => response.json())
@@ -27,47 +30,103 @@ function HorasDisponibles() {
         });
     }, []);
   
-  // Función para mostrar información de la cita
-  const handleInfo = (index) => {
-    setSelectedCita(citas[index]);
-    document.getElementById('info_modal').showModal();
-  };
+    // Función para mostrar información de la cita
+    const handleInfo = (index) => {
+      setSelectedCita(citas[index]);
+      document.getElementById('info_modal').showModal();
+    };
 
-  // Función para editar una cita
-  const handleEdit = (index) => {
-    setSelectedCita({ ...citas[index], index });
-    setIsEditMode(true);
-    document.getElementById('info_modal').showModal();
-  };
+    // Función para editar una cita
+    const handleEdit = (index) => {
+      setSelectedCita({ ...citas[index], index });
+      setIsEditMode(true);
+      document.getElementById('info_modal').showModal();
+    };
 
-  const handleEditSubmit = () => {
-    const updatedCitas = citas.map((cita, i) =>
-      i === selectedCita.index ? { ...selectedCita } : cita
-    );
-    setCitas(updatedCitas);
-    closeModal();
-  };
+    const editSubmit = () => {
+      const campos = {};
+  
+      if (selectedCita.fecha) {
+        campos.fecha = selectedCita.fecha;
+      }
+      if (selectedCita.hora) {
+        campos.hora = selectedCita.hora;
+      }
+      if (selectedCita.locacion) {
+        campos.locacion = selectedCita.locacion;
+      }
+      if (selectedCita.servicio) {
+        campos.servicio = selectedCita.servicio;
+      }
+      if (selectedCita.colaborador) {
+        campos.colaborador = selectedCita.colaborador;
+      }
+  
+      fetch(`http://localhost:5000/api/editarcita/${selectedCita._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  
+        },
+        
+        body: JSON.stringify(campos),
+      })
+        .then(async response => {
+          const data = await response.json();
+          if (!response.ok) {
+            console.error('Error al actualizar la cita:', data);
+          }
+          return data;
+        })
+        .then(data => {
+          if (data.mensaje) {
+            const updatedCitas = citas.map((cita, i) =>
+              i === selectedCita.index ? { ...selectedCita } : cita
+            );
+            setCitas(updatedCitas);
+            closeModal();
+          }
+        })
+        .catch(error => {
+          console.error('Error en la solicitud:', error.message);
+        });
+    };  
+    
+    const handleDelete = (index) => {
+      setSelectedCita(citas[index]);
+      setIsDeleteMode(true);
+      document.getElementById('info_modal').showModal();
+    };
 
-  // Función para eliminar una cita
-  const handleDelete = (index) => {
-    setSelectedCita(citas[index]);
-    setIsDeleteMode(true);
-    document.getElementById('info_modal').showModal();
-  };
-
-  const handleDeleteConfirm = () => {
-    const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
-    setCitas(updatedCitas);
-    closeModal();
-  };
-
-  // Función para cerrar el modal
-  const closeModal = () => {
-    setSelectedCita(null);
-    setIsEditMode(false);
-    setIsDeleteMode(false);
-    document.getElementById('info_modal').close();
-  };
+    const deletConfirm = () => {
+      fetch(`http://localhost:5000/api/borrarcita/${selectedCita._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,  
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.mensaje) {
+            const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
+            setCitas(updatedCitas);
+            closeModal();
+          } else {
+            console.error('Error al borrar la cita:', data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error en la solicitud:', error);
+        });
+    };
+    
+    // Función para cerrar el modal
+    const closeModal = () => {
+      setSelectedCita(null);
+      setIsEditMode(false);
+      setIsDeleteMode(false);
+      document.getElementById('info_modal').close();
+    };
 
   return (
     <div
@@ -176,7 +235,7 @@ function HorasDisponibles() {
                 onChange={(e) => setSelectedCita({ ...selectedCita, colaborador: e.target.value })}
               />
               <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>
+                <button className="btn btn-outline" onClick={editSubmit}>Guardar</button>
                 <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
               </div>
             </>
@@ -187,7 +246,7 @@ function HorasDisponibles() {
               <h3 className="font-bold text-lg">Confirmar Eliminación</h3>
               <p className="py-4">¿Estás seguro que deseas eliminar la cita del {selectedCita.fecha} en {selectedCita.locacion} con el {selectedCita.colaborador}?</p>
               <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleDeleteConfirm}>Eliminar</button>
+                <button className="btn btn-outline" onClick={deletConfirm}>Eliminar</button>
                 <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
               </div>
             </>
