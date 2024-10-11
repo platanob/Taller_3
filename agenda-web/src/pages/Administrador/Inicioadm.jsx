@@ -14,7 +14,6 @@ const InicioAdmin = () => {
     <Router>
       <div>
         <Menu2 />
-        <Routes>
           <Route path="/" element={<HorasDisponibles/>} /> 
           <Route path="/administrar-usuarios" element={<Adminusers />} />
           <Route path="/administrar-colaboradores" element={<Admincolab />} />
@@ -22,7 +21,6 @@ const InicioAdmin = () => {
           <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
           <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
           <Route path="/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
-        </Routes>
       </div>
     </Router>
   );

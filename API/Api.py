@@ -294,10 +294,10 @@ def agregar_cuenta():
 @app.route('/api/login_web', methods=['POST'])
 def iniciar_sesion():
     data = request.get_json()
-
+    print(data)
     rut = data.get('rut')
     password = data.get('password')
-
+    print(password)
     if not rut or not password:
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
@@ -360,6 +360,30 @@ def editarcita(cita_id):
     citas_collection.update_one({'_id': ObjectId(cita_id)}, {'$set': campos_a_actualizar})
 
     return jsonify({'mensaje': 'Cita actualizada correctamente'}), 200
+
+@app.route('/api/borrarcita/<cita_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def borrar_cita(cita_id):
+    try:
+        # Intentar convertir cita_id a ObjectId
+        cita_obj_id = ObjectId(cita_id)
+    except:
+        return jsonify({'error': 'ID de cita inválido'}), 400
+
+    # Buscar la cita por su ID
+    cita_existente = citas_collection.find_one({'_id': cita_obj_id})
+
+    if not cita_existente:
+        return jsonify({'error': 'Cita no encontrada'}), 404
+
+    # Borrar la cita
+    result = citas_collection.delete_one({'_id': cita_obj_id})
+
+    if result.deleted_count == 1:
+        return jsonify({'mensaje': 'Cita borrada correctamente'}), 200
+    else:
+        return jsonify({'error': 'Error al borrar la cita'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
