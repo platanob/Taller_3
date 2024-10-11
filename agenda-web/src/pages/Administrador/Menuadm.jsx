@@ -9,12 +9,12 @@ function Menu2() {
         <span className="text-2xl font-bold text-[#005baa]">Agenda Senior</span>
       </div>
       <div className="flex space-x-6">
-        <Link to="admin/" className="text-[#005baa] font-medium hover:text-[#00cfff]">Inicio</Link>
-        <Link to="admin/administrar-colaboradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Colaboradores</Link>
-        <Link to="admin/administrar-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Usuarios</Link>
-        <Link to="admin/admision-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Admision Usuarios</Link>
-        <Link to="admin/crear-citas-administradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link> 
-        <Link to="admin/visualizar-graficos" className="text-[#005baa] font-medium hover:text-[#00cfff]">Visualizar Graficos</Link>
+        <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Inicio</Link>
+        <Link to="administrar-colaboradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Colaboradores</Link>
+        <Link to="administrar-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Usuarios</Link>
+        <Link to="admision-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Admision Usuarios</Link>
+        <Link to="crear-citas-administradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link> 
+        <Link to="visualizar-graficos" className="text-[#005baa] font-medium hover:text-[#00cfff]">Visualizar Graficos</Link>
       </div>
 
       <div className="flex space-x-4">

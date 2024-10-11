@@ -14,13 +14,13 @@ const InicioAdmin = () => {
     <div>
       <Menu2 />
       <Routes>
-        <Route path="/admin" element={<HorasDisponibles />} /> 
-        <Route path="/admin/administrar-usuarios" element={<Adminusers />} />
-        <Route path="/admin/administrar-colaboradores" element={<Admincolab />} />
-        <Route path="/admin/crear-citas-administradores" element={<CrearCitasAdm />} />
-        <Route path="/admin/visualizar-graficos" element={<VisualizarGraficos />} />
-        <Route path="/admin/admision-usuarios" element={<AdmisionUsuarios />} />
-        <Route path="/admin/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
+        <Route path="/" element={<HorasDisponibles />} /> 
+        <Route path="/administrar-usuarios" element={<Adminusers />} />
+        <Route path="/administrar-colaboradores" element={<Admincolab />} />
+        <Route path="/crear-citas-administradores" element={<CrearCitasAdm />} />
+        <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
+        <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
+        <Route path="/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
       </Routes>
     </div>
   );

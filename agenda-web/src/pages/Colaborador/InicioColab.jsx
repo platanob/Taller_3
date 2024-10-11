@@ -11,10 +11,10 @@ function InicioColaborador() {
       <div>
         <Menu />
         <Routes>
-          <Route path="/colaborador/" element={<h1>Bienvenido a la página de inicio</h1>} />
-          <Route path="/colaborador/crear-citas" element={<Crearcitascolab />} />
-          <Route path="/colaborador/historial-citas" element={<HistorialCitas />} />
-          <Route path="/colaborador/Horas-agendadas" element={<HorasAgendadas />} />
+          <Route path="/" element={<h1>Bienvenido a la página de inicio</h1>} />
+          <Route path="/crear-citas" element={<Crearcitascolab />} />
+          <Route path="/historial-citas" element={<HistorialCitas />} />
+          <Route path="/Horas-agendadas" element={<HorasAgendadas />} />
         </Routes>
       </div>
   );
