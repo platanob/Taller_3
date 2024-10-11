@@ -325,5 +325,42 @@ def iniciar_sesion():
 def prueba():
     return jsonify({'mensaje': 'Es ADMIN'})
 
+@app.route('/api/editarcita/<cita_id>', methods=['PUT'])
+@jwt_required()
+@admin_required
+def editarcita(cita_id):
+    data = request.get_json()
+
+    # Buscar la cita por su ID
+    cita_existente = citas_collection.find_one({'_id': ObjectId(cita_id)})
+
+    if not cita_existente:
+        return jsonify({'error': 'Cita no encontrada'}), 404
+
+    # Crear un diccionario para actualizar solo los campos que se pasen en data
+    campos_a_actualizar = {}
+
+    if 'fecha' in data:
+        campos_a_actualizar['fecha'] = data['fecha']
+    if 'hora' in data:
+        campos_a_actualizar['hora'] = data['hora']
+    if 'locacion' in data:
+        campos_a_actualizar['locacion'] = data['locacion']
+    if 'servicio' in data:
+        campos_a_actualizar['servicio'] = data['servicio']
+    if 'colaborador' in data:
+        campos_a_actualizar['colaborador'] = data['colaborador']
+    if 'disponible' in data:
+        campos_a_actualizar['disponible'] = data['disponible']
+
+    # Verificar si hay campos para actualizar
+    if not campos_a_actualizar:
+        return jsonify({'error': 'No se proporcionaron datos para actualizar'}), 400
+
+    # Actualizar la cita solo con los campos presentes
+    citas_collection.update_one({'_id': ObjectId(cita_id)}, {'$set': campos_a_actualizar})
+
+    return jsonify({'mensaje': 'Cita actualizada correctamente'}), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
