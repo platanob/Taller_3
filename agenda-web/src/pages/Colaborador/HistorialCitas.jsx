@@ -18,38 +18,36 @@ function HistorialCitas() {
         backgroundSize: 'cover', 
         backgroundPosition: 'center', 
       }}>
-    <div className="max-w-5xl mx-auto bg-blue-200 shadow-md rounded-lg p-6">
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-blue-800 mb-4 text-center">Historial de Citas</h1>
+    <div className="max-w-5xl mx-auto bg-blue-200 shadow-lg rounded-lg p-6">
+      <h1 className="text-3xl font-bold text-blue-800 mb-6 text-center">Historial de Citas</h1>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead className='bg-blue-600 text-white'>
             <tr className="w-full bg-blue-200 shadow-md rounded-lg p-6 text-gray-600 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Fecha</th>
-              <th className="py-3 px-6 text-left">Cliente</th>
-              <th className="py-3 px-6 text-left">Servicio</th>
-              <th className="py-3 px-6 text-left">Locación</th>
-              <th className="py-3 px-6 text-left">Hora</th>
-              <th className="py-3 px-6 text-left">Colaborador</th>
+              <th className="py-2 px-4 text-left">Fecha</th>
+              <th className="py-2 px-4 text-left">Cliente</th>
+              <th className="py-2 px-4 text-left">Servicio</th>
+              <th className="py-2 px-4 text-left">Locación</th>
+              <th className="py-2 px-4 text-left">Hora</th>
+              <th className="py-2 px-4 text-left">Colaborador</th>
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
             {citas.map((cita, index) => (
               <tr key={index} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left whitespace-nowrap">{cita.fecha}</td>
-                <td className="py-3 px-6 text-left">{cita.cliente}</td>
-                <td className="py-3 px-6 text-left">{cita.servicio}</td>
-                <td className="py-3 px-6 text-left">{cita.locacion}</td>
-                <td className="py-3 px-6 text-left">{cita.hora}</td>
-                <td className="py-3 px-6 text-left">{cita.colaborador}</td>
+                <td className="py-2 px-4">{cita.fecha}</td>
+                <td className="py-2 px-4">{cita.cliente}</td>
+                <td className="py-2 px-4">{cita.servicio}</td>
+                <td className="py-2 px-4">{cita.locacion}</td>
+                <td className="py-2 px-4">{cita.hora}</td>
+                <td className="py-2 px-4">{cita.colaborador}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       </div>
-    </div>
-  </div>  
+    </div> 
   );
 }
 
