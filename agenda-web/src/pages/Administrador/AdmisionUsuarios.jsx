@@ -10,7 +10,7 @@ const AdmisionUsuarios = () => {
   ];
 
   const InfoClick = (rut, nombre, correo) => {
-    navigate(`/usuario/${rut}/${nombre}/${correo}`);
+    navigate(`/admin/admision-usuarios/usuario/${rut}/${nombre}/${correo}`);
   };
 
   return (
