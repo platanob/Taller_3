@@ -62,21 +62,21 @@ const Graficos = () => {
       <div className="flex justify-center ">
         <div className="stats mb-8 md:w-1/3 rounded-md">
           <div className="stat bg-blue-200 place-items-center">
-            <div className="stat-title">Horas Agendadas</div>
+            <div className="stat-title text-black">Horas Agendadas</div>
             <div className="stat-value">100</div>
-            <div className="stat-desc">Desde Enero a Diciembre</div>
+            <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
 
           <div className="stat bg-blue-200 place-items-center">
-            <div className="stat-title">Horas trabajadas</div>
+            <div className="stat-title text-black">Horas trabajadas</div>
             <div className="stat-value">200</div>
-            <div className="stat-desc">Desde Enero a Diciembre</div>
+            <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
 
           <div className="stat bg-blue-200 place-items-center">
-            <div className="stat-title">Asistencias</div>
+            <div className="stat-title text-black">Asistencias</div>
             <div className="stat-value">200</div>
-            <div className="stat-desc">Desde Enero a Diciembre</div>
+            <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
         </div>
       </div>
