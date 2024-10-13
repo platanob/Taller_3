@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [rut, setRut] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Hook para navegación
+  const navigate = useNavigate();  
 
   const login = async () => {
     if (!rut || !password) {
@@ -19,26 +19,31 @@ const Login = () => {
         },
         body: JSON.stringify({ rut, password }),
       });
-
-      const data = await response.json();
-
+  
       if (response.ok) {
-        localStorage.setItem('access_token', data.access_token);
-
+        const data = await response.json();  // Obtener datos aquí
+  
+        console.log('Respuesta de la API:', data); 
+  
+        localStorage.setItem('token', data.token);  
+        console.log('Token:', data.token);  
+  
         if (data.admin) {
           window.alert('Éxito: Bienvenido Administrador');
-          navigate('/admin'); // Redirige a la página de administrador
+          navigate('/admin');  // Redirige a la página de administrador
         } else {
           window.alert('Éxito: Bienvenido Colaborador');
-          navigate('/colaborador'); // Redirige a la página de colaborador
+          navigate('/colaborador');  // Redirige a la página de colaborador
         }
       } else {
-        window.alert('Error: ' + (data.message || 'Error al iniciar sesión'));
+        const errorData = await response.json(); 
+        window.alert('Error: ' + (errorData.message || 'Error al iniciar sesión'));
       }
     } catch (error) {
       window.alert('Error: Hubo un problema con la conexión.');
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('/img/fondo.jpg')" }}>

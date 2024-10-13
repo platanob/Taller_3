@@ -1,6 +1,6 @@
 // Inicio.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Menu from './Menucolab';
 import Crearcitascolab from './CrearCitasColab';
 import HistorialCitas from './HistorialCitas';
@@ -8,7 +8,6 @@ import HorasAgendadas from './Horasagendadas';
 
 function InicioColaborador() {
   return (
-    <Router>
       <div>
         <Menu />
         <Routes>
@@ -18,7 +17,6 @@ function InicioColaborador() {
           <Route path="/Horas-agendadas" element={<HorasAgendadas />} />
         </Routes>
       </div>
-    </Router>
   );
 }
 

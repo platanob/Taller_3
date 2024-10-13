@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Menu2 from './Menuadm';
+import { Routes, Route } from 'react-router-dom';
 import Adminusers from './administrarusuarios';
 import Admincolab from './AdministrarColab';
 import CrearCitasAdm from './CrearCitasAdmin';
@@ -11,18 +11,18 @@ import UsuarioInfo from './UsuarioInfo';
 
 const InicioAdmin = () => {
   return (
-    <Router>
-      <div>
-        <Menu2 />
-          <Route path="/" element={<HorasDisponibles/>} /> 
-          <Route path="/administrar-usuarios" element={<Adminusers />} />
-          <Route path="/administrar-colaboradores" element={<Admincolab />} />
-          <Route path="/crear-citas-administradores" element={<CrearCitasAdm />} />
-          <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
-          <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
-          <Route path="/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
-      </div>
-    </Router>
+    <div>
+      <Menu2 />
+      <Routes>
+        <Route path="/" element={<HorasDisponibles />} /> 
+        <Route path="/administrar-usuarios" element={<Adminusers />} />
+        <Route path="/administrar-colaboradores" element={<Admincolab />} />
+        <Route path="/crear-citas-administradores" element={<CrearCitasAdm />} />
+        <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
+        <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
+        <Route path="/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} />
+      </Routes>
+    </div>
   );
 }
 
