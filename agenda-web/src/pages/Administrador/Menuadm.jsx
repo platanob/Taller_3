@@ -1,7 +1,34 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Menu2() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegúrate de tener el token almacenado en localStorage
+        },
+        credentials: 'include' // Esto permite que se envíen cookies si las hay
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('token'); // Elimina el token del localStorage
+        alert('Has cerrado sesión con éxito.');
+        navigate('/'); // Redirige al usuario a la página de inicio
+      } else {
+        const errorData = await response.json();
+        alert(`Error al cerrar sesión: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      alert('Hubo un error al cerrar sesión.');
+    }
+  };
+
   return (
     <nav className="flex justify-between items-center bg-[#d6e2e5] p-4 shadow-md">
       <div className="flex items-center">
@@ -18,7 +45,12 @@ function Menu2() {
       </div>
 
       <div className="flex space-x-4">
-        <button className="px-5 py-2 bg-[#005baa] text-white rounded-full hover:opacity-90">Cerrar Sesión</button>
+        <button 
+          className="px-5 py-2 bg-[#005baa] text-white rounded-full hover:opacity-90" 
+          onClick={handleLogout}
+        >
+          Cerrar Sesión
+        </button>
       </div>
     </nav>
   );
