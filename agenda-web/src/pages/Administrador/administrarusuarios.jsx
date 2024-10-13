@@ -64,7 +64,9 @@ const AdminUsers = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
-  >  <div className="max-w-5xl mx-auto bg-blue-200 shadow-lg rounded-lg p-6">
+  >  
+  
+  <div className="max-w-5xl mx-auto bg-blue-200 shadow-lg rounded-lg p-6">
       <h2 className="text-3xl font-bold text-blue-800 mb-6 text-center">Administrar Usuarios</h2>
       <div className="overflow-x-auto">
       <table className="min-w-full bg-white border border-gray-200">
