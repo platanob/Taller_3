@@ -58,46 +58,47 @@ const AdminUsers = () => {
   };
 
   return (
-    <div
-    className="min-h-screen bg-gray-100 flex flex-col items-center p-10"
+    <div className="min-h-screen bg-gray-100 py-10"
     style={{
-      backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)), url("/img/fondo.jpg")',
+      backgroundImage: 'url("/img/fondo.jpg")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
-  >   <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
-      <h2 className="text-3xl font-bold text-white drop-shadow-lg">Administrar Usuarios</h2>
-      </div>
-      <table className="table-auto bg-gray-200 border border-black shadow-lg rounded-lg w-full max-w-4xl ">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="px-4 py-2 text-left ">Nombre</th>
-            <th className="px-4 py-2 text-left">RUT</th>
-            <th className="px-4 py-2">Acciones</th>
+  >  
+  
+  <div className="max-w-5xl mx-auto bg-blue-200 shadow-lg rounded-lg p-6">
+      <h2 className="text-3xl font-bold text-blue-800 mb-6 text-center">Administrar Usuarios</h2>
+      <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border border-gray-200">
+        <thead className='bg-blue-600 text-white'>
+          <tr>
+            <th className="py-2 px-4 text-left">Nombre</th>
+            <th className="py-2 px-4 text-left">RUT</th>
+            <th className="py-2 px-4 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {users.length > 0 ? (
             users.map((user) => (
-              <tr key={user.id} className="border-t border border-black">
-                <td className="px-4 py-2 text-gray-700">{user.name}</td>
-                <td className="px-4 py-2 text-gray-700">{user.rut}</td>
-                <td className="px-4 py-2 text-center space-x-2">
+              <tr key={user.id} className="border-t text-gray-800">
+                <td className="py-2 px-4 ">{user.name}</td>
+                <td className="py-2 px-4 ">{user.rut}</td>
+                <td className="py-2 px-4 flex justify-center space-x-2">
                   <button
                     onClick={() => handleInfo(user.id)}
-                    className="bg-white border border-black py-1 px-2 rounded hover:bg-gray-300"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                   >
                     Ver Información
                   </button>
                   <button
                     onClick={() => handleEdit(user.id)}
-                    className="bg-white border border-black py-1 px-2 rounded hover:bg-gray-300"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(user.id)}
-                    className="bg-white border border-black py-1 px-2 rounded hover:bg-gray-300"
+                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
                   >
                     Borrar
                   </button>
@@ -113,6 +114,8 @@ const AdminUsers = () => {
           )}
         </tbody>
       </table>
+    </div>
+    </div>
 
       {/* Modal */}
       <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">

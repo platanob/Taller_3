@@ -157,19 +157,19 @@ function HorasDisponibles() {
 
             <div className="mt-4 flex flex-col space-y-2 w-full">
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                 onClick={() => handleInfo(index)}
               >
                 Información
               </button>
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                 onClick={() => handleEdit(index)}
               >
                 Editar
               </button>
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
                 onClick={() => handleDelete(index)}
               >
                 Borrar

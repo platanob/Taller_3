@@ -14,13 +14,11 @@ function HorasAgendadas() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
 
-  // Función para mostrar información de la cita
   const handleInfo = (index) => {
     setSelectedCita(citas[index]);
     document.getElementById('info_modal').showModal();
   };
 
-  // Función para editar una cita
   const handleEdit = (index) => {
     setSelectedCita({ ...citas[index], index });
     setIsEditMode(true);
@@ -35,7 +33,6 @@ function HorasAgendadas() {
     closeModal();
   };
 
-  // Función para eliminar una cita
   const handleDelete = (index) => {
     setSelectedCita(citas[index]);
     setIsDeleteMode(true);
@@ -48,7 +45,6 @@ function HorasAgendadas() {
     closeModal();
   };
 
-  // Función para cerrar el modal
   const closeModal = () => {
     setSelectedCita(null);
     setIsEditMode(false);
@@ -65,8 +61,9 @@ function HorasAgendadas() {
         backgroundPosition: 'center',
       }}
     >
-      <div className="max-w-5xl mx-auto bg-blue-200 shadow-md rounded-lg p-6">
-      <h1 className="text-2xl font-bold text-blue-800 mb-4 text-center">Horas Agendadas</h1>    
+      <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
+        <h1 className="text-4xl font-bold text-white drop-shadow-lg">Horas Agendadas</h1>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {citas.map((cita, index) => (
@@ -84,19 +81,19 @@ function HorasAgendadas() {
 
             <div className="mt-4 flex flex-col space-y-2 w-full">
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                 onClick={() => handleInfo(index)}
               >
                 Información
               </button>
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
                 onClick={() => handleEdit(index)}
               >
                 Editar
               </button>
               <button
-                className="bg-white text-black font-bold py-2 text-center shadow rounded-md"
+                className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
                 onClick={() => handleDelete(index)}
               >
                 Borrar
@@ -106,7 +103,6 @@ function HorasAgendadas() {
         ))}
       </div>
 
-      {/* Modal */}
       <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
           {selectedCita && !isEditMode && !isDeleteMode && (
@@ -180,7 +176,6 @@ function HorasAgendadas() {
           )}
         </div>
       </dialog>
-    </div>
     </div>
   );
 }
