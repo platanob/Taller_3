@@ -1,132 +1,140 @@
 import React, { useState, useEffect } from 'react';
-
+import Preloader from './Espera'; // Asegúrate de ajustar la ruta según tu estructura de archivos
 
 function HorasDisponibles() {
     const [citas, setCitas] = useState([]);
     const [selectedCita, setSelectedCita] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
+    const [loading, setLoading] = useState(true); // Estado de carga
     const token = localStorage.getItem('token');
-  
+
     // Fetch para obtener las citas desde la API
     useEffect(() => {
-      const token = localStorage.getItem('token');  
-    
-      fetch('http://localhost:5000/api/citas_disponibles', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`  // JWT para autenticación
-        }
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.citas_disponibles) {
-            setCitas(data.citas_disponibles);
-          }
-        })
-        .catch(error => {
-          console.error('Error al obtener las citas:', error);
-        });
-    }, []);
-  
+        const fetchData = async () => {
+            setLoading(true); // Comenzamos la carga
+            try {
+                const response = await fetch('http://localhost:5000/api/citas_disponibles', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`  // JWT para autenticación
+                    }
+                });
+                const data = await response.json();
+                if (data.citas_disponibles) {
+                    setCitas(data.citas_disponibles);
+                }
+            } catch (error) {
+                console.error('Error al obtener las citas:', error);
+            } finally {
+                setLoading(false); // Finalizamos la carga
+            }
+        };
+        fetchData();
+    }, [token]);
+
     // Función para mostrar información de la cita
     const handleInfo = (index) => {
-      setSelectedCita(citas[index]);
-      document.getElementById('info_modal').showModal();
+        setSelectedCita(citas[index]);
+        document.getElementById('info_modal').showModal();
     };
 
     // Función para editar una cita
     const handleEdit = (index) => {
-      setSelectedCita({ ...citas[index], index });
-      setIsEditMode(true);
-      document.getElementById('info_modal').showModal();
+        setSelectedCita({ ...citas[index], index });
+        setIsEditMode(true);
+        document.getElementById('info_modal').showModal();
     };
 
     const editSubmit = () => {
-      const campos = {};
-  
-      if (selectedCita.fecha) {
-        campos.fecha = selectedCita.fecha;
-      }
-      if (selectedCita.hora) {
-        campos.hora = selectedCita.hora;
-      }
-      if (selectedCita.locacion) {
-        campos.locacion = selectedCita.locacion;
-      }
-      if (selectedCita.servicio) {
-        campos.servicio = selectedCita.servicio;
-      }
-      if (selectedCita.colaborador) {
-        campos.colaborador = selectedCita.colaborador;
-      }
-  
-      fetch(`http://localhost:5000/api/editarcita/${selectedCita._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  
-        },
-        
-        body: JSON.stringify(campos),
-      })
+        const campos = {};
+    
+        if (selectedCita.fecha) {
+            campos.fecha = selectedCita.fecha;
+        }
+        if (selectedCita.hora) {
+            campos.hora = selectedCita.hora;
+        }
+        if (selectedCita.locacion) {
+            campos.locacion = selectedCita.locacion;
+        }
+        if (selectedCita.servicio) {
+            campos.servicio = selectedCita.servicio;
+        }
+        if (selectedCita.colaborador) {
+            campos.colaborador = selectedCita.colaborador;
+        }
+    
+        fetch(`http://localhost:5000/api/editarcita/${selectedCita._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  
+            },
+            body: JSON.stringify(campos),
+        })
         .then(async response => {
-          const data = await response.json();
-          if (!response.ok) {
-            console.error('Error al actualizar la cita:', data);
-          }
-          return data;
+            const data = await response.json();
+            if (!response.ok) {
+                console.error('Error al actualizar la cita:', data);
+            }
+            return data;
         })
         .then(data => {
-          if (data.mensaje) {
-            const updatedCitas = citas.map((cita, i) =>
-              i === selectedCita.index ? { ...selectedCita } : cita
-            );
-            setCitas(updatedCitas);
-            closeModal();
-          }
+            if (data.mensaje) {
+                const updatedCitas = citas.map((cita, i) =>
+                    i === selectedCita.index ? { ...selectedCita } : cita
+                );
+                setCitas(updatedCitas);
+                closeModal();
+            }
         })
         .catch(error => {
-          console.error('Error en la solicitud:', error.message);
+            console.error('Error en la solicitud:', error.message);
         });
     };  
     
     const handleDelete = (index) => {
-      setSelectedCita(citas[index]);
-      setIsDeleteMode(true);
-      document.getElementById('info_modal').showModal();
+        setSelectedCita(citas[index]);
+        setIsDeleteMode(true);
+        document.getElementById('info_modal').showModal();
     };
 
     const deletConfirm = () => {
-      fetch(`http://localhost:5000/api/borrarcita/${selectedCita._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,  
-        },
-      })
+        fetch(`http://localhost:5000/api/borrarcita/${selectedCita._id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,  
+            },
+        })
         .then(response => response.json())
         .then(data => {
-          if (data.mensaje) {
-            const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
-            setCitas(updatedCitas);
-            closeModal();
-          } else {
-            console.error('Error al borrar la cita:', data.error);
-          }
+            if (data.mensaje) {
+                const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
+                setCitas(updatedCitas);
+                closeModal();
+            } else {
+                console.error('Error al borrar la cita:', data.error);
+            }
         })
         .catch(error => {
-          console.error('Error en la solicitud:', error);
+            console.error('Error en la solicitud:', error);
         });
     };
     
     // Función para cerrar el modal
     const closeModal = () => {
-      setSelectedCita(null);
-      setIsEditMode(false);
-      setIsDeleteMode(false);
-      document.getElementById('info_modal').close();
+        setSelectedCita(null);
+        setIsEditMode(false);
+        setIsDeleteMode(false);
+        document.getElementById('info_modal').close();
     };
+
+    // Mostrar el preloader si loading es true
+    if (loading) {
+        return <Preloader />;
+    }
 
   return (
     <div
@@ -256,5 +264,5 @@ function HorasDisponibles() {
     </div>
   );
 }
-
+  
 export default HorasDisponibles;
