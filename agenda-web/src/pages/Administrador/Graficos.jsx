@@ -63,19 +63,19 @@ const Graficos = () => {
         <div className="stats mb-8 md:w-1/3 rounded-md">
           <div className="stat bg-blue-200 place-items-center">
             <div className="stat-title text-black">Horas Agendadas</div>
-            <div className="stat-value">100</div>
+            <div className="stat-value text-black">100</div>
             <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
 
           <div className="stat bg-blue-200 place-items-center">
             <div className="stat-title text-black">Horas trabajadas</div>
-            <div className="stat-value">200</div>
+            <div className="stat-value text-black">200</div>
             <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
 
           <div className="stat bg-blue-200 place-items-center">
             <div className="stat-title text-black">Asistencias</div>
-            <div className="stat-value">200</div>
+            <div className="stat-value text-black">200</div>
             <div className="stat-desc text-black">Desde Enero hasta Diciembre</div>
           </div>
         </div>
@@ -84,19 +84,19 @@ const Graficos = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="bg-blue-200 shadow-md rounded-lg p-4">
           <div className="bg-white shadow-inner rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Horas agendadas según categoría</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Horas agendadas según categoría</h2>
             <Bar data={barData} />
           </div>
         </div>
         <div className="bg-blue-200 shadow-md rounded-lg p-4">
           <div className="bg-white shadow-inner rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Horas trabajadas por colaborador</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Horas trabajadas por colaborador</h2>
             <Line data={lineData1} />
           </div>
         </div>
         <div className="bg-blue-200 shadow-md rounded-lg p-4">
           <div className="bg-white shadow-inner rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Asistencias</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Asistencias</h2>
             <Line data={lineData2} />
           </div>
         </div>
