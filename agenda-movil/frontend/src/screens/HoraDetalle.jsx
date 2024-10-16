@@ -7,10 +7,7 @@ const HoraDetalle = ({ route, navigation }) => {
   const { fecha, hora, lugar, servicio, profesional } = route.params;
 
   return (
-    <LinearGradient
-    colors={['#55A9F9', '#003B88']}
-    style={styles.gradientContainer}
-    >
+    <View style={styles.gradientContainer}>
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
               colors={['#260e86', '#003B88']} // Degradado para el header
@@ -37,13 +34,14 @@ const HoraDetalle = ({ route, navigation }) => {
           <Text style={styles.detailText}><Text style={styles.label}>Profesional a Cargo: </Text>{profesional}</Text>
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
+    backgroundColor: '#55A9F9',
   },
   container: {
     flexGrow: 1,

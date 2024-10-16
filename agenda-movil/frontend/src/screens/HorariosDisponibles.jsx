@@ -102,10 +102,7 @@ const Horarios = () => {
   }
 
   return (
-    <LinearGradient
-      colors={['#55A9F9', '#003B88']}
-      style={styles.gradientContainer}
-    >
+    <View style={styles.gradientContainer}>
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
             colors={['#260e86', '#003B88']} 
@@ -149,13 +146,14 @@ const Horarios = () => {
           <Text style={styles.noAppointmentsText}>No hay horarios disponibles.</Text>
         )}
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
+    backgroundColor: '#55A9F9',
   },
   container: {
     flexGrow: 1,

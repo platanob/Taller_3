@@ -37,10 +37,7 @@ const MenuInicio = () => {
 
 
   return (
-    <LinearGradient
-      colors={['#55A9F9', '#003B88']} // Degradado de fondo
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <LinearGradient
           colors={['#260e86', '#003B88']} // Degradado para el header
@@ -78,7 +75,7 @@ const MenuInicio = () => {
           <Text style={styles.buttonText}>Cerrar Sesión</Text>
         </TouchableOpacity>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 
@@ -86,6 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     width: '100%',
+    backgroundColor: '#55A9F9',
   },
   content: {
     flexGrow: 1,
