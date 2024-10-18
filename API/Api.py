@@ -311,7 +311,7 @@ def iniciar_sesion():
     }), 200
 @app.route('/api/nuevashoras_colab', methods=['POST'])
 @jwt_required()
-def nuevashoras():
+def nuevas_horas():
     data = request.get_json()
     required_fields = ['fecha', 'hora', 'locacion', 'servicio']
 
@@ -438,8 +438,8 @@ def borrar_cita(cita_id):
 ╚█████╔╝╚██████╔╝███████╗██║░╚███║░░░██║░░░██║░░██║██████╔╝  ██║░░██║██████╔╝██║░╚═╝░██║██║██║░╚███║
 ░╚════╝░░╚═════╝░╚══════╝╚═╝░░╚══╝░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░  ╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝"""
 @app.route('/api/obtener_cuentas', methods=['GET'])
-@admin_required
 @jwt_required()
+@admin_required
 def obtener_cuentas():
     try:
         cuentas = list(cuentas_admin.find({}, {'nombre': 1, 'rut': 1, 'admin': 1, 'especialidad': 1}))
