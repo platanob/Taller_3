@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
 import gridfs
+from io import BytesIO  # Para manejar archivos en memoria
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
@@ -384,6 +385,188 @@ def borrar_cita(cita_id):
         return jsonify({'mensaje': 'Cita borrada correctamente'}), 200
     else:
         return jsonify({'error': 'Error al borrar la cita'}), 500
+
+@app.route('/api/obtener_cuentas', methods=['GET'])
+@admin_required
+@jwt_required()
+def obtener_cuentas():
+    try:
+        cuentas = list(cuentas_admin.find({}, {'nombre': 1, 'rut': 1, 'admin': 1, 'especialidad': 1}))
+        
+        for cuenta in cuentas:
+            cuenta['_id'] = str(cuenta['_id'])
+        
+        if not cuentas:
+            return jsonify({'mensaje': 'No se encontraron cuentas'}), 404
+
+        return jsonify({'cuentas': cuentas}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener cuentas: {str(e)}'}), 500
+
+@app.route('/api/editar_cuenta/<id>', methods=['PUT'])
+@jwt_required()
+@admin_required
+def editar_cuenta(id):
+    try:
+        cuenta_id = ObjectId(id)
+        
+        data = request.get_json()
+        
+        actualizacion = {}
+        if 'nombre' in data:
+            actualizacion['nombre'] = data['nombre']
+        if 'rut' in data:
+            actualizacion['rut'] = data['rut']
+        if 'password' in data:
+            actualizacion['password'] = generate_password_hash(data['password'])  
+        if 'admin' in data:
+            actualizacion['admin'] = data['admin']
+        if 'especialidad' in data:
+            actualizacion['especialidad'] = data['especialidad']
+        
+        if not actualizacion:
+            return jsonify({'error': 'No se enviaron campos para actualizar'}), 400
+
+        resultado = cuentas_admin.update_one({'_id': cuenta_id}, {'$set': actualizacion})
+        
+        if resultado.matched_count == 0:
+            return jsonify({'error': 'No se encontró la cuenta con el ID proporcionado'}), 404
+        
+        return jsonify({'mensaje': 'Cuenta actualizada exitosamente'}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al actualizar cuenta: {str(e)}'}), 500
+
+@app.route('/api/eliminar_cuenta/<id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def eliminar_cuenta(id):
+    try:
+        cuenta_id = ObjectId(id)
+        
+        resultado = cuentas_admin.delete_one({'_id': cuenta_id})
+        
+        if resultado.deleted_count == 0:
+            return jsonify({'error': 'No se encontró la cuenta con el ID proporcionado'}), 404
+        
+        return jsonify({'mensaje': 'Cuenta eliminada exitosamente'}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al eliminar cuenta: {str(e)}'}), 500
+
+@app.route('/api/obtener_usuarios', methods=['GET'])
+@jwt_required()
+@admin_required
+def obtener_usuarios():
+    try:
+        
+        usuarios = list(users_collection.find({}, {'rut': 1, 'nombre': 1, 'correo': 1, '_id': 1}))
+
+        # Convertir ObjectId a string
+        for usuario in usuarios:
+            usuario['_id'] = str(usuario['_id'])
+
+        if not usuarios:
+            return jsonify({'mensaje': 'No se encontraron usuarios'}), 404
+
+        return jsonify({'usuarios': usuarios}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener usuarios: {str(e)}'}), 500
+
+@app.route('/api/editar_usuario/<id>', methods=['PUT'])
+@jwt_required()
+@admin_required
+def editar_usuario(id):
+    try:
+        usuario_id = ObjectId(id)
+        
+        data = request.get_json()
+
+
+        actualizacion = {}
+        if 'nombre' in data:
+            actualizacion['nombre'] = data['nombre']
+        if 'rut' in data:
+            actualizacion['rut'] = data['rut']
+        if 'correo' in data:
+            actualizacion['correo'] = data['correo']
+        if 'password' in data:
+            actualizacion['password'] = generate_password_hash(data['password'])  
+
+
+        if not actualizacion:
+            return jsonify({'error': 'No se enviaron campos para actualizar'}), 400
+
+
+        resultado = users_collection.update_one({'_id': usuario_id}, {'$set': actualizacion})
+        
+        if resultado.matched_count == 0:
+            return jsonify({'error': 'No se encontró el usuario con el ID proporcionado'}), 404
+        
+        return jsonify({'mensaje': 'Usuario actualizado exitosamente'}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al actualizar usuario: {str(e)}'}), 500
+
+@app.route('/api/eliminar_usuario/<id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def eliminar_usuario(id):
+    try:
+        usuario_id = ObjectId(id)
+
+        resultado = users_collection.delete_one({'_id': usuario_id})
+        
+        if resultado.deleted_count == 0:
+            return jsonify({'error': 'No se encontró el usuario con el ID proporcionado'}), 404
+        
+        return jsonify({'mensaje': 'Usuario eliminado exitosamente'}), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al eliminar usuario: {str(e)}'}), 500
+
+
+@app.route('/api/obtener_usuarios_nuevos', methods=['GET'])
+def obtener_usuarios_nuevos():
+    try:
+        usuarios = list(usuarios_nuevos.find({}, {
+            'nombre': 1,
+            'rut': 1,
+            'correo': 1,
+            'pdf_id': 1,
+            'carnet_frontal_id': 1,
+            'carnet_trasero_id': 1,
+            '_id': 1
+        }))
+        
+    
+        for usuario in usuarios:
+            usuario['_id'] = str(usuario['_id'])
+            usuario['pdf_id'] = str(usuario.get('pdf_id', ''))
+            usuario['carnet_frontal_id'] = str(usuario.get('carnet_frontal_id', ''))
+            usuario['carnet_trasero_id'] = str(usuario.get('carnet_trasero_id', ''))
+
+        if not usuarios:
+            return jsonify({'mensaje': 'No se encontraron usuarios'}), 404
+
+        return jsonify({'usuarios': usuarios}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener los usuarios: {str(e)}'}), 500
+
+@app.route('/api/obtener_archivo/<id>', methods=['GET'])
+def obtener_archivo(id):
+    try:
+        # Recuperar el archivo de GridFS usando el ID
+        file_data = fs.get(ObjectId(id))
+
+        # Devolver el archivo
+        return send_file(BytesIO(file_data.read()), download_name=file_data.filename, as_attachment=True)
+
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener el archivo: {str(e)}"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
