@@ -23,10 +23,10 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();  // Obtener datos aquí
   
-        console.log('Respuesta de la API:', data); 
+        //console.log('Respuesta de la API:', data); 
   
         localStorage.setItem('token', data.token);  
-        console.log('Token:', data.token);  
+        //console.log('Token:', data.token);  
   
         if (data.admin) {
           window.alert('Éxito: Bienvenido Administrador');
