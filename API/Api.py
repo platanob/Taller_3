@@ -146,25 +146,6 @@ def protected():
     else:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
-@app.route('/api/nuevashoras', methods=['POST'])
-@jwt_required()
-def nuevashoras():
-    data = request.get_json()
-    required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador', 'disponible']
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Faltan datos necesarios'}), 400
-
-    cita = {
-        'fecha': data['fecha'],
-        'hora': data['hora'],
-        'locacion': data['locacion'],
-        'servicio': data['servicio'],
-        'colaborador': data['colaborador'],
-        'disponible': True
-    }
-
-    result = citas_collection.insert_one(cita)
-    return jsonify({'cita_id': str(result.inserted_id)}), 201
 
 @app.route('/api/citas_disponibles', methods=['GET'])
 def citas_disponibles():
@@ -216,10 +197,20 @@ def mis_citas():
     usuario_rut = get_jwt_identity()
     citas = citas_collection.find({'usuario_id': usuario_rut})
     citas_list = []
+
     for cita in citas:
+        # Convertir el _id a string
         cita['_id'] = str(cita['_id'])
+        
+        # Obtener el nombre del colaborador por su ID
+        colaborador = cuentas_admin.find_one({'_id': cita['colaborador']})
+        if colaborador:
+            cita['colaborador'] = colaborador['nombre']  # Cambia el ID por el nombre
+
         citas_list.append(cita)
+
     return jsonify({'citas': citas_list}), 200
+
 
 @app.route('/api/cancelar_cita/<cita_id>', methods=['PUT'])
 @jwt_required()
@@ -318,12 +309,65 @@ def iniciar_sesion():
         'token': access_token,
         'admin': cuenta['admin']
     }), 200
-
-@app.route('/api/prueba', methods=['POST'])
+@app.route('/api/nuevashoras_colab', methods=['POST'])
 @jwt_required()
-@admin_required  # Este decorador valida si el usuario es admin
-def prueba():
-    return jsonify({'mensaje': 'Es ADMIN'})
+def nuevashoras():
+    data = request.get_json()
+    required_fields = ['fecha', 'hora', 'locacion', 'servicio']
+
+    # Verificar que todos los campos requeridos están presentes
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Faltan datos necesarios'}), 400
+
+    # Obtener el ID del colaborador desde el JWT
+    colaborador_id = get_jwt_identity()  # Se asume que aquí tienes el ID del colaborador en lugar del RUT
+
+    # Verificar si el colaborador existe en la base de datos
+    colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
+
+    if not colaborador:
+        return jsonify({'error': 'Colaborador no encontrado'}), 404
+
+    cita = {
+        'fecha': data['fecha'],
+        'hora': data['hora'],
+        'locacion': data['locacion'],
+        'servicio': data['servicio'],
+        'colaborador': colaborador['_id'],
+        'disponible': True
+    }
+
+    result = citas_collection.insert_one(cita)
+    return jsonify({'cita_id': str(result.inserted_id)}), 201
+
+@app.route('/api/nuevashoras_admin', methods=['POST'])
+@jwt_required()
+def nuevashoras():
+    data = request.get_json()
+    required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador']
+
+    # Verificar que todos los campos requeridos están presentes
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Faltan datos necesarios'}), 400
+
+    # Buscar el colaborador por su RUT
+    rut_colaborador = data['colaborador']
+    colaborador = cuentas_admin.find_one({'rut': rut_colaborador})
+
+    if not colaborador:
+        return jsonify({'error': 'Colaborador no encontrado con el RUT proporcionado'}), 404
+
+    cita = {
+        'fecha': data['fecha'],
+        'hora': data['hora'],
+        'locacion': data['locacion'],
+        'servicio': data['servicio'],
+        'colaborador': colaborador['_id'], 
+        'disponible': True
+    }
+
+    result = citas_collection.insert_one(cita)
+    return jsonify({'cita_id': str(result.inserted_id)}), 201
 
 @app.route('/api/editarcita/<cita_id>', methods=['PUT'])
 @jwt_required()
@@ -594,6 +638,8 @@ def obtener_archivo(id):
 
     except Exception as e:
         return jsonify({"error": f"Error al obtener el archivo: {str(e)}"}), 404
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
