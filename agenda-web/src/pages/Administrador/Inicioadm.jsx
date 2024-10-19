@@ -20,7 +20,7 @@ const InicioAdmin = () => {
         <Route path="/crear-citas-administradores" element={<CrearCitasAdm />} />
         <Route path="/visualizar-graficos" element={<VisualizarGraficos />} />
         <Route path="/admision-usuarios" element={<AdmisionUsuarios />} />
-        <Route path="/admision-usuarios/usuario/:rut/:nombre/:correo" element={<UsuarioInfo />} /> 
+        <Route path="/admision-usuarios/usuario-info" element={<UsuarioInfo />} />
       </Routes>
     </div>
   );

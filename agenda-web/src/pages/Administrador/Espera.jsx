@@ -17,7 +17,7 @@ const Preloader = () => {
           Preparando la mejor experiencia para ti
         </h1>
         <p className="text-lg lg:text-xl text-white opacity-80">
-          Un momento, por favor... Estamos cargando tus citas.
+          Un momento, por favor... Estamos cargando la Información.
         </p>
       </div>
       
