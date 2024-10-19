@@ -359,11 +359,9 @@ def nuevashoras():
     data = request.get_json()
     required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador']
 
-    # Verificar que todos los campos requeridos están presentes
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Faltan datos necesarios'}), 400
 
-    # Buscar el colaborador por su RUT
     rut_colaborador = data['colaborador']
     colaborador = cuentas_admin.find_one({'rut': rut_colaborador})
 
@@ -661,8 +659,12 @@ def aceptar_usuario(usuario_id):
             'nombre': 1,
             'rut': 1,
             'correo': 1,
-            'password': 1
+            'password': 1,
+            'pdf_id': 1,
+            'carnet_frontal_id': 1,
+            'carnet_trasero_id': 1
         })
+
         if not usuario_nuevo:
             return jsonify({'mensaje': 'Usuario no encontrado en usuarios_nuevos'}), 404
         usuario_filtrado = {
@@ -673,17 +675,54 @@ def aceptar_usuario(usuario_id):
         }
 
         result = users_collection.insert_one(usuario_filtrado)
-        
+
+
+        if 'pdf_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['pdf_id']))
+        if 'carnet_frontal_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['carnet_frontal_id']))
+        if 'carnet_trasero_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['carnet_trasero_id']))
+
+
         usuarios_nuevos.delete_one({'_id': ObjectId(usuario_id)})
 
+
         return jsonify({
-            'mensaje': 'Usuario aceptado y transferido a users_collection',
+            'mensaje': 'Usuario aceptado, transferido a users_collection y archivos eliminados',
             'usuario_id': str(result.inserted_id)
         }), 200
 
     except Exception as e:
         return jsonify({'error': f'Error al aceptar el usuario: {str(e)}'}), 500
 
+@app.route('/api/eliminar_usuario_nuevo/<usuario_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def eliminar_usuario_nuevo(usuario_id):
+    try:
+        usuario_nuevo = usuarios_nuevos.find_one({'_id': ObjectId(usuario_id)}, {
+            'pdf_id': 1,
+            'carnet_frontal_id': 1,
+            'carnet_trasero_id': 1
+        })
+
+        if not usuario_nuevo:
+            return jsonify({'mensaje': 'Usuario no encontrado en usuarios_nuevos'}), 404
+
+        if 'pdf_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['pdf_id']))
+        if 'carnet_frontal_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['carnet_frontal_id']))
+        if 'carnet_trasero_id' in usuario_nuevo:
+            fs.delete(ObjectId(usuario_nuevo['carnet_trasero_id']))
+            
+        usuarios_nuevos.delete_one({'_id': ObjectId(usuario_id)})
+
+        return jsonify({'mensaje': 'Usuario y archivos eliminados correctamente'}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al eliminar el usuario: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
