@@ -15,7 +15,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 CORS(app, resources={
     r"/api/*": {
         "origins": "*",  
-        "methods": ["GET", "POST", "PUT", "OPTIONS"],
+        "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True  # Permite el envío de credenciales
     }

@@ -130,7 +130,6 @@ const UsuarioInfo = () => {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };
