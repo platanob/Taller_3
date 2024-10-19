@@ -149,12 +149,25 @@ def protected():
 
 @app.route('/api/citas_disponibles', methods=['GET'])
 def citas_disponibles():
-    citas = citas_collection.find({'disponible': True})
-    citas_list = []
-    for cita in citas:
-        cita['_id'] = str(cita['_id'])
-        citas_list.append(cita)
-    return jsonify({'citas_disponibles': citas_list}), 200
+    try:
+        citas = citas_collection.find({'disponible': True})
+        citas_list = []
+        
+        for cita in citas:
+            cita['_id'] = str(cita['_id'])
+            colaborador = cuentas_admin.find_one({'_id': ObjectId(cita['colaborador'])}, {'nombre': 1})
+            
+            if colaborador:
+                cita['colaborador'] = colaborador['nombre']
+            else:
+                cita['colaborador'] = 'Colaborador no encontrado'
+            
+            citas_list.append(cita)
+
+        return jsonify({'citas_disponibles': citas_list}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener citas disponibles: {str(e)}'}), 500
 
 @app.route('/api/agendar', methods=['POST'])
 @jwt_required()
@@ -639,6 +652,37 @@ def obtener_archivo(id):
     except Exception as e:
         return jsonify({"error": f"Error al obtener el archivo: {str(e)}"}), 404
 
+@app.route('/api/aceptar_usuario/<usuario_id>', methods=['POST'])
+@jwt_required()
+@admin_required
+def aceptar_usuario(usuario_id):
+    try:
+        usuario_nuevo = usuarios_nuevos.find_one({'_id': ObjectId(usuario_id)}, {
+            'nombre': 1,
+            'rut': 1,
+            'correo': 1,
+            'password': 1
+        })
+        if not usuario_nuevo:
+            return jsonify({'mensaje': 'Usuario no encontrado en usuarios_nuevos'}), 404
+        usuario_filtrado = {
+            'nombre': usuario_nuevo['nombre'],
+            'rut': usuario_nuevo['rut'],
+            'correo': usuario_nuevo['correo'],
+            'password': usuario_nuevo['password']
+        }
+
+        result = users_collection.insert_one(usuario_filtrado)
+        
+        usuarios_nuevos.delete_one({'_id': ObjectId(usuario_id)})
+
+        return jsonify({
+            'mensaje': 'Usuario aceptado y transferido a users_collection',
+            'usuario_id': str(result.inserted_id)
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al aceptar el usuario: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
