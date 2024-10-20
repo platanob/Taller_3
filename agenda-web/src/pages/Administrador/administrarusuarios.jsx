@@ -7,7 +7,7 @@ const AdminUsers = () => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/obtener_cuentas', {
+    fetch('http://localhost:5000/api/obtener_usuarios', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -15,10 +15,10 @@ const AdminUsers = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.cuentas) {
-          setUsers(data.cuentas);
+        if (data.usuarios) {  
+          setUsers(data.usuarios);  
         } else {
-          console.error('Error al obtener cuentas:', data.mensaje || data.error);
+          console.error('Error al obtener usuarios:', data.mensaje || data.error);
         }
       })
       .catch((error) => console.error('Error al conectar con la API:', error));
@@ -45,8 +45,7 @@ const AdminUsers = () => {
   };
 
   const handleEditSubmit = () => {
-    fetch(`http://localhost:5000/api/editar_cuenta/${selectedUser._id}`, {
-      method: 'PUT',
+    fetch(`http://localhost:5000/api/editar_usuario/${selectedUser._id}`, {  
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -54,6 +53,7 @@ const AdminUsers = () => {
       body: JSON.stringify({
         nombre: selectedUser.nombre,
         rut: selectedUser.rut,
+        correo: selectedUser.correo,  
       }),
     })
       .then((response) => response.json())
@@ -79,9 +79,23 @@ const AdminUsers = () => {
   };
 
   const handleDeleteConfirm = () => {
-    const updatedUsers = users.filter((user) => user.id !== selectedUser.id);
-    setUsers(updatedUsers);
-    closeModal();
+    fetch(`http://localhost:5000/api/eliminar_usuario/${selectedUser._id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.mensaje) {
+          const updatedUsers = users.filter((user) => user._id !== selectedUser._id);
+          setUsers(updatedUsers);
+          closeModal();
+        } else {
+          console.error('Error al eliminar usuario:', data.error);
+        }
+      })
+      .catch((error) => console.error('Error al conectar con la API:', error));
   };
 
   return (
@@ -100,6 +114,7 @@ const AdminUsers = () => {
               <tr>
                 <th className="py-2 px-4 text-left">Nombre</th>
                 <th className="py-2 px-4 text-left">RUT</th>
+                <th className="py-2 px-4 text-left">Correo</th> 
                 <th className="py-2 px-4 text-center">Acciones</th>
               </tr>
             </thead>
@@ -109,6 +124,7 @@ const AdminUsers = () => {
                   <tr key={user._id} className="border-t text-gray-800">
                     <td className="py-2 px-4 ">{user.nombre}</td>
                     <td className="py-2 px-4 ">{user.rut}</td>
+                    <td className="py-2 px-4 ">{user.correo}</td> 
                     <td className="py-2 px-4 flex justify-center space-x-2">
                       <button
                         onClick={() => handleInfo(user._id)}
@@ -138,7 +154,7 @@ const AdminUsers = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="px-4 py-2 text-center text-gray-600">
+                  <td colSpan="4" className="px-4 py-2 text-center text-gray-600"> 
                     No hay usuarios registrados.
                   </td>
                 </tr>
@@ -156,6 +172,7 @@ const AdminUsers = () => {
               <h3 className="font-bold text-lg">Información del Usuario</h3>
               <p className="py-4">Nombre: {selectedUser.nombre}</p>
               <p className="py-4">RUT: {selectedUser.rut}</p>
+              <p className="py-4">Correo: {selectedUser.correo}</p> {/* Mostrar correo */}
               <div className="modal-action">
                 <button className="btn btn-outline" onClick={closeModal}>Cerrar</button>
               </div>
@@ -178,6 +195,13 @@ const AdminUsers = () => {
                 placeholder="RUT"
                 value={selectedUser.rut}
                 onChange={(e) => setSelectedUser({ ...selectedUser, rut: e.target.value })}
+              />
+              <input
+                type="email"
+                className="input input-bordered w-full my-2"
+                placeholder="Correo"
+                value={selectedUser.correo}  // Agregar campo de correo en la edición
+                onChange={(e) => setSelectedUser({ ...selectedUser, correo: e.target.value })}
               />
               <div className="modal-action">
                 <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>

@@ -1,7 +1,7 @@
   {
     "nombre": "María Gómez",
     "rut": "98.765.432-1",
-    "password": " ",
+    "password": "securePass!456",
     "admin": true,
     "especialidad": ""
   }
