@@ -8,6 +8,7 @@ from functools import wraps
 import gridfs
 from io import BytesIO  # Para manejar archivos en memoria
 
+
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
 
@@ -322,6 +323,7 @@ def iniciar_sesion():
         'token': access_token,
         'admin': cuenta['admin']
     }), 200
+
 @app.route('/api/nuevashoras_colab', methods=['POST'])
 @jwt_required()
 def nuevas_horas():
@@ -353,21 +355,31 @@ def nuevas_horas():
     result = citas_collection.insert_one(cita)
     return jsonify({'cita_id': str(result.inserted_id)}), 201
 
+from bson import ObjectId
+
+
 @app.route('/api/nuevashoras_admin', methods=['POST'])
 @jwt_required()
 def nuevashoras():
     data = request.get_json()
     required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador']
 
+    # Verificar si faltan datos requeridos
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Faltan datos necesarios'}), 400
 
     rut_colaborador = data['colaborador']
     colaborador = cuentas_admin.find_one({'rut': rut_colaborador})
 
+    # Verificar si el colaborador existe
     if not colaborador:
         return jsonify({'error': 'Colaborador no encontrado con el RUT proporcionado'}), 404
 
+    # Verificar si el colaborador no es un administrador
+    if colaborador.get('admin', True):  # Si el campo 'admin' no existe, asume que es True (es admin)
+        return jsonify({'error': 'El colaborador proporcionado es un administrador, no se pueden asignar citas'}), 403
+
+    # Crear la cita
     cita = {
         'fecha': data['fecha'],
         'hora': data['hora'],
@@ -379,6 +391,7 @@ def nuevashoras():
 
     result = citas_collection.insert_one(cita)
     return jsonify({'cita_id': str(result.inserted_id)}), 201
+
 
 @app.route('/api/editarcita/<cita_id>', methods=['PUT'])
 @jwt_required()
