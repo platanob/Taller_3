@@ -62,9 +62,6 @@ function HorasDisponibles() {
         if (selectedCita.servicio) {
             campos.servicio = selectedCita.servicio;
         }
-        if (selectedCita.colaborador) {
-            campos.colaborador = selectedCita.colaborador;
-        }
     
         fetch(`http://localhost:5000/api/editarcita/${selectedCita._id}`, {
             method: 'PUT',

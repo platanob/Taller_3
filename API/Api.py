@@ -416,8 +416,6 @@ def editarcita(cita_id):
         campos_a_actualizar['locacion'] = data['locacion']
     if 'servicio' in data:
         campos_a_actualizar['servicio'] = data['servicio']
-    if 'colaborador' in data:
-        campos_a_actualizar['colaborador'] = data['colaborador']
     if 'disponible' in data:
         campos_a_actualizar['disponible'] = data['disponible']
 
