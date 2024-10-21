@@ -45,7 +45,8 @@ const AdminUsers = () => {
   };
 
   const handleEditSubmit = () => {
-    fetch(`http://localhost:5000/api/editar_usuario/${selectedUser._id}`, {  
+    fetch(`http://localhost:5000/api/editar_usuario/${selectedUser._id}`, {
+      method: 'PUT',  
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -53,10 +54,15 @@ const AdminUsers = () => {
       body: JSON.stringify({
         nombre: selectedUser.nombre,
         rut: selectedUser.rut,
-        correo: selectedUser.correo,  
+        correo: selectedUser.correo, 
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+      })
       .then((data) => {
         if (data.mensaje) {
           const updatedUsers = users.map((user) =>
