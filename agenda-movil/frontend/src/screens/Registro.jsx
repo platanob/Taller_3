@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ScrollView, Platform, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -17,6 +17,10 @@ export default function Registro() {
   const [pdfFile, setPdfFile] = useState(null);
   const [carnetFrontal, setCarnetFrontal] = useState(null);
   const [carnetTrasero, setCarnetTrasero] = useState(null);
+  const [edad, setEdad] = useState('');
+  const [localidad, setLocalidad] = useState(''); 
+  const [isDiscapacitado, setIsDiscapacitado] = useState(false); 
+  const [pdfDiscapacidad, setPdfDiscapacidad] = useState(null); 
 
   function base64ToBlob(base64Data, contentType = 'image/jpeg') {
     const byteCharacters = atob(base64Data.split(',')[1]);
@@ -28,6 +32,23 @@ export default function Registro() {
     return new Blob([byteArray], { type: contentType });
   }
   
+  const selectPdfDiscapacidad = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+      });
+
+      if (result.type !== 'cancel') {
+        setPdfDiscapacidad(result);
+        console.log('Archivo de discapacidad seleccionado:', result);
+      } else {
+        console.log('Selección cancelada');
+      }
+    } catch (err) {
+      console.error('Error en la selección de archivo:', err);
+      Alert.alert('Error', 'Hubo un error seleccionando el archivo. Por favor, inténtalo de nuevo.');
+    }
+  };
 
   const register = async () => {
     if (!nombre || !rut || !correo || !password || !confirmPassword) {
@@ -47,6 +68,11 @@ export default function Registro() {
 
     if (!carnetFrontal || !carnetTrasero) {
       Alert.alert('Error', 'Por favor, selecciona ambas imágenes del carnet (frontal y trasero)');
+      return;
+    }
+
+    if (isDiscapacitado && (!pdfDiscapacidad || pdfDiscapacidad.canceled || !pdfDiscapacidad.assets)) {
+      Alert.alert('Error', 'Por favor, selecciona el archivo de discapacidad');
       return;
     }
   
@@ -157,7 +183,6 @@ export default function Registro() {
 
           <Text style={styles.title}>Registro de Usuario</Text>
 
-          {/* Campos de texto */}
           <Text style={styles.label}>Nombre Completo</Text>
           <TextInput
             placeholder="Nombre Completo"
@@ -184,6 +209,25 @@ export default function Registro() {
             style={styles.input}
             value={correo}
             onChangeText={setCorreo}
+          />
+
+          <Text style={styles.label}>Edad</Text>
+          <TextInput
+            placeholder="Edad"
+            placeholderTextColor="#000"
+            keyboardType="numeric"
+            style={styles.input}
+            value={edad}
+            onChangeText={setEdad}
+          />
+
+          <Text style={styles.label}>Localidad</Text>
+          <TextInput
+            placeholder="Localidad"
+            placeholderTextColor="#000"
+            style={styles.input}
+            value={localidad}
+            onChangeText={setLocalidad}
           />
 
           <Text style={styles.label}>Contraseña</Text>
@@ -226,35 +270,51 @@ export default function Registro() {
             </TouchableOpacity>
           </View>
 
-          {/* Sección para subir archivo PDF */}
           <View style={styles.fileUploadContainer}>
             <TouchableOpacity style={styles.fileButton} onPress={selectPdf}>
-              <Text style={styles.fileButtonText}>Seleccionar archivo PDF</Text>
+              <Text style={styles.fileButtonText}>Adjuntar Cartola Registro Social</Text>
             </TouchableOpacity>
             <Text style={styles.pdfFileName}>
               {pdfFile && pdfFile.assets ? pdfFile.assets[0].name : 'Ningún archivo seleccionado'}
             </Text>
           </View>
 
-           {/* Sección para seleccionar imagen del carnet frontal */}
           <View style={styles.fileUploadContainer}>
             <TouchableOpacity style={styles.fileButton} onPress={selectCarnetFrontal}>
-              <Text style={styles.fileButtonText}>Seleccionar Carnet Frontal</Text>
+              <Text style={styles.fileButtonText}>Adjuntar Imagen Carnet Frontal</Text>
             </TouchableOpacity>
             <Text style={styles.pdfFileName}>
               {carnetFrontal && carnetFrontal.assets ? carnetFrontal.assets[0].fileName : 'Ninguna imagen seleccionada'}
             </Text>
           </View>
 
-          {/* Sección para seleccionar imagen del carnet trasero */}
           <View style={styles.fileUploadContainer}>
             <TouchableOpacity style={styles.fileButton} onPress={selectCarnetTrasero}>
-              <Text style={styles.fileButtonText}>Seleccionar Carnet Trasero</Text>
+              <Text style={styles.fileButtonText}>Adjuntar Imagen Carnet Trasero</Text>
             </TouchableOpacity>
             <Text style={styles.pdfFileName}>
               {carnetTrasero && carnetFrontal.assets ? carnetTrasero.assets[0].fileName : 'Ninguna imagen seleccionada'}
             </Text>
           </View>
+
+           <View style={styles.switchContainer}>
+            <Text style={styles.label}>¿Tienes alguna discapacidad?</Text>
+            <Switch
+              value={isDiscapacitado}
+              onValueChange={setIsDiscapacitado}
+            />
+          </View>
+
+          {isDiscapacitado && (
+            <View style={styles.fileUploadContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={selectPdfDiscapacidad}>
+                <Text style={styles.fileButtonText}>Adjuntar Certificado de Discapacidad</Text>
+              </TouchableOpacity>
+              <Text style={styles.pdfFileName}>
+                {pdfDiscapacidad && pdfDiscapacidad.assets ? pdfDiscapacidad.assets[0].name : 'Ningún archivo seleccionado'}
+              </Text>
+            </View>
+          )}
 
           <TouchableOpacity style={styles.button} onPress={register}>
             <Text style={styles.buttonText}>REGISTRARME</Text>
@@ -379,5 +439,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,  
     top: 8,     
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 15,
   },
 });

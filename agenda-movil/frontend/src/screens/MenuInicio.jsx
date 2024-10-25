@@ -11,13 +11,13 @@ const MenuInicio = () => {
 
   const Logout = async () => {
     try {
-      const token = await AsyncStorage.getItem('access_token'); // Obtén el token almacenado
+      const token = await AsyncStorage.getItem('access_token'); 
 
       const response = await fetch('http://127.0.0.1:5000/api/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Incluye el token en el encabezado
+          'Authorization': `Bearer ${token}`, 
         },
         credentials: 'include',
       });
