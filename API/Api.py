@@ -295,14 +295,12 @@ def agregar_cuenta():
     return jsonify({'mensaje': 'Cuenta agregada exitosamente'}), 201
 
 
-# Ruta para iniciar sesión
 @app.route('/api/login_web', methods=['POST'])
 def iniciar_sesion():
     data = request.get_json()
-    print(data)
     rut = data.get('rut')
     password = data.get('password')
-    print(password)
+
     if not rut or not password:
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
@@ -311,31 +309,35 @@ def iniciar_sesion():
     if not cuenta:
         return jsonify({'error': 'Usuario no encontrado'}), 404
 
-
     if not check_password_hash(cuenta['password'], password):
         return jsonify({'error': 'Contraseña incorrecta'}), 401
 
-    access_token = create_access_token(identity={'rut': rut, 'admin': cuenta['admin']})
+    # Incluir el `_id` en el token
+    access_token = create_access_token(identity={
+        'rut': rut,
+        'admin': cuenta['admin'],
+        'id': str(cuenta['_id'])  # Convertir `_id` a cadena
+    })
 
     return jsonify({
         'mensaje': 'Inicio de sesión exitoso',
         'token': access_token,
         'admin': cuenta['admin']
     }), 200
+
 @app.route('/api/nuevashoras_colab', methods=['POST'])
 @jwt_required()
 def nuevas_horas():
     data = request.get_json()
     required_fields = ['fecha', 'hora', 'locacion', 'servicio']
 
-    # Verificar que todos los campos requeridos están presentes
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Faltan datos necesarios'}), 400
 
     # Obtener el ID del colaborador desde el JWT
-    colaborador_id = get_jwt_identity()  # Se asume que aquí tienes el ID del colaborador en lugar del RUT
+    identity = get_jwt_identity()
+    colaborador_id = identity['id']  # Obtener el `id` del colaborador
 
-    # Verificar si el colaborador existe en la base de datos
     colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
 
     if not colaborador:
@@ -352,6 +354,7 @@ def nuevas_horas():
 
     result = citas_collection.insert_one(cita)
     return jsonify({'cita_id': str(result.inserted_id)}), 201
+
 
 @app.route('/api/nuevashoras_admin', methods=['POST'])
 @jwt_required()
@@ -440,6 +443,9 @@ def borrar_cita(cita_id):
         return jsonify({'mensaje': 'Cita borrada correctamente'}), 200
     else:
         return jsonify({'error': 'Error al borrar la cita'}), 500
+    
+
+
 
 """
 ░█████╗░██╗░░░██╗███████╗███╗░░██╗████████╗░█████╗░░██████╗  ░█████╗░██████╗░███╗░░░███╗██╗███╗░░██╗
