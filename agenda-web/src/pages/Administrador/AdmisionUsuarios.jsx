@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Preloader from './Espera'; 
+import Preloader from './Espera';
+import Swal from 'sweetalert2';
 
 const AdmisionUsuarios = () => {
   const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
   const [error, setError] = useState(null);
-  const [cargando, setCargando] = useState(true); 
+  const [cargando, setCargando] = useState(true);
 
-  // Función para obtener los usuarios desde la API
   const cargarUsuarios = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/obtener_usuarios_nuevos', {
@@ -28,7 +28,7 @@ const AdmisionUsuarios = () => {
       console.error('Error al cargar usuarios:', error);
       setError('Error al cargar usuarios. Inténtalo de nuevo más tarde.');
     } finally {
-      setCargando(false); // Ocultar el preloader después de cargar los datos
+      setCargando(false); 
     }
   };
 
@@ -36,13 +36,104 @@ const AdmisionUsuarios = () => {
     cargarUsuarios();
   }, []);
 
+  const aceptarUsuario = async (usuarioId) => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas aceptar a este usuario?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, aceptar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/aceptar_usuario/${usuarioId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+          }
+
+          cargarUsuarios();
+          Swal.fire({
+            icon: 'success',
+            title: 'Usuario aceptado',
+            text: 'El usuario ha sido aceptado correctamente.',
+            confirmButtonColor: '#3085d6',
+          });
+        } catch (error) {
+          console.error('Error al aceptar usuario:', error);
+          setError('Error al aceptar el usuario. Inténtalo de nuevo más tarde.');
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un problema al aceptar el usuario.',
+          });
+        }
+      }
+    });
+  };
+
+  const eliminarUsuario = async (usuarioId) => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas eliminar a este usuario?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/eliminar_usuario_nuevo/${usuarioId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+          }
+
+          cargarUsuarios();
+          Swal.fire({
+            icon: 'success',
+            title: 'Usuario eliminado',
+            text: 'El usuario ha sido eliminado correctamente.',
+            confirmButtonColor: '#3085d6',
+          });
+        } catch (error) {
+          console.error('Error al eliminar usuario:', error);
+          setError('Error al eliminar el usuario. Inténtalo de nuevo más tarde.');
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un problema al eliminar el usuario.',
+          });
+        }
+      }
+    });
+  };
+
   const InfoClick = (usuario) => {
     navigate('/admin/admision-usuarios/usuario-info', {
       state: { usuario },
     });
   };
 
-  // Mostrar el preloader mientras se están cargando los datos
   if (cargando) {
     return <Preloader />;
   }
@@ -84,10 +175,16 @@ const AdmisionUsuarios = () => {
                     >
                       Información
                     </button>
-                    <button className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition">
+                    <button
+                      onClick={() => aceptarUsuario(usuario._id)}
+                      className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition"
+                    >
                       Aceptar
                     </button>
-                    <button className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">
+                    <button
+                      onClick={() => eliminarUsuario(usuario._id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                    >
                       Eliminar
                     </button>
                   </td>

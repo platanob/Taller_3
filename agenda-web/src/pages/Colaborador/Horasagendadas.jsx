@@ -1,18 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function HorasAgendadas() {
-  const [citas, setCitas] = useState([
-    { fecha: '2024-10-01', servicio: 'Corte de cabello', locacion: 'Peluquería Unisex', hora: '10:00 AM', colaborador: 'Francisca Peluca' },
-    { fecha: '2024-10-02', servicio: 'Peinado', locacion: 'Peluquería Unisex', hora: '11:00 AM', colaborador: 'Francisca Peluca' },
-    { fecha: '2024-10-03', servicio: 'Tintura', locacion: 'Peluquería Unisex', hora: '1:00 PM', colaborador: 'Francisca Peluca' },
-    { fecha: '2024-10-04', servicio: 'Manicure', locacion: 'Peluquería Unisex', hora: '9:00 AM', colaborador: 'Francisca Peluca' },
-    { fecha: '2024-10-05', servicio: 'Maquillaje', locacion: 'Peluquería Unisex', hora: '2:00 PM', colaborador: 'Francisca Peluca' },
-    { fecha: '2024-10-06', servicio: 'Pedicure', locacion: 'Peluquería Unisex', hora: '3:00 PM', colaborador: 'Francisca Peluca' },
-  ]);
-
+  const [citas, setCitas] = useState([]);
+  const [colaborador, setColaborador] = useState('');
   const [selectedCita, setSelectedCita] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
+
+  useEffect(() => {
+    const obtenerCitas = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/mis_citas', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCitas(data.citas);
+          setColaborador(data.colaborador); // Suponiendo que el nombre del colaborador viene en la respuesta
+        } else {
+          console.error('Error al obtener las citas');
+        }
+      } catch (error) {
+        console.error('Error en la solicitud:', error);
+      }
+    };
+
+    obtenerCitas();
+  }, []);
 
   const handleInfo = (index) => {
     setSelectedCita(citas[index]);
@@ -62,7 +80,7 @@ function HorasAgendadas() {
       }}
     >
       <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
-        <h1 className="text-4xl font-bold text-white drop-shadow-lg">Horas Agendadas</h1>
+        <h1 className="text-4xl font-bold text-white drop-shadow-lg">Horas Agendadas {colaborador}</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
