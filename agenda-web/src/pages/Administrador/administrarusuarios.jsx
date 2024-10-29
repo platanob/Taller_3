@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { FaInfoCircle, FaEdit, FaTrash, FaFileAlt } from 'react-icons/fa'; 
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -164,27 +165,27 @@ const AdminUsers = () => {
                     <td className="py-2 px-4 flex justify-center space-x-2">
                       <button
                         onClick={() => handleInfo(user._id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                        className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                       >
-                        Ver Información
+                        <FaInfoCircle /> <span className='text-sm'>Info</span>
                       </button>
                       <button
                         onClick={() => handleViewHistory(user._id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                        className="flex items-center space-x-1 bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 transition"
                       >
-                        Ver Historial
+                        <FaFileAlt className="" /> <span className="text-sm">Historial Citas</span>
                       </button>
                       <button
                         onClick={() => handleEdit(user._id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                        className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition"
                       >
-                        Editar
+                        <FaEdit /> <span className='text-sm'>Editar</span>
                       </button>
                       <button
                         onClick={() => handleDelete(user._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                        className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
                       >
-                        Borrar
+                        <FaTrash /> <span className='text-sm'>Borrar</span>
                       </button>
                     </td>
                   </tr>

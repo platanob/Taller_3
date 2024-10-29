@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Preloader from './Espera';
 import Swal from 'sweetalert2';
+import { FaInfoCircle, FaTrash } from 'react-icons/fa'; 
+import { FaFileCircleCheck } from 'react-icons/fa6';
 
 const AdmisionUsuarios = () => {
   const navigate = useNavigate();
@@ -171,21 +173,21 @@ const AdmisionUsuarios = () => {
                   <td className="py-2 px-4 flex justify-center space-x-2">
                     <button
                       onClick={() => InfoClick(usuario)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                      className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                     >
-                      Información
+                      <FaInfoCircle /> <span>Información</span>
                     </button>
                     <button
                       onClick={() => aceptarUsuario(usuario._id)}
-                      className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition"
+                      className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
                     >
-                      Aceptar
+                      <FaFileCircleCheck /> <span>Aceptar</span>
                     </button>
                     <button
                       onClick={() => eliminarUsuario(usuario._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
-                    >
-                      Eliminar
+                      className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                      >
+                      <FaTrash /> <span>Eliminar</span>
                     </button>
                   </td>
                 </tr>

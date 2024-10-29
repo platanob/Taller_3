@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { FaInfoCircle, FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa'; 
+import { useNavigate } from 'react-router-dom'; 
 
 const AdministradorColab = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     fetch('http://localhost:5000/api/obtener_cuentas', {
@@ -119,62 +122,74 @@ const AdministradorColab = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-10"
-      style={{
-        backgroundImage: 'url("/img/fondo.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{ backgroundImage: 'url("/img/fondo.jpg")', backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
-      <div className="max-w-5xl mx-auto bg-blue-200 shadow-lg rounded-lg p-6">
-        <h2 className="text-3xl font-bold text-blue-800 mb-6 text-center">Administrar Colaboradores</h2>
-        <div className="overflow-x-auto">
+      <div className="max-w-5xl mx-auto bg-blue-200 shadow-xl rounded-lg p-8">
+        <h2 className="text-4xl font-bold text-blue-800 mb-6 text-center">Administrar Colaboradores</h2>
+        
+        <div className="overflow-x-auto rounded-lg">
           <table className="min-w-full bg-white border border-gray-200">
             <thead className='bg-blue-600 text-white'>
               <tr>
-                <th className="py-2 px-4 text-left">Nombre</th>
-                <th className="py-2 px-4 text-left">RUT</th>
-                <th className="py-2 px-4 text-left">Especialidad</th>
-                <th className="py-2 px-4 text-center">Acciones</th>
+                <th className="py-3 px-4 text-left">Nombre</th>
+                <th className="py-3 px-4 text-left">RUT</th>
+                <th className="py-3 px-4 text-left">Especialidad</th>
+                <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {users.length > 0 ? (
                 users.map((user) => (
-                  <tr key={user._id} className="border-t text-gray-800">
-                    <td className="py-2 px-4 ">{user.nombre}</td>
-                    <td className="py-2 px-4 ">{user.rut}</td>
-                    <td className="py-2 px-4 ">{user.especialidad}</td>
-                    <td className="py-2 px-4 flex justify-center space-x-2">
+                  <tr key={user._id} className="border-t hover:bg-gray-100 transition">
+                    <td className="py-3 px-4 text-black">{user.nombre}</td>
+                    <td className="py-3 px-4 text-black">{user.rut}</td>
+                    <td className="py-3 px-4 text-black">{user.especialidad}</td>
+                    <td className="py-3 px-4 flex justify-center space-x-3">
                       <button
                         onClick={() => handleInfo(user._id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                        className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                       >
-                        Ver Información
+                        <FaInfoCircle /> <span>Info</span>
                       </button>
                       <button
                         onClick={() => handleEdit(user._id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                        className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                       >
-                        Editar
+                        <FaEdit /> <span>Editar</span>
                       </button>
                       <button
                         onClick={() => handleDelete(user._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                        className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
                       >
-                        Borrar
+                        <FaTrash /> <span>Borrar</span>
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="px-4 py-2 text-center text-gray-600">
+                  <td colSpan="4" className="px-4 py-6 text-center text-gray-500">
                     No hay usuarios registrados.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="flex justify-end space-x-4 mt-8">
+          <button
+            className="flex items-center space-x-2 bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105"
+            onClick={() => navigate('/admin/administrar-colaboradores/crear-colaborador')} 
+          >
+            <FaUserPlus /> <span>Añadir colaborador</span> 
+          </button>
+          <button
+            className="flex items-center space-x-2 bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105"
+            onClick={() => navigate('/admin/administrar-colaboradores/crear-administrador')}
+          >
+            <FaUserPlus /> <span>Añadir administrador</span> 
+          </button>
         </div>
       </div>
     </div>

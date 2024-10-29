@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaArrowRightFromBracket } from 'react-icons/fa6';
 
 function Menu2() {
   const navigate = useNavigate();
@@ -10,15 +11,15 @@ function Menu2() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegúrate de tener el token almacenado en localStorage
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
         },
-        credentials: 'include' // Esto permite que se envíen cookies si las hay
+        credentials: 'include' 
       });
 
       if (response.ok) {
-        localStorage.removeItem('token'); // Elimina el token del localStorage
+        localStorage.removeItem('token'); 
         alert('Has cerrado sesión con éxito.');
-        navigate('/'); // Redirige al usuario a la página de inicio
+        navigate('/'); 
       } else {
         const errorData = await response.json();
         alert(`Error al cerrar sesión: ${errorData.message}`);
@@ -45,10 +46,10 @@ function Menu2() {
 
       <div className="flex space-x-4">
         <button 
-          className="px-5 py-2 bg-[#005baa] text-white rounded-full hover:opacity-90" 
+          className="flex items-center space-x-2 bg-[#005baa] text-white px-5 py-2 rounded-full hover:opacity-90"
           onClick={handleLogout}
         >
-          Cerrar Sesión
+          <FaArrowRightFromBracket /> <span>Cerrar Sesión</span>
         </button>
       </div>
     </nav>
