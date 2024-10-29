@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Login = () => {
   const [rut, setRut] = useState('');
@@ -8,7 +9,12 @@ const Login = () => {
 
   const login = async () => {
     if (!rut || !password) {
-      window.alert('Error: Por favor, ingresa tu RUT y contraseña.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Por favor, ingresa tu RUT y contraseña.',
+        confirmButtonText: 'Aceptar'
+      });
       return;
     }
     try {
@@ -21,26 +27,45 @@ const Login = () => {
       });
   
       if (response.ok) {
-        const data = await response.json();  // Obtener datos aquí
-  
-        //console.log('Respuesta de la API:', data); 
+        const data = await response.json();
   
         localStorage.setItem('token', data.token);  
-        //console.log('Token:', data.token);  
   
         if (data.admin) {
-          window.alert('Éxito: Bienvenido Administrador');
-          navigate('/admin');  // Redirige a la página de administrador
+          Swal.fire({
+            icon: 'success',
+            title: 'Bienvenido Administrador',
+            text: 'Éxito: Bienvenido Administrador',
+            confirmButtonText: 'Continuar'
+          }).then(() => {
+            navigate('/admin');  // Redirige a la página de administrador
+          });
         } else {
-          window.alert('Éxito: Bienvenido Colaborador');
-          navigate('/colaborador');  // Redirige a la página de colaborador
+          Swal.fire({
+            icon: 'success',
+            title: 'Bienvenido Colaborador',
+            text: 'Éxito: Bienvenido Colaborador',
+            confirmButtonText: 'Continuar'
+          }).then(() => {
+            navigate('/colaborador');  // Redirige a la página de colaborador
+          });
         }
       } else {
         const errorData = await response.json(); 
-        window.alert('Error: ' + (errorData.message || 'Error al iniciar sesión'));
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorData.message || 'Error al iniciar sesión',
+          confirmButtonText: 'Aceptar'
+        });
       }
     } catch (error) {
-      window.alert('Error: Hubo un problema con la conexión.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema con la conexión.',
+        confirmButtonText: 'Aceptar'
+      });
     }
   };
   

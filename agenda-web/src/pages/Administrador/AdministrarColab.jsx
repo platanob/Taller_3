@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 const AdministradorColab = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/obtener_cuentas', {
@@ -16,7 +15,6 @@ const AdministradorColab = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.cuentas) {
-          // Filtra solo los usuarios que tienen una especialidad
           const colaboradoresConEspecialidad = data.cuentas.filter(user => user.especialidad);
           setUsers(colaboradoresConEspecialidad);
         } else {
@@ -25,81 +23,98 @@ const AdministradorColab = () => {
       })
       .catch((error) => console.error('Error al conectar con la API:', error));
   }, []);
-  
+
   const handleInfo = (id) => {
     const user = users.find((user) => user._id === id);
-    setSelectedUser(user);
-    document.getElementById('info_modal').showModal();
-  };
-
-  const closeModal = () => {
-    setSelectedUser(null);
-    setIsEditMode(false);
-    setIsDeleteMode(false);
-    document.getElementById('info_modal').close();
+    Swal.fire({
+      title: 'Información del Usuario',
+      html: `
+        <p><strong>Nombre:</strong> ${user.nombre}</p>
+        <p><strong>RUT:</strong> ${user.rut}</p>
+        <p><strong>Especialidad:</strong> ${user.especialidad}</p>
+      `,
+      icon: 'info',
+      confirmButtonText: 'Cerrar',
+    });
   };
 
   const handleEdit = (id) => {
     const user = users.find((user) => user._id === id);
     setSelectedUser(user);
-    setIsEditMode(true);
-    document.getElementById('info_modal').showModal();
-  };
-
-  const handleEditSubmit = () => {
-    fetch(`http://localhost:5000/api/editar_cuenta/${selectedUser._id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+    Swal.fire({
+      title: 'Editar Usuario',
+      html: `
+        <input type="text" id="nombre" class="swal2-input" placeholder="Nombre" value="${user.nombre}" />
+        <input type="text" id="rut" class="swal2-input" placeholder="RUT" value="${user.rut}" />
+        <input type="text" id="especialidad" class="swal2-input" placeholder="Especialidad" value="${user.especialidad}" />
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return {
+          nombre: document.getElementById('nombre').value,
+          rut: document.getElementById('rut').value,
+          especialidad: document.getElementById('especialidad').value,
+        };
       },
-      body: JSON.stringify({
-        nombre: selectedUser.nombre,
-        rut: selectedUser.rut,
-        especialidad: selectedUser.especialidad, // Agregado el campo especialidad
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.mensaje) {
-          const updatedUsers = users.map((user) =>
-            user._id === selectedUser._id ? selectedUser : user
-          );
-          setUsers(updatedUsers);
-          closeModal();
-        } else {
-          console.error('Error al editar usuario:', data.error);
-        }
-      })
-      .catch((error) => console.error('Error al conectar con la API:', error));
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`http://localhost:5000/api/editar_cuenta/${user._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(result.value),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.mensaje) {
+              const updatedUsers = users.map((u) =>
+                u._id === user._id ? { ...user, ...result.value } : u
+              );
+              setUsers(updatedUsers);
+              Swal.fire('Editado', 'El usuario ha sido editado exitosamente', 'success');
+            } else {
+              console.error('Error al editar usuario:', data.error);
+            }
+          })
+          .catch((error) => console.error('Error al conectar con la API:', error));
+      }
+    });
   };
 
   const handleDelete = (id) => {
     const user = users.find((user) => user._id === id);
-    setSelectedUser(user);
-    setIsDeleteMode(true);
-    document.getElementById('info_modal').showModal();
-  };
-
-  const handleDeleteConfirm = () => {
-    fetch(`http://localhost:5000/api/eliminar_cuenta/${selectedUser._id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.mensaje) {
-          const updatedUsers = users.filter((user) => user._id !== selectedUser._id);
-          setUsers(updatedUsers);
-          closeModal();
-        } else {
-          console.error('Error al eliminar usuario:', data.error);
-        }
-      })
-      .catch((error) => console.error('Error al conectar con la API:', error));
+    Swal.fire({
+      title: 'Confirmar Eliminación',
+      text: `¿Estás seguro que deseas eliminar a ${user.nombre}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`http://localhost:5000/api/eliminar_cuenta/${user._id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.mensaje) {
+              setUsers(users.filter((u) => u._id !== user._id));
+              Swal.fire('Eliminado', 'El usuario ha sido eliminado', 'success');
+            } else {
+              console.error('Error al eliminar usuario:', data.error);
+            }
+          })
+          .catch((error) => console.error('Error al conectar con la API:', error));
+      }
+    });
   };
 
   return (
@@ -118,7 +133,7 @@ const AdministradorColab = () => {
               <tr>
                 <th className="py-2 px-4 text-left">Nombre</th>
                 <th className="py-2 px-4 text-left">RUT</th>
-                <th className="py-2 px-4 text-left">Especialidad</th> {/* Agregado el encabezado de especialidad */}
+                <th className="py-2 px-4 text-left">Especialidad</th>
                 <th className="py-2 px-4 text-center">Acciones</th>
               </tr>
             </thead>
@@ -128,7 +143,7 @@ const AdministradorColab = () => {
                   <tr key={user._id} className="border-t text-gray-800">
                     <td className="py-2 px-4 ">{user.nombre}</td>
                     <td className="py-2 px-4 ">{user.rut}</td>
-                    <td className="py-2 px-4 ">{user.especialidad}</td> {/* Mostrando el campo especialidad */}
+                    <td className="py-2 px-4 ">{user.especialidad}</td>
                     <td className="py-2 px-4 flex justify-center space-x-2">
                       <button
                         onClick={() => handleInfo(user._id)}
@@ -136,7 +151,6 @@ const AdministradorColab = () => {
                       >
                         Ver Información
                       </button>
-                      {/* Se eliminó el botón de Ver Historial */}
                       <button
                         onClick={() => handleEdit(user._id)}
                         className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
@@ -163,66 +177,6 @@ const AdministradorColab = () => {
           </table>
         </div>
       </div>
-
-      {/* Modal */}
-      <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-          {selectedUser && !isEditMode && !isDeleteMode && (
-            <>
-              <h3 className="font-bold text-lg">Información del Usuario</h3>
-              <p className="py-4">Nombre: {selectedUser.nombre}</p>
-              <p className="py-4">RUT: {selectedUser.rut}</p>
-              <p className="py-4">Especialidad: {selectedUser.especialidad}</p> {/* Mostrando especialidad en el modal */}
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={closeModal}>Cerrar</button>
-              </div>
-            </>
-          )}
-
-          {selectedUser && isEditMode && (
-            <>
-              <h3 className="font-bold text-lg">Editar Usuario</h3>
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Nombre"
-                value={selectedUser.nombre}
-                onChange={(e) => setSelectedUser({ ...selectedUser, nombre: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="RUT"
-                value={selectedUser.rut}
-                onChange={(e) => setSelectedUser({ ...selectedUser, rut: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Especialidad" // Campo requerido
-                value={selectedUser.especialidad}
-                onChange={(e) => setSelectedUser({ ...selectedUser, especialidad: e.target.value })}
-                required // Añadiendo el atributo requerido
-              />
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>
-                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
-              </div>
-            </>
-          )}
-
-          {selectedUser && isDeleteMode && (
-            <>
-              <h3 className="font-bold text-lg">Confirmar Eliminación</h3>
-              <p className="py-4">¿Estás seguro que deseas eliminar a {selectedUser.nombre}?</p>
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleDeleteConfirm}>Eliminar</button>
-                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
-              </div>
-            </>
-          )}
-        </div>
-      </dialog>
     </div>
   );
 };
