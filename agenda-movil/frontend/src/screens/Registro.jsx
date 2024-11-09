@@ -32,26 +32,8 @@ export default function Registro() {
     return new Blob([byteArray], { type: contentType });
   }
   
-  const selectPdfDiscapacidad = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/pdf',
-      });
-
-      if (result.type !== 'cancel') {
-        setPdfDiscapacidad(result);
-        console.log('Archivo de discapacidad seleccionado:', result);
-      } else {
-        console.log('Selección cancelada');
-      }
-    } catch (err) {
-      console.error('Error en la selección de archivo:', err);
-      Alert.alert('Error', 'Hubo un error seleccionando el archivo. Por favor, inténtalo de nuevo.');
-    }
-  };
-
   const register = async () => {
-    if (!nombre || !rut || !correo || !password || !confirmPassword) {
+    if (!nombre || !rut || !correo || !password || !confirmPassword || !edad || !localidad) {
       Alert.alert('Error', 'Por favor, completa todos los campos');
       return;
     }
@@ -65,33 +47,40 @@ export default function Registro() {
       Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido');
       return;
     }
-
+  
     if (!carnetFrontal || !carnetTrasero) {
       Alert.alert('Error', 'Por favor, selecciona ambas imágenes del carnet (frontal y trasero)');
       return;
     }
-
-    if (isDiscapacitado && (!pdfDiscapacidad || pdfDiscapacidad.canceled || !pdfDiscapacidad.assets)) {
-      Alert.alert('Error', 'Por favor, selecciona el archivo de discapacidad');
-      return;
-    }
   
-    const selectedFile = pdfFile.assets[0]; 
-    const file = selectedFile.file; 
-
+    const selectedFile = pdfFile.assets[0];
+    const file = selectedFile.file;
+  
+    // Solo intentar asignar fileDisc si el usuario tiene discapacidad y seleccionó un archivo
+    const fileDisc = isDiscapacitado && pdfDiscapacidad ? pdfDiscapacidad.assets[0].file : null;
+  
     const formData = new FormData();
     formData.append('nombre', nombre);
     formData.append('rut', rut);
     formData.append('correo', correo);
     formData.append('contrasena', password);
-    formData.append('archivo', file)
-     // Convertir URI base64 a Blob
+    formData.append('edad', edad);
+    formData.append('localidad', localidad);
+    formData.append('discapacidad', isDiscapacitado ? 'true' : 'false');
+  
+    // Adjuntar carnet de discapacidad solo si aplica
+    if (isDiscapacitado && fileDisc) {
+      formData.append('carnet_discapacidad', fileDisc);
+    }
+  
+    formData.append('archivo', file);
+  
     const carnetFrontalBlob = base64ToBlob(carnetFrontal.assets[0].uri, 'image/png');
     const carnetTraseroBlob = base64ToBlob(carnetTrasero.assets[0].uri, 'image/png');
-    // Imagen carnet frontal (en formato Blob)
+  
     formData.append('carnet_frontal', carnetFrontalBlob, 'carnet_frontal.png');
     formData.append('carnet_trasero', carnetTraseroBlob, 'carnet_trasero.png');
-      
+  
     try {
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
@@ -102,17 +91,20 @@ export default function Registro() {
       if (!response.ok) {
         throw new Error(result.error || 'Error en la solicitud');
       }
+  
       console.log('Registro exitoso', result);
-
+  
       if (Platform.OS === 'web') {
         window.alert('¡Registro exitoso!');
       } else {
         Alert.alert('Éxito', '¡Registro exitoso!');
       }
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error detallado del servidor:', error.message);
     }
   };
+  
 
   const selectPdf = async () => {
     try {
@@ -123,6 +115,24 @@ export default function Registro() {
       if (result.type !== 'cancel') {
         setPdfFile(result);
         console.log('Archivo seleccionado:', result);
+      } else {
+        console.log('Selección cancelada');
+      }
+    } catch (err) {
+      console.error('Error en la selección de archivo:', err);
+      Alert.alert('Error', 'Hubo un error seleccionando el archivo. Por favor, inténtalo de nuevo.');
+    }
+  };
+
+  const selectPdfDiscapacidad = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+      });
+
+      if (result.type !== 'cancel') {
+        setPdfDiscapacidad(result);
+        console.log('Archivo de discapacidad seleccionado:', result);
       } else {
         console.log('Selección cancelada');
       }
@@ -194,7 +204,7 @@ export default function Registro() {
 
           <Text style={styles.label}>RUT</Text>
           <TextInput
-            placeholder="RUT"
+            placeholder="Ej: X.XXX.XXX-X"
             placeholderTextColor="#000"
             style={styles.input}
             value={rut}
@@ -223,7 +233,7 @@ export default function Registro() {
 
           <Text style={styles.label}>Localidad</Text>
           <TextInput
-            placeholder="Localidad"
+            placeholder="Ej: Padre las Casas"
             placeholderTextColor="#000"
             style={styles.input}
             value={localidad}
@@ -297,7 +307,7 @@ export default function Registro() {
             </Text>
           </View>
 
-           <View style={styles.switchContainer}>
+          <View style={styles.switchContainer}>
             <Text style={styles.label}>¿Tienes alguna discapacidad?</Text>
             <Switch
               value={isDiscapacitado}

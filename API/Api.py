@@ -53,6 +53,7 @@ def register():
         nombre = data.get('nombre')
         rut = data.get('rut')
         correo = data.get('correo')
+        localidad = data.get('localidad')
         password = data.get('contrasena')
         discapacidad = data.get('discapacidad') == 'true'  # Convertir a booleano
         carnet_discapacidad = None
@@ -120,6 +121,7 @@ def register():
             "password": hashed_password,
             "nombre": nombre,
             "correo": correo,
+            "localidad": localidad,
             "pdf_id": pdf_id,  # ID del archivo PDF en GridFS
             "carnet_frontal_id": carnet_frontal_id,  # ID de la imagen de carnet frontal
             "carnet_trasero_id": carnet_trasero_id,   # ID de la imagen de carnet trasero
@@ -128,6 +130,8 @@ def register():
         if discapacidad:
             usuario_data["discapacidad"] = True
             usuario_data["carnet_discapacidad_id"] = carnet_discapacidad_id  # ID del carnet de discapacidad
+        else:
+            usuario_data["discapacidad"] = False
 
         usuarios_nuevos.insert_one(usuario_data)
 
