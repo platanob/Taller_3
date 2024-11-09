@@ -54,6 +54,8 @@ def register():
         rut = data.get('rut')
         correo = data.get('correo')
         password = data.get('contrasena')
+        discapacidad = data.get('discapacidad') == 'true'  # Convertir a booleano
+        carnet_discapacidad = None
 
         # Verificar que los campos de texto están presentes
         if not nombre or not rut or not correo or not password:
@@ -86,7 +88,7 @@ def register():
         carnet_frontal = request.files['carnet_frontal']
         carnet_trasero = request.files['carnet_trasero']
 
-        # Verificar que las imágenes sean válidas (puedes agregar más validaciones si es necesario)
+        # Verificar que las imágenes sean válidas
         if carnet_frontal.filename == '' or not carnet_frontal.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             return jsonify({"error": "Debes subir una imagen válida para el carnet frontal"}), 400
 
@@ -97,24 +99,42 @@ def register():
         carnet_frontal_id = fs.put(carnet_frontal, filename=carnet_frontal.filename)
         carnet_trasero_id = fs.put(carnet_trasero, filename=carnet_trasero.filename)
 
+        # Verificar si se sube el carnet de discapacidad
+        if discapacidad:
+            if 'carnet_discapacidad' not in request.files:
+                return jsonify({"error": "El archivo de carnet de discapacidad es requerido"}), 400
+            
+            carnet_discapacidad = request.files['carnet_discapacidad']
+            if carnet_discapacidad.filename == '' or not carnet_discapacidad.filename.lower().endswith(('.pdf', '.png', '.jpg', '.jpeg')):
+                return jsonify({"error": "Debes subir un archivo válido para el carnet de discapacidad"}), 400
+            
+            # Guardar el carnet de discapacidad en GridFS
+            carnet_discapacidad_id = fs.put(carnet_discapacidad, filename=carnet_discapacidad.filename)
+
         # Hashear la contraseña
         hashed_password = generate_password_hash(password)
 
         # Insertar los datos del nuevo usuario en la base de datos
-        usuarios_nuevos.insert_one({
+        usuario_data = {
             "rut": rut,
             "password": hashed_password,
             "nombre": nombre,
             "correo": correo,
             "pdf_id": pdf_id,  # ID del archivo PDF en GridFS
             "carnet_frontal_id": carnet_frontal_id,  # ID de la imagen de carnet frontal
-            "carnet_trasero_id": carnet_trasero_id   # ID de la imagen de carnet trasero
-        })
+            "carnet_trasero_id": carnet_trasero_id,   # ID de la imagen de carnet trasero
+        }
+
+        if discapacidad:
+            usuario_data["discapacidad"] = True
+            usuario_data["carnet_discapacidad_id"] = carnet_discapacidad_id  # ID del carnet de discapacidad
+
+        usuarios_nuevos.insert_one(usuario_data)
 
         return jsonify({"message": "Usuario registrado con éxito"}), 201
     
     except Exception as e:
-        return jsonify({"error": f"Se produjo un error: {str(e)}"}), 500
+        return jsonify
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -630,15 +650,19 @@ def obtener_usuarios_nuevos():
             'pdf_id': 1,
             'carnet_frontal_id': 1,
             'carnet_trasero_id': 1,
+            'edad': 1,
+            'sector': 1,
+            'discapacidad': 1,
+            'carnet_discapacidad_id': 1,
             '_id': 1
         }))
         
-    
         for usuario in usuarios:
             usuario['_id'] = str(usuario['_id'])
             usuario['pdf_id'] = str(usuario.get('pdf_id', ''))
             usuario['carnet_frontal_id'] = str(usuario.get('carnet_frontal_id', ''))
             usuario['carnet_trasero_id'] = str(usuario.get('carnet_trasero_id', ''))
+            usuario['carnet_discapacidad_id'] = str(usuario.get('carnet_discapacidad_id', ''))  # Convertir a string si existe
 
         if not usuarios:
             return jsonify({'mensaje': 'No se encontraron usuarios'}), 404
@@ -674,31 +698,42 @@ def aceptar_usuario(usuario_id):
             'password': 1,
             'pdf_id': 1,
             'carnet_frontal_id': 1,
-            'carnet_trasero_id': 1
+            'carnet_trasero_id': 1,
+            'edad': 1,
+            'sector': 1,
+            'discapacidad': 1,
+            'carnet_discapacidad_id': 1
         })
 
         if not usuario_nuevo:
             return jsonify({'mensaje': 'Usuario no encontrado en usuarios_nuevos'}), 404
+        
+        # Filtrar los campos que se van a insertar en users_collection
         usuario_filtrado = {
             'nombre': usuario_nuevo['nombre'],
             'rut': usuario_nuevo['rut'],
             'correo': usuario_nuevo['correo'],
-            'password': usuario_nuevo['password']
+            'password': usuario_nuevo['password'],
+            'edad': usuario_nuevo.get('edad'),  # Agregar edad
+            'sector': usuario_nuevo.get('sector'),  # Agregar sector
+            'discapacidad': usuario_nuevo.get('discapacidad'),  # Agregar discapacidad 
         }
 
+        # Insertar el usuario en la colección de usuarios
         result = users_collection.insert_one(usuario_filtrado)
 
-
+        # Eliminar archivos de GridFS
         if 'pdf_id' in usuario_nuevo:
             fs.delete(ObjectId(usuario_nuevo['pdf_id']))
         if 'carnet_frontal_id' in usuario_nuevo:
             fs.delete(ObjectId(usuario_nuevo['carnet_frontal_id']))
         if 'carnet_trasero_id' in usuario_nuevo:
             fs.delete(ObjectId(usuario_nuevo['carnet_trasero_id']))
+        if 'carnet_discapacidad_id' in usuario_nuevo:  # También eliminar el carnet de discapacidad
+            fs.delete(ObjectId(usuario_nuevo['carnet_discapacidad_id']))
 
-
+        # Eliminar el usuario de la colección de usuarios nuevos
         usuarios_nuevos.delete_one({'_id': ObjectId(usuario_id)})
-
 
         return jsonify({
             'mensaje': 'Usuario aceptado, transferido a users_collection y archivos eliminados',
