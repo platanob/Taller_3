@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from functools import wraps
 import gridfs
+from datetime import datetime, timedelta
 from io import BytesIO  # Para manejar archivos en memoria
 
 
@@ -288,6 +289,8 @@ def admin_required(fn):
     return wrapper
 
 @app.route('/api/agregar_web', methods=['POST'])
+@jwt_required()
+@admin_required
 def agregar_cuenta():
     data = request.get_json()
     
@@ -350,37 +353,53 @@ def iniciar_sesion():
 @jwt_required()
 def nuevas_horas():
     data = request.get_json()
-    required_fields = ['fecha', 'hora', 'locacion', 'servicio']
+    required_fields = ['fecha', 'hora_inicio', 'hora_fin', 'intervalo', 'locacion', 'servicio']
 
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Faltan datos necesarios'}), 400
 
     # Obtener el ID del colaborador desde el JWT
     identity = get_jwt_identity()
-    colaborador_id = identity['id']  # Obtener el `id` del colaborador
+    colaborador_id = identity['id']
 
     colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
 
     if not colaborador:
         return jsonify({'error': 'Colaborador no encontrado'}), 404
 
-    cita = {
-        'fecha': data['fecha'],
-        'hora': data['hora'],
-        'locacion': data['locacion'],
-        'servicio': data['servicio'],
-        'colaborador': colaborador['_id'],
-        'disponible': True
-    }
+    # Convertir las horas y el intervalo
+    fecha = data['fecha']
+    hora_inicio = datetime.strptime(f"{fecha} {data['hora_inicio']}", "%Y-%m-%d %H:%M")
+    hora_fin = datetime.strptime(f"{fecha} {data['hora_fin']}", "%Y-%m-%d %H:%M")
+    intervalo = timedelta(minutes=int(data['intervalo']))
 
-    result = citas_collection.insert_one(cita)
-    return jsonify({'cita_id': str(result.inserted_id)}), 201
+    # Verificar que la hora de inicio es menor que la hora de fin
+    if hora_inicio >= hora_fin:
+        return jsonify({'error': 'La hora de inicio debe ser anterior a la hora de fin'}), 400
+
+    # Crear citas en intervalos
+    citas_creadas = []
+    hora_actual = hora_inicio
+    while hora_actual <= hora_fin:
+        cita = {
+            'fecha': fecha,
+            'hora': hora_actual.time().strftime("%H:%M"),
+            'locacion': data['locacion'],
+            'servicio': data['servicio'],
+            'colaborador': colaborador['_id'],
+            'disponible': True
+        }
+        result = citas_collection.insert_one(cita)
+        citas_creadas.append(str(result.inserted_id))
+        hora_actual += intervalo
+
+    return jsonify({'citas_creadas': citas_creadas}), 201
 
 @app.route('/api/nuevashoras_admin', methods=['POST'])
 @jwt_required()
 def nuevashoras():
     data = request.get_json()
-    required_fields = ['fecha', 'hora', 'locacion', 'servicio', 'colaborador']
+    required_fields = ['fecha', 'hora_inicio', 'hora_fin', 'intervalo', 'locacion', 'servicio', 'colaborador']
 
     # Verificar si faltan datos requeridos
     if not all(field in data for field in required_fields):
@@ -397,18 +416,33 @@ def nuevashoras():
     if colaborador.get('admin', True):  # Si el campo 'admin' no existe, asume que es True (es admin)
         return jsonify({'error': 'El colaborador proporcionado es un administrador, no se pueden asignar citas'}), 403
 
-    # Crear la cita
-    cita = {
-        'fecha': data['fecha'],
-        'hora': data['hora'],
-        'locacion': data['locacion'],
-        'servicio': data['servicio'],
-        'colaborador': colaborador['_id'], 
-        'disponible': True
-    }
+    # Convertir las horas y el intervalo
+    fecha = data['fecha']
+    hora_inicio = datetime.strptime(f"{fecha} {data['hora_inicio']}", "%Y-%m-%d %H:%M")
+    hora_fin = datetime.strptime(f"{fecha} {data['hora_fin']}", "%Y-%m-%d %H:%M")
+    intervalo = timedelta(minutes=int(data['intervalo']))
 
-    result = citas_collection.insert_one(cita)
-    return jsonify({'cita_id': str(result.inserted_id)}), 201
+    # Verificar que la hora de inicio es menor que la hora de fin
+    if hora_inicio >= hora_fin:
+        return jsonify({'error': 'La hora de inicio debe ser anterior a la hora de fin'}), 400
+
+    # Crear citas en intervalos
+    citas_creadas = []
+    hora_actual = hora_inicio
+    while hora_actual <= hora_fin:
+        cita = {
+            'fecha': fecha,
+            'hora': hora_actual.time().strftime("%H:%M"),
+            'locacion': data['locacion'],
+            'servicio': data['servicio'],
+            'colaborador': colaborador['_id'],
+            'disponible': True
+        }
+        result = citas_collection.insert_one(cita)
+        citas_creadas.append(str(result.inserted_id))
+        hora_actual += intervalo
+
+    return jsonify({'citas_creadas': citas_creadas}), 201
 
 
 @app.route('/api/editarcita/<cita_id>', methods=['PUT'])
@@ -548,6 +582,31 @@ def eliminar_cuenta(id):
     
     except Exception as e:
         return jsonify({'error': f'Error al eliminar cuenta: {str(e)}'}), 500
+
+@app.route('/api/usuarios_por_especialidad', methods=['GET'])
+@jwt_required()
+@admin_required
+def usuarios_por_especialidad():
+    try:
+        # Consulta a la base de datos para obtener usuarios que no son admin
+        usuarios_no_admin = list(cuentas_admin.find({'admin': False}))
+        
+        # Agrupamos los usuarios por especialidad
+        agrupados_por_especialidad = {}
+        for usuario in usuarios_no_admin:
+            especialidad = usuario.get('especialidad', 'Sin Especialidad')
+            if especialidad not in agrupados_por_especialidad:
+                agrupados_por_especialidad[especialidad] = []
+            agrupados_por_especialidad[especialidad].append({
+                'nombre': usuario.get('nombre'),
+                'rut': usuario.get('rut'),
+                '_id': str(usuario['_id'])
+            })
+        
+        return jsonify(agrupados_por_especialidad), 200
+    
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener usuarios por especialidad: {str(e)}'}), 500
 
 """
 ░█████╗░██╗░░░██╗███████╗███╗░░██╗████████╗░█████╗░░██████╗
@@ -770,6 +829,8 @@ def eliminar_usuario_nuevo(usuario_id):
 
     except Exception as e:
         return jsonify({'error': f'Error al eliminar el usuario: {str(e)}'}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
