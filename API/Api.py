@@ -55,6 +55,7 @@ def register():
         rut = data.get('rut')
         correo = data.get('correo')
         localidad = data.get('localidad')
+        fechaNacimiento = data.get('fechaNacimiento')  # Cambié 'edad' por 'fecha_nacimiento'
         password = data.get('contrasena')
         discapacidad = data.get('discapacidad') == 'true'  # Convertir a booleano
         carnet_discapacidad = None
@@ -123,6 +124,7 @@ def register():
             "nombre": nombre,
             "correo": correo,
             "localidad": localidad,
+            "fechaNacimiento": fechaNacimiento,
             "pdf_id": pdf_id,  # ID del archivo PDF en GridFS
             "carnet_frontal_id": carnet_frontal_id,  # ID de la imagen de carnet frontal
             "carnet_trasero_id": carnet_trasero_id,   # ID de la imagen de carnet trasero
@@ -713,8 +715,8 @@ def obtener_usuarios_nuevos():
             'pdf_id': 1,
             'carnet_frontal_id': 1,
             'carnet_trasero_id': 1,
-            'edad': 1,
-            'sector': 1,
+            'fechaNacimiento': 1,
+            'localidad': 1,
             'discapacidad': 1,
             'carnet_discapacidad_id': 1,
             '_id': 1

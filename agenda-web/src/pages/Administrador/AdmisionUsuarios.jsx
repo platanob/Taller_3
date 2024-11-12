@@ -160,16 +160,18 @@ const AdmisionUsuarios = () => {
               <tr>
                 <th className="py-2 px-4 text-left">RUT</th>
                 <th className="py-2 px-4 text-left">Nombre</th>
-                <th className="py-2 px-4 text-left">Correo</th>
-                <th className="py-2 px-4 text-center">Acciones</th>
+                <th className="py-2 px-4 text-left">Localidad</th> 
+                <th className="py-2 px-4 text-left">Discapacidad</th> 
+                <th className="py-2 px-4 text-center"></th>
               </tr>
             </thead>
             <tbody>
               {usuarios.map((usuario) => (
                 <tr key={usuario.rut} className="border-t text-gray-800">
-                  <td className="py-2 px-4">{usuario.rut}</td>
+                  <td className="py-2 px-1">{usuario.rut}</td>
                   <td className="py-2 px-4">{usuario.nombre}</td>
-                  <td className="py-2 px-4">{usuario.correo}</td>
+                  <td className="py-2 px-4">{usuario.localidad}</td> 
+                  <td className="py-2 px-4 text-center">{usuario.discapacidad ? 'Sí' : 'No'}</td> 
                   <td className="py-2 px-4 flex justify-center space-x-2">
                     <button
                       onClick={() => InfoClick(usuario)}
