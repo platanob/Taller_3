@@ -25,12 +25,6 @@ const UsuarioInfo = () => {
     return edadCalculada;
   };
 
-  useEffect(() => {
-    if (usuario.fechaNacimiento) {
-      setEdad(calcularEdad(usuario.fechaNacimiento));
-    }
-  }, [usuario]);
-
   const obtenerArchivoURL = async (id) => {
     const token = localStorage.getItem('token');
     try {
@@ -64,6 +58,10 @@ const UsuarioInfo = () => {
       setPdfURL(pdf);
       setIsLoading(false); // Terminar la carga cuando se hayan obtenido los archivos
     };
+    
+    if (usuario.fechaNacimiento) {
+      setEdad(calcularEdad(usuario.fechaNacimiento));
+    }
 
     cargarArchivos();
   }, [usuario]);
