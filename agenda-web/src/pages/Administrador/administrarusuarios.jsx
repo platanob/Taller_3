@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { FaInfoCircle, FaEdit, FaTrash, FaFileAlt } from 'react-icons/fa'; 
+import { FaInfoCircle, FaEdit, FaTrash, FaFileAlt } from 'react-icons/fa';
+import Espera from './Espera';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
     fetch('http://localhost:5000/api/obtener_usuarios', {
@@ -15,13 +17,14 @@ const AdminUsers = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.usuarios) {  
-          setUsers(data.usuarios);  
+        if (data.usuarios) {
+          setUsers(data.usuarios);
         } else {
           console.error('Error al obtener usuarios:', data.mensaje || data.error);
         }
       })
-      .catch((error) => console.error('Error al conectar con la API:', error));
+      .catch((error) => console.error('Error al conectar con la API:', error))
+      .finally(() => setLoading(false)); // Finaliza la carga
   }, []);
 
   const handleInfo = (id) => {
@@ -119,6 +122,11 @@ const AdminUsers = () => {
       }
     });
   };
+
+  if (loading) {
+    return <Espera />; // Muestra el preloader mientras carga
+  }
+
   const handleViewHistory = (id) => {
     const user = users.find((user) => user._id === id);
     Swal.fire({
@@ -134,6 +142,8 @@ const AdminUsers = () => {
       confirmButtonText: 'Cerrar',
     });
   };
+
+  
 
   return (
     <div className="min-h-screen bg-gray-100 py-10"

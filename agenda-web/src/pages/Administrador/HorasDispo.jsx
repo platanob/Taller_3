@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import Preloader from './Espera'; // Asegúrate de ajustar la ruta según tu estructura de archivos
+import Preloader from './Espera'; 
 
 function HorasDisponibles() {
     const [citas, setCitas] = useState([]);

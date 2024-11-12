@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { FaInfoCircle, FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa'; 
-import { useNavigate } from 'react-router-dom'; 
+import { FaInfoCircle, FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import Espera from './Espera';
 
 const AdministradorColab = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const navigate = useNavigate(); 
+  const [loading, setLoading] = useState(true); // Estado de carga
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('http://localhost:5000/api/obtener_cuentas', {
@@ -24,7 +26,8 @@ const AdministradorColab = () => {
           console.error('Error al obtener cuentas:', data.mensaje || data.error);
         }
       })
-      .catch((error) => console.error('Error al conectar con la API:', error));
+      .catch((error) => console.error('Error al conectar con la API:', error))
+      .finally(() => setLoading(false)); // Finaliza la carga
   }, []);
 
   const handleInfo = (id) => {
@@ -119,6 +122,10 @@ const AdministradorColab = () => {
       }
     });
   };
+
+  if (loading) {
+    return <Espera />; // Muestra el preloader mientras carga
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-10"
