@@ -40,6 +40,7 @@ function Menu() {
         <Link to="crear-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link>
         <Link to="historial-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Historial de Citas</Link>
         <Link to="Horas-agendadas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Horas Agendadas</Link>
+        <Link to="Citas-realizadas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Citas Realizadas</Link>
       </div>
       <div className="flex space-x-4">
         <button 
