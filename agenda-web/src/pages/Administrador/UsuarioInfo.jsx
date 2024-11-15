@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilePdf } from '@fortawesome/free-solid-svg-icons';
+import { faFilePdf, faDownload  } from '@fortawesome/free-solid-svg-icons';
 import Preloader from './Espera';
 
 const UsuarioInfo = () => {
@@ -11,8 +11,10 @@ const UsuarioInfo = () => {
   const [carnetTraseroURL, setCarnetTraseroURL] = useState(null);
   const [pdfURL, setPdfURL] = useState(null);
   const [discapacidadPDFURL, setDiscapacidadPDFURL] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); 
-  const [edad, setEdad] = useState(null); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [edad, setEdad] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); 
+  const [scale, setScale] = useState(1); 
 
   const calcularEdad = (fechaNacimiento) => {
     const [dia, mes, año] = fechaNacimiento.split('-').map(Number);
@@ -31,7 +33,7 @@ const UsuarioInfo = () => {
     try {
       const response = await fetch(`http://localhost:5000/api/obtener_archivo/${id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -54,7 +56,6 @@ const UsuarioInfo = () => {
       const trasero = await obtenerArchivoURL(usuario.carnet_trasero_id);
       const pdf = await obtenerArchivoURL(usuario.pdf_id);
 
-
       setCarnetFrontalURL(frontal);
       setCarnetTraseroURL(trasero);
       setPdfURL(pdf);
@@ -62,9 +63,9 @@ const UsuarioInfo = () => {
         const discapacidadPDF = await obtenerArchivoURL(usuario.carnet_discapacidad_id);
         setDiscapacidadPDFURL(discapacidadPDF);
       }
-      setIsLoading(false); // Terminar la carga cuando se hayan obtenido los archivos
+      setIsLoading(false);
     };
-    
+
     if (usuario.fechaNacimiento) {
       setEdad(calcularEdad(usuario.fechaNacimiento));
     }
@@ -77,7 +78,7 @@ const UsuarioInfo = () => {
     try {
       const response = await fetch(`http://localhost:5000/api/obtener_archivo/${usuario.pdf_id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -100,6 +101,25 @@ const UsuarioInfo = () => {
     }
   };
 
+  const openImageModal = (imageURL) => {
+    setSelectedImage(imageURL);
+    setScale(1);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setScale(1);
+  };
+
+  const increaseScale = () => {
+    const maxScale = 2; 
+    if (scale < maxScale) {
+      setScale(scale + 0.5); 
+    } else {
+      setScale(1); 
+    }
+  };
+
   if (isLoading) {
     return <Preloader />;
   }
@@ -107,9 +127,7 @@ const UsuarioInfo = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-10" style={{ backgroundImage: 'url("/img/fondo.jpg")' }}>
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-blue-800 mb-6 text-center">
-          Información del Usuario
-        </h1>
+        <h1 className="text-3xl font-bold text-blue-800 mb-6 text-center">Información del Usuario</h1>
 
         <table className="min-w-full bg-white border border-gray-200">
           <thead className="bg-blue-600 text-white">
@@ -136,24 +154,57 @@ const UsuarioInfo = () => {
 
         <h2 className="text-2xl font-bold text-blue-800 mt-6 text-center">Archivos del Usuario</h2>
         <div className={`mt-3 grid ${usuario.discapacidad ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'} gap-4`}>
-          <div className="bg-gray-200 p-1 rounded-md text-center">
-            <div className="w-full h-40 ">
+          <div
+            className="bg-gray-200 p-1 rounded-md text-center cursor-pointer relative group" // Añadimos el grupo para el hover
+            onClick={() => openImageModal(carnetFrontalURL)}
+          >
+            <div className="w-full h-40">
               {carnetFrontalURL ? (
-                <img src={carnetFrontalURL} alt="Carnet Frontal" className="w-full h-full object-fill rounded-md" />
+                <img
+                  src={carnetFrontalURL}
+                  alt="Carnet Frontal"
+                  className="w-full h-full object-fill rounded-md"
+                />
               ) : (
                 <p>No disponible</p>
               )}
+
+              {/* Botón de descarga */}
+              <a
+                href={carnetFrontalURL}
+                download
+                className="absolute bottom-2 right-2 bg-blue-500 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              >
+                <FontAwesomeIcon icon={faDownload} className="text-white text-xl" />
+              </a>
             </div>
           </div>
-          <div className="bg-gray-200 p-1 rounded-md text-center">
+          <div
+            className="bg-gray-200 p-1 rounded-md text-center cursor-pointer relative group" // Añadimos el grupo para el hover
+            onClick={() => openImageModal(carnetTraseroURL)}
+          >
             <div className="w-full h-40">
               {carnetTraseroURL ? (
-                <img src={carnetTraseroURL} alt="Carnet Trasero" className="w-full h-full object-fill rounded-md" />
+                <img
+                  src={carnetTraseroURL}
+                  alt="Carnet Frontal"
+                  className="w-full h-full object-fill rounded-md"
+                />
               ) : (
                 <p>No disponible</p>
               )}
+
+              {/* Botón de descarga */}
+              <a
+                href={carnetTraseroURL}
+                download
+                className="absolute bottom-2 right-2 bg-blue-500 text-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              >
+                <FontAwesomeIcon icon={faDownload} className="text-white text-xl" />
+              </a>
             </div>
           </div>
+
           <div className="bg-gray-200 p-6 rounded-lg shadow-md flex items-center justify-center flex-col">
             <FontAwesomeIcon icon={faFilePdf} className="text-red-600 text-5xl mb-4" />
             <button
@@ -176,6 +227,24 @@ const UsuarioInfo = () => {
           )}
         </div>
       </div>
+
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div
+            className="transition-transform duration-300"
+            style={{ transform: `scale(${scale})` }} 
+            onClick={increaseScale} 
+          >
+            <img src={selectedImage} alt="Imagen ampliada" className="max-w-full max-h-screen rounded-md" />
+          </div>
+          <button
+            className="absolute top-5 right-5 text-white bg-red-600 p-3 rounded-full shadow-md"
+            onClick={closeImageModal}
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
     </div>
   );
 };
