@@ -160,7 +160,7 @@ const AdmisionUsuarios = () => {
               <tr>
                 <th className="py-2 px-4 text-left">RUT</th>
                 <th className="py-2 px-4 text-left">Nombre</th>
-                <th className="py-2 px-4 text-left">Localidad</th> 
+                <th className="py-2 px-4 text-left">Sector</th> 
                 <th className="py-2 px-4 text-left">Discapacidad</th> 
                 <th className="py-2 px-4 text-center"></th>
               </tr>

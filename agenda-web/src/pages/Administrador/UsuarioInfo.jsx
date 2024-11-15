@@ -10,6 +10,7 @@ const UsuarioInfo = () => {
   const [carnetFrontalURL, setCarnetFrontalURL] = useState(null);
   const [carnetTraseroURL, setCarnetTraseroURL] = useState(null);
   const [pdfURL, setPdfURL] = useState(null);
+  const [discapacidadPDFURL, setDiscapacidadPDFURL] = useState(null);
   const [isLoading, setIsLoading] = useState(true); 
   const [edad, setEdad] = useState(null); 
 
@@ -53,9 +54,14 @@ const UsuarioInfo = () => {
       const trasero = await obtenerArchivoURL(usuario.carnet_trasero_id);
       const pdf = await obtenerArchivoURL(usuario.pdf_id);
 
+
       setCarnetFrontalURL(frontal);
       setCarnetTraseroURL(trasero);
       setPdfURL(pdf);
+      if (usuario.discapacidad && usuario.carnet_discapacidad_id) {
+        const discapacidadPDF = await obtenerArchivoURL(usuario.carnet_discapacidad_id);
+        setDiscapacidadPDFURL(discapacidadPDF);
+      }
       setIsLoading(false); // Terminar la carga cuando se hayan obtenido los archivos
     };
     
@@ -88,6 +94,12 @@ const UsuarioInfo = () => {
     }
   };
 
+  const handleDiscapacidadPdfClick = () => {
+    if (discapacidadPDFURL) {
+      window.open(discapacidadPDFURL);
+    }
+  };
+
   if (isLoading) {
     return <Preloader />;
   }
@@ -107,14 +119,14 @@ const UsuarioInfo = () => {
               <th className="py-2 px-4 text-left">Edad</th>
               <th className="py-2 px-4 text-left">Correo</th>
               <th className="py-2 px-4 text-left">Sector</th>
-              <th className="py-2 px-4 text-left">Discapacidad</th>
+              <th className="py-2 px-4 text-center">Discapacidad</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-t text-gray-800">
               <td className="py-2 px-2">{usuario.rut}</td>
               <td className="py-2 px-4">{usuario.nombre}</td>
-              <td className="py-2 px-5">{edad}</td>
+              <td className="py-2 px-5 text-left">{edad}</td>
               <td className="py-2 px-4">{usuario.correo}</td>
               <td className="py-2 px-4">{usuario.localidad}</td>
               <td className="py-2 px-4 text-center">{usuario.discapacidad ? 'Sí' : 'No'}</td>
@@ -122,10 +134,10 @@ const UsuarioInfo = () => {
           </tbody>
         </table>
 
-        <h2 className="text-2xl font-bold text-blue-800 mt-6">Archivos del Usuario</h2>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h2 className="text-2xl font-bold text-blue-800 mt-6 text-center">Archivos del Usuario</h2>
+        <div className={`mt-3 grid ${usuario.discapacidad ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'} gap-4`}>
           <div className="bg-gray-200 p-1 rounded-md text-center">
-            <div className="w-128 h-40"> {/* Ancho y alto */}
+            <div className="w-full h-40 ">
               {carnetFrontalURL ? (
                 <img src={carnetFrontalURL} alt="Carnet Frontal" className="w-full h-full object-fill rounded-md" />
               ) : (
@@ -134,7 +146,7 @@ const UsuarioInfo = () => {
             </div>
           </div>
           <div className="bg-gray-200 p-1 rounded-md text-center">
-            <div className="w-128 h-40"> {/* Ancho y alto */}
+            <div className="w-full h-40">
               {carnetTraseroURL ? (
                 <img src={carnetTraseroURL} alt="Carnet Trasero" className="w-full h-full object-fill rounded-md" />
               ) : (
@@ -151,6 +163,17 @@ const UsuarioInfo = () => {
               Ver Cartola Registro Social
             </button>
           </div>
+          {usuario.discapacidad && discapacidadPDFURL && (
+            <div className="bg-gray-200 p-6 rounded-lg shadow-md flex items-center justify-center flex-col">
+              <FontAwesomeIcon icon={faFilePdf} className="text-red-600 text-5xl mb-4" />
+              <button
+                onClick={handleDiscapacidadPdfClick}
+                className="bg-gradient-to-r from-red-500 to-red-700 text-white py-2 px-4 rounded-lg shadow hover:shadow-lg transition duration-300"
+              >
+                Ver Documento de Discapacidad
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
