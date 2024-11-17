@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 
 const CrearCitasAdm = () => {
   const [fecha, setFecha] = useState('');
-  const [hora, setHora] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [horaFin, setHoraFin] = useState('');
+  const [intervalo, setIntervalo] = useState('');
   const [locacion, setLocacion] = useState('');
   const [servicio, setServicio] = useState('');
   const [colaborador, setColaborador] = useState('');
@@ -11,28 +13,41 @@ const CrearCitasAdm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const nuevaCita = { fecha, hora, locacion, servicio, colaborador };
+
+    // Crear el objeto con los datos necesarios
+    const nuevaCita = {
+      fecha,
+      hora_inicio: horaInicio,
+      hora_fin: horaFin,
+      intervalo,
+      locacion,
+      servicio,
+      colaborador,
+    };
 
     try {
       const response = await fetch('http://localhost:5000/api/nuevashoras_admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(nuevaCita)
+        body: JSON.stringify(nuevaCita),
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMensaje('Cita creada con éxito!');
+        setMensaje('Citas creadas con éxito!');
+        // Limpiar los campos del formulario
         setFecha('');
-        setHora('');
+        setHoraInicio('');
+        setHoraFin('');
+        setIntervalo('');
         setLocacion('');
         setServicio('');
         setColaborador('');
       } else {
-        setMensaje(data.error || 'Error al crear la cita');
+        setMensaje(data.error || 'Error al crear las citas');
       }
     } catch (error) {
       setMensaje('Error al conectar con el servidor');
@@ -46,10 +61,10 @@ const CrearCitasAdm = () => {
       backgroundPosition: 'center',
     }}>
       <div className="max-w-3xl mx-auto bg-blue-200 shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-blue-800 mb-4">CREAR UNA NUEVA CITA</h1>
+        <h1 className="text-2xl font-bold text-blue-800 mb-4">CREAR NUEVAS CITAS</h1>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Selector de fecha */}
+          {/* Fecha */}
           <div>
             <label className="block text-sm font-medium text-gray-700">FECHA</label>
             <input
@@ -60,25 +75,41 @@ const CrearCitasAdm = () => {
             />
           </div>
 
-          {/* Selector de hora */}
+          {/* Hora de Inicio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">HORA</label>
-            <select
+            <label className="block text-sm font-medium text-gray-700">HORA DE INICIO</label>
+            <input
+              type="time"
               className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
-              value={hora}
-              onChange={(e) => setHora(e.target.value)}
-            >
-              <option value="">Selecciona una hora</option>
-              {Array.from({ length: 24 }, (_, i) => i).flatMap(hour => (
-                ['00', '30'].map(minute => (
-                  <option key={`${hour}:${minute}`} value={`${hour}:${minute}`}>
-                    {`${hour.toString().padStart(2, '0')}:${minute}`}
-                  </option>
-                ))
-              ))}
-            </select>
+              value={horaInicio}
+              onChange={(e) => setHoraInicio(e.target.value)}
+            />
           </div>
 
+          {/* Hora de Fin */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">HORA DE FIN</label>
+            <input
+              type="time"
+              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+              value={horaFin}
+              onChange={(e) => setHoraFin(e.target.value)}
+            />
+          </div>
+
+          {/* Intervalo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">INTERVALO (Minutos)</label>
+            <input
+              type="number"
+              placeholder="Ej: 30"
+              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+              value={intervalo}
+              onChange={(e) => setIntervalo(e.target.value)}
+            />
+          </div>
+
+          {/* Locación */}
           <div>
             <label className="block text-sm font-medium text-gray-700">LOCACIÓN</label>
             <input
@@ -90,7 +121,7 @@ const CrearCitasAdm = () => {
             />
           </div>
 
-          {/* Selector de servicio */}
+          {/* Servicio */}
           <div>
             <label className="block text-sm font-medium text-gray-700">SERVICIO</label>
             <select
@@ -105,7 +136,7 @@ const CrearCitasAdm = () => {
             </select>
           </div>
 
-          {/* Campo de texto para colaborador */}
+          {/* Colaborador */}
           <div>
             <label className="block text-sm font-medium text-gray-700">NOMBRE DEL COLABORADOR</label>
             <input
@@ -120,7 +151,7 @@ const CrearCitasAdm = () => {
           <button
             type="submit"
             className="w-full bg-blue-700 text-white py-2 rounded-md shadow hover:bg-blue-800 transition duration-200">
-            Crear cita
+            Crear citas
           </button>
         </form>
 
