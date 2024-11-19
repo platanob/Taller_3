@@ -1,4 +1,3 @@
-// HistorialCitas.js
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
