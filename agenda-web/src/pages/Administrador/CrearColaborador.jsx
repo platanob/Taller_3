@@ -6,6 +6,7 @@ const CrearColaborador = () => {
   const [form, setForm] = useState({
     nombre: '',
     rut: '',
+    correo: '',
     contrasena: '',
     confirmarContrasena: '',
     especialidad: '',
@@ -27,9 +28,16 @@ const CrearColaborador = () => {
       return;
     }
 
+    const rutRegex = /^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$/;
+    if (!rutRegex.test(form.rut)) {
+      Swal.fire('Error', 'El RUT no tiene un formato válido', 'error');
+      return;
+    }
+
     const nuevoColaborador = {
       nombre: form.nombre,
       rut: form.rut,
+      correo: form.correo,
       contrasena: form.contrasena,
       especialidad: form.especialidad,
     };
@@ -96,6 +104,19 @@ const CrearColaborador = () => {
               onChange={handleChange}
               className="mt-1 text-gray-700 bg-white block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="Ej: 11.234.234-5"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Correo</label>
+            <input
+              type="text"
+              name="correo"
+              value={form.correo}
+              onChange={handleChange}
+              className="mt-1 text-gray-700 bg-white block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Correo Electronico"
               required
             />
           </div>

@@ -177,7 +177,7 @@ const AdmisionUsuarios = () => {
                       onClick={() => InfoClick(usuario)}
                       className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
                     >
-                      <FaInfoCircle /> <span>Información</span>
+                      <FaInfoCircle /> <span>Info</span>
                     </button>
                     <button
                       onClick={() => aceptarUsuario(usuario._id)}

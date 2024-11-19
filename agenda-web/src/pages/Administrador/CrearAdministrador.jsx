@@ -19,14 +19,20 @@ const CrearAdministrador = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (form.password !== form.confirmPassword) {
       Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
       return;
     }
-
+  
+    const rutRegex = /^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$/;
+    if (!rutRegex.test(form.rut)) {
+      Swal.fire('Error', 'El RUT no tiene un formato válido', 'error');
+      return;
+    }
+  
     try {
-      const response = await fetch('http://localhost:5000/api/crear_admin', {
+      const response = await fetch('http://localhost:5000/api/agregar_web', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,12 +44,12 @@ const CrearAdministrador = () => {
           password: form.password,
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         Swal.fire('Éxito', 'Administrador creado correctamente', 'success');
-        navigate('/admin/administrar-colaboradores'); 
+        navigate('/admin/administrar-colaboradores'); // Redirección después del éxito
       } else {
         Swal.fire('Error', data.error || 'No se pudo crear el administrador', 'error');
       }

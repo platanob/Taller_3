@@ -37,7 +37,9 @@ const AdministradorColab = () => {
       html: `
         <p><strong>Nombre:</strong> ${user.nombre}</p>
         <p><strong>RUT:</strong> ${user.rut}</p>
+        <p><strong>Correo Electronico:</strong> ${user.correo}</p>
         <p><strong>Especialidad:</strong> ${user.especialidad}</p>
+        
       `,
       icon: 'info',
       confirmButtonText: 'Cerrar',

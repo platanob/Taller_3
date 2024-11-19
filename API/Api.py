@@ -303,13 +303,15 @@ def agregar_cuenta():
     nombre = data.get('nombre')
     rut = data.get('rut')
     password = data.get('password')
-    admin = data.get('admin')
+    admin = data.get('admin', True)
     especialidad = data.get('especialidad', '')  
     
     if not nombre or not rut or not password:
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
     
-
+    if len(rut) < 8 or not rut.replace('.', '').replace('-', '').isdigit():
+        return jsonify({'error': 'RUT inválido'}), 400
+    
     password_hash = generate_password_hash(password)
 
     cuenta = {
@@ -323,6 +325,40 @@ def agregar_cuenta():
     cuentas_admin.insert_one(cuenta)
     
     return jsonify({'mensaje': 'Cuenta agregada exitosamente'}), 201
+
+@app.route('/api/crear_colaborador', methods=['POST'])
+@jwt_required()
+@admin_required
+def crear_colaborador():
+    data = request.get_json()
+
+    nombre = data.get('nombre')
+    rut = data.get('rut')
+    correo = data.get('correo')
+    password = data.get('contrasena')
+    especialidad = data.get('especialidad')
+
+    if not nombre or not rut or not password:
+        return jsonify({'error': 'Faltan campos obligatorios'}), 400
+
+    if len(rut) < 8 or not rut.replace('.', '').replace('-', '').isdigit():
+        return jsonify({'error': 'RUT inválido'}), 400
+
+    password_hash = generate_password_hash(password)
+
+    colaborador = {
+        "nombre": nombre,
+        "rut": rut,
+        "correo": correo,
+        "password": password_hash,
+        "admin": False,  
+        "especialidad": especialidad,
+    }
+
+    # Insertar en la base de datos
+    cuentas_admin.insert_one(colaborador)
+
+    return jsonify({'mensaje': 'Colaborador creado exitosamente'}), 201
 
 
 @app.route('/api/login_web', methods=['POST'])
@@ -525,7 +561,7 @@ def borrar_cita(cita_id):
 @admin_required
 def obtener_cuentas():
     try:
-        cuentas = list(cuentas_admin.find({}, {'nombre': 1, 'rut': 1, 'admin': 1, 'especialidad': 1}))
+        cuentas = list(cuentas_admin.find({}, {'nombre': 1, 'rut': 1, 'correo': 1, 'admin': 1, 'especialidad': 1}))
         
         for cuenta in cuentas:
             cuenta['_id'] = str(cuenta['_id'])
@@ -636,7 +672,7 @@ def usuarios_por_especialidad():
 def obtener_usuarios():
     try:
         
-        usuarios = list(users_collection.find({}, {'rut': 1, 'nombre': 1, 'correo': 1, '_id': 1}))
+        usuarios = list(users_collection.find({}, {'rut': 1, 'nombre': 1, 'correo': 1, 'discapacidad': 1, 'localidad': 1, 'fechaNacimiento': 1, '_id': 1}))
 
         # Convertir ObjectId a string
         for usuario in usuarios:
@@ -665,8 +701,8 @@ def editar_usuario(id):
             actualizacion['nombre'] = data['nombre']
         if 'rut' in data:
             actualizacion['rut'] = data['rut']
-        if 'correo' in data:
-            actualizacion['correo'] = data['correo']
+        if 'localidad' in data:
+            actualizacion['localidad'] = data['localidad']
         if 'password' in data:
             actualizacion['password'] = generate_password_hash(data['password'])  
 
@@ -764,8 +800,8 @@ def aceptar_usuario(usuario_id):
             'pdf_id': 1,
             'carnet_frontal_id': 1,
             'carnet_trasero_id': 1,
-            'edad': 1,
-            'sector': 1,
+            'fechaNacimiento': 1,
+            'localidad': 1,
             'discapacidad': 1,
             'carnet_discapacidad_id': 1
         })
@@ -779,8 +815,8 @@ def aceptar_usuario(usuario_id):
             'rut': usuario_nuevo['rut'],
             'correo': usuario_nuevo['correo'],
             'password': usuario_nuevo['password'],
-            'edad': usuario_nuevo.get('edad'),  # Agregar edad
-            'sector': usuario_nuevo.get('sector'),  # Agregar sector
+            'fechaNacimiento': usuario_nuevo.get('fechaNacimiento'),  # Agregar edad
+            'localidad': usuario_nuevo.get('localidad'),  # Agregar sector
             'discapacidad': usuario_nuevo.get('discapacidad'),  # Agregar discapacidad 
         }
 

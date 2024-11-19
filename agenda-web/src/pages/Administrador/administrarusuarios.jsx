@@ -5,8 +5,23 @@ import Espera from './Espera';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
+
+  const calcularEdad = (fechaNacimiento) => {
+    if (!fechaNacimiento || typeof fechaNacimiento !== 'string') {
+      return 'No disponible'; 
+    }
+    const [dia, mes, año] = fechaNacimiento.split('-').map(Number);
+    const fechaNacimientoDate = new Date(año, mes - 1, dia);
+    const hoy = new Date();
+    let edadCalculada = hoy.getFullYear() - fechaNacimientoDate.getFullYear();
+    const mesDiferencia = hoy.getMonth() - fechaNacimientoDate.getMonth();
+    if (mesDiferencia < 0 || (mesDiferencia === 0 && hoy.getDate() < fechaNacimientoDate.getDate())) {
+      edadCalculada--;
+    }
+    return edadCalculada;
+  };
 
   useEffect(() => {
     fetch('http://localhost:5000/api/obtener_usuarios', {
@@ -26,15 +41,20 @@ const AdminUsers = () => {
       .catch((error) => console.error('Error al conectar con la API:', error))
       .finally(() => setLoading(false)); // Finaliza la carga
   }, []);
-
+  
   const handleInfo = (id) => {
     const user = users.find((user) => user._id === id);
+    const edad = calcularEdad(user.fechaNacimiento);
+
     Swal.fire({
       title: 'Información del Usuario',
       html: `
         <p><strong>Nombre:</strong> ${user.nombre}</p>
         <p><strong>RUT:</strong> ${user.rut}</p>
         <p><strong>Correo:</strong> ${user.correo}</p>
+        <p><strong>Localidad:</strong> ${user.localidad}</p>
+        <p><strong>Discapacidad:</strong> ${user.discapacidad ? 'Sí' : 'No'}</p>
+        <p><strong>Edad:</strong> ${edad} años</p>
       `,
       icon: 'info',
       confirmButtonText: 'Cerrar',
@@ -50,7 +70,7 @@ const AdminUsers = () => {
       html: `
         <input id="nombre" class="swal2-input" placeholder="Nombre" value="${user.nombre}">
         <input id="rut" class="swal2-input" placeholder="RUT" value="${user.rut}">
-        <input id="correo" class="swal2-input" placeholder="Correo" value="${user.correo}">
+        <input id="localidad" class="swal2-input" placeholder="Localidad" value="${user.localidad}">
       `,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
@@ -58,13 +78,13 @@ const AdminUsers = () => {
       preConfirm: () => {
         const nombre = document.getElementById('nombre').value;
         const rut = document.getElementById('rut').value;
-        const correo = document.getElementById('correo').value;
+        const localidad = document.getElementById('localidad').value;
 
-        return { nombre, rut, correo };
+        return { nombre, rut, localidad };
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        const { nombre, rut, correo } = result.value;
+        const { nombre, rut, localidad } = result.value;
 
         fetch(`http://localhost:5000/api/editar_usuario/${user._id}`, {
           method: 'PUT',
@@ -72,13 +92,13 @@ const AdminUsers = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
-          body: JSON.stringify({ nombre, rut, correo }),
+          body: JSON.stringify({ nombre, rut, localidad }),
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.mensaje) {
               const updatedUsers = users.map((u) =>
-                u._id === user._id ? { ...user, nombre, rut, correo } : u
+                u._id === user._id ? { ...user, nombre, rut, localidad } : u
               );
               setUsers(updatedUsers);
             } else {
@@ -124,7 +144,7 @@ const AdminUsers = () => {
   };
 
   if (loading) {
-    return <Espera />; // Muestra el preloader mientras carga
+    return <Espera />; 
   }
 
   const handleViewHistory = (id) => {
@@ -159,9 +179,9 @@ const AdminUsers = () => {
           <table className="min-w-full bg-white border border-gray-200">
             <thead className='bg-blue-600 text-white'>
               <tr>
-                <th className="py-2 px-4 text-left">Nombre</th>
-                <th className="py-2 px-4 text-left">RUT</th>
-                <th className="py-2 px-4 text-left">Correo</th>
+                <th className="py-2 px-2 text-left">Nombre</th>
+                <th className="py-2 px-2 text-left">RUT</th>
+                <th className="py-2 px-4 text-left">Discapacidad</th>
                 <th className="py-2 px-4 text-center">Acciones</th>
               </tr>
             </thead>
@@ -169,9 +189,9 @@ const AdminUsers = () => {
               {users.length > 0 ? (
                 users.map((user) => (
                   <tr key={user._id} className="border-t text-gray-800">
-                    <td className="py-2 px-4">{user.nombre}</td>
-                    <td className="py-2 px-4">{user.rut}</td>
-                    <td className="py-2 px-4">{user.correo}</td>
+                    <td className="py-2 px-2">{user.nombre}</td>
+                    <td className="py-2 px-2">{user.rut}</td>
+                    <td className="py-2 px-4 text-center">{user.discapacidad ? 'Sí' : 'No'}</td>
                     <td className="py-2 px-4 flex justify-center space-x-2">
                       <button
                         onClick={() => handleInfo(user._id)}
