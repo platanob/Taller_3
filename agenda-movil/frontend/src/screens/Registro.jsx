@@ -17,7 +17,7 @@ export default function Registro() {
   const [pdfFile, setPdfFile] = useState(null);
   const [carnetFrontal, setCarnetFrontal] = useState(null);
   const [carnetTrasero, setCarnetTrasero] = useState(null);
-  const [edad, setEdad] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState(null); 
   const [localidad, setLocalidad] = useState(''); 
   const [isDiscapacitado, setIsDiscapacitado] = useState(false); 
   const [pdfDiscapacidad, setPdfDiscapacidad] = useState(null); 
@@ -33,7 +33,18 @@ export default function Registro() {
   }
   
   const register = async () => {
-    if (!nombre || !rut || !correo || !password || !confirmPassword || !edad || !localidad) {
+    // Validación para la fecha de nacimiento
+    if (!fechaNacimiento || fechaNacimiento === 'null' || fechaNacimiento === '') {
+      Alert.alert('Error', 'La fecha de nacimiento no puede estar vacía');
+      return;
+    }
+    const fechaRegex = /^\d{2}-\d{2}-\d{4}$/;
+    if (!fechaRegex.test(fechaNacimiento)) {
+      Alert.alert('Error', 'La fecha de nacimiento debe tener el formato dd-mm-yyyy');
+      return;
+    }
+
+    if (!nombre || !rut || !correo || !password || !confirmPassword || !localidad) {
       Alert.alert('Error', 'Por favor, completa todos los campos');
       return;
     }
@@ -64,7 +75,7 @@ export default function Registro() {
     formData.append('rut', rut);
     formData.append('correo', correo);
     formData.append('contrasena', password);
-    formData.append('edad', edad);
+    formData.append('fechaNacimiento', fechaNacimiento);
     formData.append('localidad', localidad);
     formData.append('discapacidad', isDiscapacitado ? 'true' : 'false');
   
@@ -221,16 +232,14 @@ export default function Registro() {
             onChangeText={setCorreo}
           />
 
-          <Text style={styles.label}>Edad</Text>
+          <Text style={styles.label}>Fecha de Nacimiento</Text>
           <TextInput
-            placeholder="Edad"
+            placeholder="dd-mm-yyyy"
             placeholderTextColor="#000"
-            keyboardType="numeric"
             style={styles.input}
-            value={edad}
-            onChangeText={setEdad}
+            value={fechaNacimiento}
+            onChangeText={setFechaNacimiento}
           />
-
           <Text style={styles.label}>Localidad</Text>
           <TextInput
             placeholder="Ej: Padre las Casas"

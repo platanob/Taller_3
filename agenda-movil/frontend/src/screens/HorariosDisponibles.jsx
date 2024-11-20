@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const Horarios = () => {
   const navigation = useNavigation();
   const [horarios, setHorarios] = useState([]);
+  const [horariosOriginales, setHorariosOriginales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const obtenerHorarios = async () => {
@@ -23,7 +24,7 @@ const Horarios = () => {
       const response = await fetch('http://localhost:5000/api/citas_disponibles', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,  // Incluye el token de acceso en la solicitud
+          'Authorization': `Bearer ${token}`,
         },
       });
   
@@ -31,6 +32,7 @@ const Horarios = () => {
       
       if (response.status === 200) {
         setHorarios(result.citas_disponibles);
+        setHorariosOriginales(result.citas_disponibles);
         setLoading(false);
       } else {
         Alert.alert("Error", result.error || "No se pudieron obtener los horarios disponibles");
@@ -45,7 +47,52 @@ const Horarios = () => {
 
   useEffect(() => {
     obtenerHorarios();
-  }, []);  
+  }, []); 
+
+  const filtrarPorFecha = () => {
+    const filtrados = [...horariosOriginales].sort((a, b) => {
+      return new Date(a.fecha) - new Date(b.fecha);
+    });
+
+    setHorarios(filtrados);
+    Alert.alert("Filtro aplicado", "Horarios ordenados por fecha");
+  };
+
+  const filtrarPorHora = () => {
+    const filtrados = [...horariosOriginales].sort((a, b) => {
+      const [horaA, minA] = a.hora.split(':');
+      const [horaB, minB] = b.hora.split(':');
+      
+      if (horaA !== horaB) return parseInt(horaA) - parseInt(horaB);
+      return parseInt(minA) - parseInt(minB);
+    });
+
+    setHorarios(filtrados);
+    Alert.alert("Filtro aplicado", "Horarios ordenados por hora");
+  };
+
+  const filtrarPorServicio = () => {
+    const filtrados = [...horariosOriginales].sort((a, b) => {
+      return a.servicio.localeCompare(b.servicio);
+    });
+
+    setHorarios(filtrados);
+    Alert.alert("Filtro aplicado", "Horarios ordenados por servicio");
+  };
+
+  const filtrarPorLocacion = () => {
+    const filtrados = [...horariosOriginales].sort((a, b) => {
+      return a.locacion.localeCompare(b.locacion);
+    });
+
+    setHorarios(filtrados);
+    Alert.alert("Filtro aplicado", "Horarios ordenados por locación");
+  };
+  
+  const restablecerFiltros = () => {
+    setHorarios(horariosOriginales);
+    Alert.alert("Filtros restablecidos", "Se han eliminado todos los filtros aplicados");
+  };
 
   const infoPress = (fecha, hora, lugar, servicio, profesional) => {
     navigation.navigate('HoraDetalle', { fecha, hora, lugar, servicio, profesional });
@@ -53,34 +100,45 @@ const Horarios = () => {
 
   const agendarPress = async (cita_id) => {
     try {
-      const confirmar = window.confirm("¿Estás seguro de que quieres agendar esta cita?");
-      
-      if (!confirmar) return;
-
-      const token = await AsyncStorage.getItem('access_token');
-      
-      if (!token) {
-        Alert.alert("Error", "Usuario no autenticado.");
-        return;
-      }
-      
-      const response = await fetch('http://localhost:5000/api/agendar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,  // Token para la solicitud
-        },
-        body: JSON.stringify({ cita_id }),  // Manda el ID de la cita
-      });
-  
-      const result = await response.json();
-  
-      if (response.status === 200) {
-        Alert.alert("Éxito", "Cita agendada correctamente");
-        obtenerHorarios();
-      } else {
-        Alert.alert("Error", result.error || "No se pudo agendar la cita");
-      }
+      Alert.alert(
+        "Confirmar agenda",
+        "¿Estás seguro de que quieres agendar esta cita?",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel"
+          },
+          {
+            text: "Aceptar",
+            onPress: async () => {
+              const token = await AsyncStorage.getItem('access_token');
+              
+              if (!token) {
+                Alert.alert("Error", "Usuario no autenticado.");
+                return;
+              }
+              
+              const response = await fetch('http://localhost:5000/api/agendar', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ cita_id }),
+              });
+          
+              const result = await response.json();
+          
+              if (response.status === 200) {
+                Alert.alert("Éxito", "Cita agendada correctamente");
+                obtenerHorarios();
+              } else {
+                Alert.alert("Error", result.error || "No se pudo agendar la cita");
+              }
+            }
+          }
+        ]
+      );
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Hubo un problema al agendar la cita.");
@@ -105,9 +163,9 @@ const Horarios = () => {
     <View style={styles.gradientContainer}>
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
-            colors={['#260e86', '#003B88']} 
-            style={styles.header}
-          >
+          colors={['#260e86', '#003B88']} 
+          style={styles.header}
+        >
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={30} color="black" />
           </TouchableOpacity>
@@ -120,10 +178,29 @@ const Horarios = () => {
 
         <Text style={styles.title}>Horarios Disponibles</Text>
 
+        <View style={styles.filterButtonsContainer}>
+          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorFecha}>
+            <Text style={styles.filterButtonText}>Fecha</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorHora}>
+            <Text style={styles.filterButtonText}>Hora</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorServicio}>
+            <Text style={styles.filterButtonText}>Servicio</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorLocacion}>
+            <Text style={styles.filterButtonText}>Locación</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.filterButton, styles.resetButton]} onPress={restablecerFiltros}>
+            <Text style={styles.filterButtonText}>Restablecer</Text>
+          </TouchableOpacity>
+        </View>
+
         {horarios.length > 0 ? (
           horarios.map((horario) => (
             <View key={horario._id} style={styles.card}>
               <Text style={styles.dateText}>{horario.fecha}</Text>
+              <Text style={styles.hourText}>{horario.hora}</Text>
               <Text style={styles.serviceText}>{horario.servicio}</Text>
               <Text style={styles.placeText}>{horario.locacion}</Text>
               <View style={styles.buttonContainer}>
@@ -149,8 +226,42 @@ const Horarios = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
+  filterButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 10,
+    gap: 12, 
+  },
+  filterButton: {
+    backgroundColor: '#003B88',
+    padding: 15, 
+    borderRadius: 15, 
+    alignItems: 'center',
+    minWidth: '45%', 
+    margin: 5,
+    elevation: 5, 
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  filterButtonText: {
+    color: 'white',
+    fontSize: 18, 
+    fontWeight: 'bold',
+    textAlign: 'center',
+    letterSpacing: 0.5, 
+  },
+  resetButton: {
+    backgroundColor: '#FF5252', 
+    minWidth: '92%', 
+  },
   gradientContainer: {
     flex: 1,
     backgroundColor: '#55A9F9',
