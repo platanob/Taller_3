@@ -1,201 +1,160 @@
 import React, { useState, useEffect } from 'react';
 
 function HorasAgendadas() {
-  const [citas, setCitas] = useState([]);
-  const [colaborador, setColaborador] = useState('');
-  const [selectedCita, setSelectedCita] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth());
+    const [selectedDay, setSelectedDay] = useState(null); // Día seleccionado en "YYYY-MM-DD"
+    const [colaborador, setColaborador] = useState({ nombre: "", id: "" });
+    const [appointments, setAppointments] = useState([]);
 
-  useEffect(() => {
-    const obtenerCitas = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/mis_citas', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
+    // Función para cargar la información del colaborador
+    const loadColaborador = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch("http://localhost:5000/api/colaborador_info", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        if (response.ok) {
-          const data = await response.json();
-          setCitas(data.citas);
-          setColaborador(data.colaborador); // Suponiendo que el nombre del colaborador viene en la respuesta
-        } else {
-          console.error('Error al obtener las citas');
+            if (response.ok) {
+                const data = await response.json();
+                setColaborador({ nombre: data.nombre, id: data._id });
+            } else {
+                console.error("Error al obtener información del colaborador:", response.status);
+            }
+        } catch (error) {
+            console.error("Error al cargar el colaborador:", error);
         }
-      } catch (error) {
-        console.error('Error en la solicitud:', error);
-      }
     };
 
-    obtenerCitas();
-  }, []);
+    // Función para cargar las citas según el colaborador y la fecha seleccionada
+    const loadAppointments = async () => {
+        if (!selectedDay) return; // No cargar si no hay fecha seleccionada
 
-  const handleInfo = (index) => {
-    setSelectedCita(citas[index]);
-    document.getElementById('info_modal').showModal();
-  };
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/citas_colaborador?fecha=${selectedDay}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-  const handleEdit = (index) => {
-    setSelectedCita({ ...citas[index], index });
-    setIsEditMode(true);
-    document.getElementById('info_modal').showModal();
-  };
+            if (response.ok) {
+                const data = await response.json();
+                setAppointments(data.citas || []);
+            } else {
+                console.error("Error al obtener citas:", response.status);
+                setAppointments([]);
+            }
+        } catch (error) {
+            console.error("Error al cargar citas:", error);
+            setAppointments([]);
+        }
+    };
 
-  const handleEditSubmit = () => {
-    const updatedCitas = citas.map((cita, i) =>
-      i === selectedCita.index ? { ...selectedCita } : cita
-    );
-    setCitas(updatedCitas);
-    closeModal();
-  };
+    // Cargar citas al cambiar la fecha seleccionada
+    useEffect(() => {
+        loadAppointments();
+    }, [selectedDay]);
 
-  const handleDelete = (index) => {
-    setSelectedCita(citas[index]);
-    setIsDeleteMode(true);
-    document.getElementById('info_modal').showModal();
-  };
+    // Cargar la información del colaborador al montar el componente
+    useEffect(() => {
+        loadColaborador();
+    }, []);
 
-  const handleDeleteConfirm = () => {
-    const updatedCitas = citas.filter((_, i) => i !== selectedCita.index);
-    setCitas(updatedCitas);
-    closeModal();
-  };
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-  const closeModal = () => {
-    setSelectedCita(null);
-    setIsEditMode(false);
-    setIsDeleteMode(false);
-    document.getElementById('info_modal').close();
-  };
+    const prevMonth = () => setMonth((prev) => (prev === 0 ? 11 : prev - 1));
+    const nextMonth = () => setMonth((prev) => (prev === 11 ? 0 : prev + 1));
 
-  return (
-    <div
-      className="min-h-screen bg-gray-100 flex flex-col items-center p-10"
-      style={{
-        backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)), url("/img/fondo.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div className="bg-black bg-opacity-50 p-4 rounded-md mb-10">
-        <h1 className="text-4xl font-bold text-white drop-shadow-lg">Horas Agendadas {colaborador}</h1>
-      </div>
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {citas.map((cita, index) => (
-          <div
-            key={index}
-            className="bg-blue-200 rounded-lg p-5 w-64 shadow-md flex flex-col"
-          >
-            <div className="flex justify-between w-full mb-2">
-              <p className="text-sm font-bold text-black">{cita.fecha}</p>
-              <p className="text-red-500 font-semibold truncate max-w-[8rem] text-right">
-                {cita.locacion}
-              </p>
+    // Manejo de selección de día en formato "YYYY-MM-DD"
+    const selectDay = (day) => {
+        const formattedDay = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        setSelectedDay(formattedDay);
+    };
+
+    return (
+        <div
+        className="min-h-screen bg-gray-100 py-10"
+        style={{
+          backgroundImage: 'url("/img/fondo.jpg")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="flex">
+            {/* Selector de Año y Mes */}
+            <div className="w-1/3 p-4 bg-white shadow-md rounded-lg">
+                <h2 className="text-3xl font-bold text-blue-800 mb-6 text-center">
+                    Calendario colaborador: {colaborador.nombre}
+                </h2>
+                <div className="mb-4">
+                    <label className="text-sm text-black font-semibold">Año:</label>
+                    <div className="text-black py-2 px-4 flex justify-between items-center mt-1">
+                        <button onClick={() => setYear(year > 2020 ? year - 1 : year)}>&lt;</button>
+                        <span className="text-black py-2 px-4 font-semibold text-center">{year}</span>
+                        <button onClick={() => setYear(year < 2030 ? year + 1 : year)}>&gt;</button>
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <label className="text-sm text-black font-semibold">Mes:</label>
+                    <div className="text-black py-2 px-4 flex justify-between items-center mt-1">
+                        <button onClick={prevMonth}>&lt;</button>
+                        <span className="text-black py-2 px-4 font-semibold text-center">{meses[month]}</span>
+                        <button onClick={nextMonth}>&gt;</button>
+                    </div>
+                </div>
+
+                {/* Tabla mensual de días */}
+                <div className="grid grid-cols-7 gap-1 mt-4">
+                    {[...Array(daysInMonth)].map((_, day) => (
+                        <div
+                            key={day}
+                            onClick={() => selectDay(day + 1)}
+                            className={`text-black flex justify-center items-center p-2 border rounded-lg cursor-pointer ${
+                                selectedDay === `${year}-${String(month + 1).padStart(2, "0")}-${String(day + 1).padStart(2, "0")}`
+                                    ? "bg-blue-500 text-white"
+                                    : "hover:bg-blue-200"
+                            }`}
+                        >
+                            {day + 1}
+                        </div>
+                    ))}
+                </div>
             </div>
-            <p className="text-md text-black mb-1">{cita.servicio}</p>
 
-            <div className="mt-4 flex flex-col space-y-2 w-full">
-              <button
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
-                onClick={() => handleInfo(index)}
-              >
-                Información
-              </button>
-              <button
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
-                onClick={() => handleEdit(index)}
-              >
-                Editar
-              </button>
-              <button
-                className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
-                onClick={() => handleDelete(index)}
-              >
-                Borrar
-              </button>
+            {/* Panel de Citas */}
+            <div className="w-2/3 p-4 bg-white shadow-md rounded-lg ml-4">
+                <h2 className="text-3xl font-bold text-blue-800 mb-6">
+                    Citas 
+                    {selectedDay && <span> para el día: {selectedDay}</span>}
+                </h2>
+                <div id="appointments-grid" className="grid grid-cols-1 gap-4">
+                    {appointments.length > 0 ? (
+                        appointments.map((appointment, index) => (
+                            <div
+                                key={index}
+                                className={`p-4 rounded-lg shadow-md ${
+                                    appointment.disponible ? "bg-green-200" : "bg-sky-200"
+                                }`}
+                            >
+                                <p className="font-semibold text-blue-800">{appointment.servicio}</p>
+                                <p className="text-sm text-black">{appointment.hora}</p>
+                                <p className="text-sm text-black">{appointment.locacion}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-black-500">No hay citas para este dia.</p>
+                    )}
+                </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <dialog id="info_modal" className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-          {selectedCita && !isEditMode && !isDeleteMode && (
-            <>
-              <h3 className="font-bold text-lg">Información de la Cita</h3>
-              <p className="py-4">Fecha: {selectedCita.fecha}</p>
-              <p className="py-4">Servicio: {selectedCita.servicio}</p>
-              <p className="py-4">Locación: {selectedCita.locacion}</p>
-              <p className="py-4">Hora: {selectedCita.hora}</p>
-              <p className="py-4">Colaborador: {selectedCita.colaborador}</p>
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={closeModal}>Cerrar</button>
-              </div>
-            </>
-          )}
-
-          {selectedCita && isEditMode && (
-            <>
-              <h3 className="font-bold text-lg">Editar Cita</h3>
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Fecha"
-                value={selectedCita.fecha}
-                onChange={(e) => setSelectedCita({ ...selectedCita, fecha: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Servicio"
-                value={selectedCita.servicio}
-                onChange={(e) => setSelectedCita({ ...selectedCita, servicio: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Locación"
-                value={selectedCita.locacion}
-                onChange={(e) => setSelectedCita({ ...selectedCita, locacion: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Hora"
-                value={selectedCita.hora}
-                onChange={(e) => setSelectedCita({ ...selectedCita, hora: e.target.value })}
-              />
-              <input
-                type="text"
-                className="input input-bordered w-full my-2"
-                placeholder="Colaborador"
-                value={selectedCita.colaborador}
-                onChange={(e) => setSelectedCita({ ...selectedCita, colaborador: e.target.value })}
-              />
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleEditSubmit}>Guardar</button>
-                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
-              </div>
-            </>
-          )}
-
-          {selectedCita && isDeleteMode && (
-            <>
-              <h3 className="font-bold text-lg">Confirmar Eliminación</h3>
-              <p className="py-4">¿Estás seguro que deseas eliminar la cita del {selectedCita.fecha} en {selectedCita.locacion} con {selectedCita.colaborador}?</p>
-              <div className="modal-action">
-                <button className="btn btn-outline" onClick={handleDeleteConfirm}>Eliminar</button>
-                <button className="btn btn-outline" onClick={closeModal}>Cancelar</button>
-              </div>
-            </>
-          )}
         </div>
-      </dialog>
     </div>
-  );
+    );
 }
 
 export default HorasAgendadas;

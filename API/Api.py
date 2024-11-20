@@ -871,6 +871,19 @@ def eliminar_usuario_nuevo(usuario_id):
 
     except Exception as e:
         return jsonify({'error': f'Error al eliminar el usuario: {str(e)}'}), 500
+    
+@app.route('/api/colaborador_info', methods=['GET'])
+@jwt_required()
+def obtener_colaborador():
+    identidad = get_jwt_identity()
+    rut = identidad.get('rut')
+
+    colaborador = cuentas_admin.find_one({"rut": rut}, {"_id": 0, "nombre": 1, "rut": 1})
+
+    if not colaborador:
+        return jsonify({'error': 'Colaborador no encontrado'}), 404
+
+    return jsonify(colaborador), 200
 
 @app.route('/api/asistencia_cita', methods=['POST'])
 @jwt_required()
@@ -962,6 +975,32 @@ def obtener_citas_colaborador():
     except Exception as e:
         return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
+@app.route('/api/citas_colab', methods=['GET'])
+@jwt_required()
+def citas_colab():
+    identidad = get_jwt_identity()
+    usuario_id = identidad.get('id')  # Extraer el _id del colaborador desde el token
+
+    if not usuario_id:
+        return jsonify({'error': 'No se encontró el ID del colaborador'}), 400
+
+    # Convertir el ID a ObjectId
+    usuario_obj_id = ObjectId(usuario_id)
+
+    # Obtener las citas asociadas al colaborador
+    citas = citas_collection.find({'colaborador': usuario_obj_id})
+    citas_list = []
+
+    for cita in citas:
+        cita['_id'] = str(cita['_id'])  # Convertir el _id de la cita a string
+        colaborador = cuentas_admin.find_one({'_id': ObjectId(cita['colaborador'])})
+
+        if colaborador:
+            cita['colaborador'] = colaborador['nombre']  # Reemplazar ID por el nombre del colaborador
+
+        citas_list.append(cita)
+
+    return jsonify({'citas': citas_list}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
