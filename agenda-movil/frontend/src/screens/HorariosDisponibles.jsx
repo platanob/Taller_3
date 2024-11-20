@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,6 +11,16 @@ const Horarios = () => {
   const [horarios, setHorarios] = useState([]);
   const [horariosOriginales, setHorariosOriginales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+const [filterType, setFilterType] = useState('');
+const [filterOptions, setFilterOptions] = useState([]);
+
+  const [filtroActivo, setFiltroActivo] = useState({
+    fecha: null,
+    hora: null,
+    servicio: null,
+    locacion: null
+  });
 
   const obtenerHorarios = async () => {
     try {
@@ -49,48 +59,62 @@ const Horarios = () => {
     obtenerHorarios();
   }, []); 
 
-  const filtrarPorFecha = () => {
-    const filtrados = [...horariosOriginales].sort((a, b) => {
-      return new Date(a.fecha) - new Date(b.fecha);
+  const obtenerOpcionesFiltro = (tipo) => {
+    let opciones = new Set();
+    
+    horariosOriginales.forEach(horario => {
+      switch (tipo) {
+        case 'fecha':
+          opciones.add(horario.fecha);
+          break;
+        case 'hora':
+          opciones.add(horario.hora);
+          break;
+        case 'servicio':
+          opciones.add(horario.servicio);
+          break;
+        case 'locacion':
+          opciones.add(horario.locacion);
+          break;
+      }
     });
-
-    setHorarios(filtrados);
-    Alert.alert("Filtro aplicado", "Horarios ordenados por fecha");
+    
+    return Array.from(opciones).sort();
   };
 
-  const filtrarPorHora = () => {
-    const filtrados = [...horariosOriginales].sort((a, b) => {
-      const [horaA, minA] = a.hora.split(':');
-      const [horaB, minB] = b.hora.split(':');
-      
-      if (horaA !== horaB) return parseInt(horaA) - parseInt(horaB);
-      return parseInt(minA) - parseInt(minB);
-    });
-
-    setHorarios(filtrados);
-    Alert.alert("Filtro aplicado", "Horarios ordenados por hora");
+  const abrirModal = (tipo) => {
+    setFilterType(tipo);
+    setFilterOptions(obtenerOpcionesFiltro(tipo));
+    setModalVisible(true);
   };
 
-  const filtrarPorServicio = () => {
-    const filtrados = [...horariosOriginales].sort((a, b) => {
-      return a.servicio.localeCompare(b.servicio);
+  const aplicarFiltro = (valor) => {
+    setFiltroActivo(prev => ({
+      ...prev,
+      [filterType]: valor
+    }));
+    
+    let resultadosFiltrados = [...horariosOriginales];
+    
+    // Aplicar todos los filtros activos
+    Object.entries({ ...filtroActivo, [filterType]: valor }).forEach(([tipo, valor]) => {
+      if (valor) {
+        resultadosFiltrados = resultadosFiltrados.filter(horario => horario[tipo] === valor);
+      }
     });
-
-    setHorarios(filtrados);
-    Alert.alert("Filtro aplicado", "Horarios ordenados por servicio");
+    
+    setHorarios(resultadosFiltrados);
+    setModalVisible(false);
   };
 
-  const filtrarPorLocacion = () => {
-    const filtrados = [...horariosOriginales].sort((a, b) => {
-      return a.locacion.localeCompare(b.locacion);
-    });
-
-    setHorarios(filtrados);
-    Alert.alert("Filtro aplicado", "Horarios ordenados por locación");
-  };
-  
   const restablecerFiltros = () => {
     setHorarios(horariosOriginales);
+    setFiltroActivo({
+      fecha: null,
+      hora: null,
+      servicio: null,
+      locacion: null
+    });
     Alert.alert("Filtros restablecidos", "Se han eliminado todos los filtros aplicados");
   };
 
@@ -179,22 +203,89 @@ const Horarios = () => {
         <Text style={styles.title}>Horarios Disponibles</Text>
 
         <View style={styles.filterButtonsContainer}>
-          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorFecha}>
-            <Text style={styles.filterButtonText}>Fecha</Text>
+          <TouchableOpacity 
+            style={[styles.filterButton, filtroActivo.fecha && styles.activeFilter]} 
+            onPress={() => abrirModal('fecha')}
+          >
+            <Icon name="calendar-outline" size={24} color="white" />
+            <Text style={styles.filterButtonText}>
+              {filtroActivo.fecha || 'Fecha'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorHora}>
-            <Text style={styles.filterButtonText}>Hora</Text>
+          
+          <TouchableOpacity 
+            style={[styles.filterButton, filtroActivo.hora && styles.activeFilter]} 
+            onPress={() => abrirModal('hora')}
+          >
+            <Icon name="time-outline" size={24} color="white" />
+            <Text style={styles.filterButtonText}>
+              {filtroActivo.hora || 'Hora'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorServicio}>
-            <Text style={styles.filterButtonText}>Servicio</Text>
+          
+          <TouchableOpacity 
+            style={[styles.filterButton, filtroActivo.servicio && styles.activeFilter]} 
+            onPress={() => abrirModal('servicio')}
+          >
+            <Icon name="medical-outline" size={24} color="white" />
+            <Text style={styles.filterButtonText}>
+              {filtroActivo.servicio || 'Servicio'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton} onPress={filtrarPorLocacion}>
-            <Text style={styles.filterButtonText}>Locación</Text>
+          
+          <TouchableOpacity 
+            style={[styles.filterButton, filtroActivo.locacion && styles.activeFilter]} 
+            onPress={() => abrirModal('locacion')}
+          >
+            <Icon name="location-outline" size={24} color="white" />
+            <Text style={styles.filterButtonText}>
+              {filtroActivo.locacion || 'Locación'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.filterButton, styles.resetButton]} onPress={restablecerFiltros}>
+          
+          <TouchableOpacity 
+            style={[styles.filterButton, styles.resetButton]} 
+            onPress={restablecerFiltros}
+          >
+            <Icon name="refresh-outline" size={24} color="white" />
             <Text style={styles.filterButtonText}>Restablecer</Text>
           </TouchableOpacity>
         </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                Seleccionar {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+              </Text>
+              
+              <FlatList
+                data={filterOptions}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.modalOption}
+                    onPress={() => aplicarFiltro(item)}
+                  >
+                    <Text style={styles.modalOptionText}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              
+              <TouchableOpacity
+                style={styles.closeModalButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeModalButtonText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         {horarios.length > 0 ? (
           horarios.map((horario) => (
@@ -227,44 +318,102 @@ const Horarios = () => {
   );
 };
 const styles = StyleSheet.create({
+    modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    width: '80%',
+    maxHeight: '70%',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#260e86',
+  },
+  modalOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalOptionText: {
+    fontSize: 18,
+    color: '#003B88',
+  },
+  closeModalButton: {
+    marginTop: 20,
+    backgroundColor: '#FF5252',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeModalButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  activeFilter: {
+    backgroundColor: '#1565C0',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  gradientContainer: {
+    flex: 1,
+    backgroundColor: '#55A9F9',
+  },
   filterButtonsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginVertical: 20,
-    paddingHorizontal: 10,
-    gap: 12, 
+    gap: 12,
+    marginBottom: 25,
+    padding: 10,
   },
   filterButton: {
     backgroundColor: '#003B88',
-    padding: 15, 
-    borderRadius: 15, 
-    alignItems: 'center',
-    minWidth: '45%', 
-    margin: 5,
-    elevation: 5, 
-    shadowColor: "#000",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginHorizontal: 8,
+    marginBottom: 12,
+    minWidth: 120, 
+    elevation: 4,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    shadowRadius: 3.84,
+    flexDirection: 'row',  
+    alignItems: 'center',  
+    justifyContent: 'center',
+    gap: 8,
   },
   filterButtonText: {
     color: 'white',
     fontSize: 18, 
     fontWeight: 'bold',
     textAlign: 'center',
-    letterSpacing: 0.5, 
+    letterSpacing: 0.5,
+  },
+  activeFilter: {
+    backgroundColor: '#1565C0',
+    borderWidth: 3,
+    borderColor: '#FFF',
   },
   resetButton: {
-    backgroundColor: '#FF5252', 
-    minWidth: '92%', 
-  },
-  gradientContainer: {
-    flex: 1,
-    backgroundColor: '#55A9F9',
+    backgroundColor: '#D32F2F', 
+    minWidth: 150, 
   },
   container: {
     flexGrow: 1,
