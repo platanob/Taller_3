@@ -834,6 +834,95 @@ def eliminar_usuario_nuevo(usuario_id):
     except Exception as e:
         return jsonify({'error': f'Error al eliminar el usuario: {str(e)}'}), 500
 
+@app.route('/api/asistencia_cita', methods=['POST'])
+@jwt_required()
+def asistencia_cita():
+    try:
+        # Obtener los datos enviados en la solicitud
+        data = request.get_json()
+        cita_id = data.get('cita_id')
+
+        if not cita_id:
+            return jsonify({'error': 'El campo cita_id es obligatorio'}), 400
+
+        # Buscar la cita por su ID
+        cita = citas_collection.find_one({'_id': ObjectId(cita_id)})
+        if not cita:
+            return jsonify({'error': 'Cita no encontrada'}), 404
+
+        # Obtener los IDs del usuario y del colaborador relacionados con la cita
+        usuario_id = cita.get('usuario')
+        colaborador_id = cita.get('colaborador')
+
+        if not usuario_id or not colaborador_id:
+            return jsonify({'error': 'Faltan datos en la cita para procesar la asistencia'}), 400
+
+        # Preparar el registro de la cita para agregar al historial
+        registro_historial = {
+            'cita_id': cita_id,
+            'fecha': cita.get('fecha'),
+            'hora': cita.get('hora'),
+            'locacion': cita.get('locacion'),
+            'servicio': cita.get('servicio')
+        }
+
+        # Agregar la cita al historial del usuario
+        users_collection.update_one(
+            {'_id': ObjectId(usuario_id)},
+            {'$push': {'historial_de_citas': registro_historial}}
+        )
+
+        # Agregar la cita al historial del colaborador
+        cuentas_admin.update_one(
+            {'_id': ObjectId(colaborador_id)},
+            {'$push': {'historial_de_citas': registro_historial}}
+        )
+
+        # Eliminar la cita de la colección
+        citas_collection.delete_one({'_id': ObjectId(cita_id)})
+
+        return jsonify({'mensaje': 'La cita ha sido registrada en el historial y eliminada de la colección'}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al procesar la asistencia de la cita: {str(e)}'}), 500
+
+@app.route('/api/citas_colaborador', methods=['GET'])
+@jwt_required()
+def obtener_citas_colaborador():
+    try:
+        # Obtener la fecha y el colaborador desde los parámetros de la solicitud
+        fecha = request.args.get('fecha')
+        identity = get_jwt_identity()  # ID del colaborador obtenido del JWT
+        colaborador_id = identity['id']
+
+        if not fecha:
+            return jsonify({'error': 'La fecha es obligatoria'}), 400
+
+        # Verificar el formato de la fecha
+        try:
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({'error': 'El formato de la fecha debe ser YYYY-MM-DD'}), 400
+
+        # Buscar las citas del colaborador para la fecha específica
+        citas = list(citas_collection.find(
+            {'colaborador': ObjectId(colaborador_id), 'fecha': fecha},
+            {'_id': 1, 'hora': 1, 'locacion': 1, 'servicio': 1, 'usuario': 1}  # Campos relevantes
+        ))
+
+        if not citas:
+            return jsonify({'mensaje': 'No se encontraron citas para la fecha especificada'}), 404
+
+        # Convertir ObjectId a string y preparar la respuesta
+        for cita in citas:
+            cita['_id'] = str(cita['_id'])
+            if 'usuario' in cita:
+                cita['usuario'] = str(cita['usuario'])
+
+        return jsonify({'citas': citas}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
