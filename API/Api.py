@@ -8,7 +8,7 @@ from functools import wraps
 import gridfs
 from datetime import datetime, timedelta
 from io import BytesIO  # Para manejar archivos en memoria
-
+import calendar
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
@@ -962,6 +962,109 @@ def obtener_citas_colaborador():
     except Exception as e:
         return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
+@app.route('/api/citas_por_dia', methods=['POST'])
+@jwt_required()
+@admin_required
+def obtener_citas_por_dia():
+    try:
+        # Obtener los datos desde el cuerpo de la solicitud
+        data = request.get_json()
+        if not data or 'mes' not in data:
+            return jsonify({'error': 'El mes es obligatorio y debe ser enviado en el cuerpo (formato JSON, clave: "mes")'}), 400
+
+        mes = data['mes']  # Ejemplo: "2024-11"
+
+        # Verificar el formato del mes
+        try:
+            fecha_obj = datetime.strptime(mes, "%Y-%m")  # Convierte a un objeto datetime
+        except ValueError:
+            return jsonify({'error': 'El formato del mes debe ser YYYY-MM'}), 400
+
+        # Definir el rango de fechas para el mes solicitado
+        inicio_mes = fecha_obj.replace(day=1)
+        _, ultimo_dia = calendar.monthrange(fecha_obj.year, fecha_obj.month)  # Último día del mes
+        fin_mes = fecha_obj.replace(day=ultimo_dia)
+
+        # Consultar citas en MongoDB dentro del rango de fechas
+        citas = list(citas_collection.find(
+            {
+                'fecha': {'$gte': inicio_mes.strftime("%Y-%m-%d"), '$lte': fin_mes.strftime("%Y-%m-%d")}
+            },
+            {'_id': 1, 'fecha': 1, 'disponible': 1}  # Solo traemos estos campos relevantes
+        ))
+
+        if not citas:
+            return jsonify({'mensaje': 'No se encontraron citas para el mes especificado'}), 404
+
+        # Crear un diccionario para contar citas por día
+        resumen_citas = {}
+        for dia in range(1, ultimo_dia + 1):
+            fecha_actual = fecha_obj.replace(day=dia).strftime("%Y-%m-%d")
+            resumen_citas[fecha_actual] = {'disponibles': 0, 'tomadas': 0}
+
+        # Contar las citas disponibles y tomadas por día
+        for cita in citas:
+            fecha_cita = cita['fecha']
+            if fecha_cita in resumen_citas:
+                if cita.get('disponible', False):
+                    resumen_citas[fecha_cita]['disponibles'] += 1
+                else:
+                    resumen_citas[fecha_cita]['tomadas'] += 1
+
+        # Preparar la respuesta
+        return jsonify({'resumen': resumen_citas}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
+
+@app.route('/api/citas_por_servicio', methods=['POST'])
+@jwt_required()
+@admin_required
+def obtener_citas_por_servicio():
+    try:
+        # Obtener los datos desde el cuerpo de la solicitud
+        data = request.get_json()
+        if not data or 'fecha' not in data:
+            return jsonify({'error': 'La fecha es obligatoria (formato YYYY-MM-DD)'}), 400
+
+        fecha = data['fecha']  # Ejemplo: "2024-11-22"
+
+        # Verificar el formato de la fecha
+        try:
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({'error': 'El formato de la fecha debe ser YYYY-MM-DD'}), 400
+
+        # Consultar todas las citas en MongoDB para la fecha específica
+        citas = list(citas_collection.find(
+            {
+                'fecha': fecha
+            },
+            {'_id': 1, 'hora': 1, 'servicio': 1, 'usuario': 1, 'disponible': 1}  # Campos relevantes
+        ))
+
+        if not citas:
+            return jsonify({'mensaje': 'No se encontraron citas para la fecha especificada'}), 404
+
+        # Agrupar las citas por servicio
+        citas_por_servicio = {}
+        for cita in citas:
+            servicio = cita.get('servicio', 'Sin servicio')  # Manejar el caso de servicios no definidos
+            if servicio not in citas_por_servicio:
+                citas_por_servicio[servicio] = []
+            # Agregar detalles de la cita al servicio correspondiente
+            citas_por_servicio[servicio].append({
+                'id': str(cita['_id']),
+                'hora': cita['hora'],
+                'usuario': str(cita['usuario']) if 'usuario' in cita else None,
+                'disponible': cita.get('disponible', False)
+            })
+
+        # Preparar la respuesta
+        return jsonify({'citas_por_servicio': citas_por_servicio}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
