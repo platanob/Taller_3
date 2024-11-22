@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaArrowRightFromBracket } from 'react-icons/fa6';
 
 function Menu() {
   const navigate = useNavigate();
@@ -10,15 +11,15 @@ function Menu() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegúrate de tener el token almacenado en localStorage
+          'Authorization': `Bearer ${localStorage.getItem('token')}` 
         },
-        credentials: 'include' // Esto permite que se envíen cookies si es necesario
+        credentials: 'include' 
       });
 
       if (response.ok) {
-        localStorage.removeItem('token'); // Elimina el token del localStorage
+        localStorage.removeItem('token'); 
         alert('Has cerrado sesión con éxito.');
-        navigate('/'); // Redirige al usuario a la página de inicio
+        navigate('/'); 
       } else {
         const errorData = await response.json();
         alert(`Error al cerrar sesión: ${errorData.message}`);
@@ -36,18 +37,19 @@ function Menu() {
         <span className="text-2xl font-bold text-[#005baa]">Agenda Senior</span>
       </div>
       <div className="flex space-x-6">
-        <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Inicio</Link>
+        <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Calendario</Link>
         <Link to="crear-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link>
-        <Link to="historial-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Historial de Citas</Link>
-        <Link to="Horas-agendadas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Horas Agendadas</Link>
+        <Link to="Aceptar-Citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Aceptar citas</Link>
         <Link to="Citas-realizadas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Citas Realizadas</Link>
+        <Link to="Historial-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Historial</Link>
+
       </div>
       <div className="flex space-x-4">
-        <button 
-          className="px-5 py-2 bg-[#005baa] text-white rounded-full hover:opacity-90"
+      <button 
+          className="flex items-center space-x-2 bg-[#005baa] text-white px-5 py-2 rounded-full hover:opacity-90"
           onClick={handleLogout}
         >
-          Cerrar Sesión
+          <FaArrowRightFromBracket /> <span>Cerrar Sesión</span>
         </button>
       </div>
     </nav>

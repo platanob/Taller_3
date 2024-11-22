@@ -871,6 +871,19 @@ def eliminar_usuario_nuevo(usuario_id):
 
     except Exception as e:
         return jsonify({'error': f'Error al eliminar el usuario: {str(e)}'}), 500
+    
+@app.route('/api/colaborador_info', methods=['GET'])
+@jwt_required()
+def obtener_colaborador():
+    identidad = get_jwt_identity()
+    rut = identidad.get('rut')
+
+    colaborador = cuentas_admin.find_one({"rut": rut}, {"_id": 0, "nombre": 1, "rut": 1})
+
+    if not colaborador:
+        return jsonify({'error': 'Colaborador no encontrado'}), 404
+
+    return jsonify(colaborador), 200
 
 @app.route('/api/asistencia_cita', methods=['POST'])
 @jwt_required()
