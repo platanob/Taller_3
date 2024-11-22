@@ -31,36 +31,111 @@ export default function Registro() {
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: contentType });
   }
+
+  const getFileSizeInKB = (base64) => {
+    const stringLength = base64.length - 'data:image/jpeg;base64,'.length;
+    const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+    const sizeInKB = sizeInBytes / 1024; // Convertir de bytes a KB
+    return sizeInKB.toFixed(2); // Redondear a 2 decimales
+  };
   
-  const register = async () => {
-    // Validación para la fecha de nacimiento
-    if (!fechaNacimiento || fechaNacimiento === 'null' || fechaNacimiento === '') {
-      Alert.alert('Error', 'La fecha de nacimiento no puede estar vacía');
-      return;
-    }
-    const fechaRegex = /^\d{2}-\d{2}-\d{4}$/;
-    if (!fechaRegex.test(fechaNacimiento)) {
-      Alert.alert('Error', 'La fecha de nacimiento debe tener el formato dd-mm-yyyy');
+    
+    const register = async () => {
+      if (!nombre || !rut || !correo || !password || !confirmPassword || !localidad) {
+        Alert.alert('Error', 'Por favor, completa todos los campos');
+        alert('Error: Por favor, completa todos los campos');
+        return;
+      }
+
+      const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+      if (!rutRegex.test(rut)) {
+        Alert.alert('Error', 'El RUT debe seguir el formato X.XXX.XXX-X o XX.XXX.XXX-X');
+        alert('Error: El RUT debe seguir el formato X.XXX.XXX-X o XX.XXX.XXX-X');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo)) {
+        Alert.alert('Error', 'Por favor, ingresa un correo válido');
+        alert('Error: Por favor, ingresa un correo válido');
+        return;
+      }
+
+      // Validar si la fecha es lógica
+      const [day, month, year] = fechaNacimiento.split('-').map(Number); // Convertir a números
+      const fechaIngresada = new Date(year, month - 1, day); // Crear objeto de fecha (mes empieza en 0)
+
+      // Validar que la fecha sea válida
+      if (
+        fechaIngresada.getFullYear() !== year || 
+        fechaIngresada.getMonth() !== month - 1 || 
+        fechaIngresada.getDate() !== day
+      ) {
+        Alert.alert('Error', 'La fecha ingresada no es válida');
+        alert('Error: La fecha ingresada no es válida');
+        return;
+      }
+
+      // Validar que no sea una fecha futura
+      const fechaActual = new Date();
+      if (fechaIngresada > fechaActual) {
+        Alert.alert('Error', 'La fecha de nacimiento no puede ser una fecha futura');
+        alert('Error: La fecha de nacimiento no puede ser una fecha futura');
+        return;
+      }
+
+      // Validar que la persona tenga al menos 60 años
+      const edadMinima = 60;
+      const fechaLim = new Date(
+        fechaActual.getFullYear() - edadMinima,
+        fechaActual.getMonth(),
+        fechaActual.getDate()
+      );
+
+      if (fechaIngresada > fechaLim) {
+        Alert.alert('Error', `La fecha de nacimiento indica que tienes menos de ${edadMinima} años. Solo adultos mayores pueden registrarse.`);
+        alert(`Error: La fecha de nacimiento indica que tienes menos de ${edadMinima} años. Solo adultos mayores pueden registrarse.`);
+        return;
+      }
+
+      // Validar que la persona no tenga más de 120 años 
+      const edadMaxima = 120;
+      const fechaLimite = new Date(fechaActual.getFullYear() - edadMaxima, fechaActual.getMonth(), fechaActual.getDate());
+      if (fechaIngresada < fechaLimite) {
+        Alert.alert('Error', `La fecha de nacimiento no puede ser anterior a ${edadMaxima} años`);
+        alert(`Error: La fecha de nacimiento no puede ser anterior a ${edadMaxima} años`);
+        return;
+      }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      alert('Error: Las contraseñas no coinciden');
       return;
     }
 
-    if (!nombre || !rut || !correo || !password || !confirmPassword || !localidad) {
-      Alert.alert('Error', 'Por favor, completa todos los campos');
+    if (password.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      alert('Error: La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if(!pdfFile){
+      Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido para el registro social de hogares');
+      alert('Error: Por favor, selecciona un archivo PDF válido para el registro social de hogares');
       return;
     }
   
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
-  
-    if (!pdfFile || pdfFile.canceled || !pdfFile.assets || pdfFile.assets.length === 0) {
-      Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido');
-      return;
-    }
   
     if (!carnetFrontal || !carnetTrasero) {
       Alert.alert('Error', 'Por favor, selecciona ambas imágenes del carnet (frontal y trasero)');
+      alert('Error: Por favor, selecciona ambas imágenes del carnet (frontal y trasero)')
+      return;
+    }
+
+    // Validar que, si el usuario marca el switch de discapacidad, suba el archivo correspondiente
+    if (isDiscapacitado && !pdfDiscapacidad) {
+      Alert.alert('Error', 'Por favor, adjunta un archivo que certifique tu discapacidad');
+      alert('Error: Por favor, adjunta un archivo que certifique tu discapacidad');
       return;
     }
   
@@ -100,7 +175,13 @@ export default function Registro() {
   
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || 'Error en la solicitud');
+        if (result.error) {
+          Alert.alert('Error', result.error); 
+          alert('Error', result.error);
+        } else {
+          Alert.alert('Error', 'Error desconocido al registrar usuario');
+        }
+        return;
       }
   
       console.log('Registro exitoso', result);
@@ -112,6 +193,8 @@ export default function Registro() {
       }
       navigation.navigate('Login');
     } catch (error) {
+      Alert.alert('Error', 'Error al registrar usuario', error.message);
+      alert('Error al registrar usuario', error.message);
       console.error('Error detallado del servidor:', error.message);
     }
   };
@@ -122,8 +205,23 @@ export default function Registro() {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
       });
+
+      resultado = result.assets[0];
+      resultado2 = resultado.name.toLowerCase();
   
       if (result.type !== 'cancel') {
+        if (!resultado2.endsWith('.pdf')) {
+          Alert.alert('Error', 'Solo se permiten archivos PDF.');
+          console.log('Error: Solo se permiten archivos PDF.'); 
+          alert('Error: Solo se permiten archivos PDF.');
+          return;
+        }
+        if (resultado.size > 10 * 1024 * 1024) { // 10 MB
+          Alert.alert('Error', 'El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
+          console.log('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
+          alert('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.')
+          return;
+        }
         setPdfFile(result);
         console.log('Archivo seleccionado:', result);
       } else {
@@ -140,8 +238,23 @@ export default function Registro() {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
       });
+      
+      resultado = result.assets[0];
+      resultado2 = resultado.name.toLowerCase();
 
       if (result.type !== 'cancel') {
+        if (!resultado2.endsWith('.pdf')) {
+          Alert.alert('Error', 'Solo se permiten archivos PDF.');
+          console.log('Error: Solo se permiten archivos PDF.'); 
+          alert('Error: Solo se permiten archivos PDF.');
+          return;
+        } 
+        if (resultado.size > 10 * 1024 * 1024) { // 10 MB
+            Alert.alert('Error', 'El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
+            console.log('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
+            alert('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.')
+            return;
+          }
         setPdfDiscapacidad(result);
         console.log('Archivo de discapacidad seleccionado:', result);
       } else {
@@ -161,7 +274,31 @@ export default function Registro() {
         quality: 1,
       });
 
+      resultado = result.assets[0];
+      resultado2 = resultado.fileName.toLowerCase();
+
       if (!result.canceled) {
+        if (!resultado2.endsWith('.jpg') && !resultado2.endsWith('.png') ) {
+          Alert.alert('Error', 'Solo se permiten archivos JPG o PNG.');
+          console.log('Error: Solo se permiten archivos JPG o PNG.'); 
+          alert('Error: Solo se permiten archivos JPG o PNG.');
+          return;
+        }
+        const fileUri = result.assets[0].uri;
+    
+        const fileSizeInKB = getFileSizeInKB(fileUri);
+    
+        console.log('Tamaño aproximado del archivo:', fileSizeInKB, 'KB');
+  
+        if (fileSizeInKB > 5000) { // 5 MB en KB
+          Alert.alert(
+            'Error',
+            'La imagen seleccionada excede el tamaño máximo de 5 MB.'
+          );
+          console.log('Error: La imagen seleccionada excede el tamaño máximo de 5 MB'); 
+          alert('Error: La imagen seleccionada excede el tamaño máximo de 5 MB');
+          return;
+        }
         setCarnetFrontal(result);
         console.log('Carnet frontal seleccionado:', result);
       }
@@ -179,7 +316,31 @@ export default function Registro() {
         quality: 1,
       });
 
+      resultado = result.assets[0];
+      resultado2 = resultado.fileName.toLowerCase();
+
       if (!result.canceled) {
+        if (!resultado2.endsWith('.jpg') && !resultado2.endsWith('.png') ) {
+          Alert.alert('Error', 'Solo se permiten archivos JPG o PNG.');
+          console.log('Error: Solo se permiten archivos JPG o PNG.'); 
+          alert('Error: Solo se permiten archivos JPG o PNG.');
+          return;
+        }
+        const fileUri = result.assets[0].uri;
+    
+        const fileSizeInKB = getFileSizeInKB(fileUri);
+    
+        console.log('Tamaño aproximado del archivo:', fileSizeInKB, 'KB');
+  
+        if (fileSizeInKB > 5000) { // 5 MB en KB
+          Alert.alert(
+            'Error',
+            'La imagen seleccionada excede el tamaño máximo de 5 MB.'
+          );
+          console.log('Error: La imagen seleccionada excede el tamaño máximo de 5 MB'); 
+          alert('Error: La imagen seleccionada excede el tamaño máximo de 5 MB');
+          return;
+        }
         setCarnetTrasero(result);
         console.log('Carnet trasero seleccionado:', result);
       }

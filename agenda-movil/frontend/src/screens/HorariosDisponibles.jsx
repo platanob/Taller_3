@@ -124,50 +124,39 @@ const [filterOptions, setFilterOptions] = useState([]);
 
   const agendarPress = async (cita_id) => {
     try {
-      Alert.alert(
-        "Confirmar agenda",
-        "¿Estás seguro de que quieres agendar esta cita?",
-        [
-          {
-            text: "Cancelar",
-            style: "cancel"
+      const confirmar = window.confirm("¿Estás seguro de que quieres agendar esta cita?");
+      
+      if (confirmar) {
+        const token = await AsyncStorage.getItem('access_token');
+        
+        if (!token) {
+          window.alert("Error: Usuario no autenticado.");
+          return;
+        }
+        
+        const response = await fetch('http://localhost:5000/api/agendar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
-          {
-            text: "Aceptar",
-            onPress: async () => {
-              const token = await AsyncStorage.getItem('access_token');
-              
-              if (!token) {
-                Alert.alert("Error", "Usuario no autenticado.");
-                return;
-              }
-              
-              const response = await fetch('http://localhost:5000/api/agendar', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ cita_id }),
-              });
-          
-              const result = await response.json();
-          
-              if (response.status === 200) {
-                Alert.alert("Éxito", "Cita agendada correctamente");
-                obtenerHorarios();
-              } else {
-                Alert.alert("Error", result.error || "No se pudo agendar la cita");
-              }
-            }
-          }
-        ]
-      );
+          body: JSON.stringify({ cita_id }),
+        });
+    
+        const result = await response.json();
+    
+        if (response.status === 200) {
+          window.alert("Éxito: Cita agendada correctamente");
+          obtenerHorarios();
+        } else {
+          window.alert(`Error: ${result.error || "No se pudo agendar la cita"}`);
+        }
+      }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Hubo un problema al agendar la cita.");
+      window.alert("Error: Hubo un problema al agendar la cita.");
     }
-  };
+  };  
 
   if (loading) {
     return (

@@ -67,9 +67,15 @@ def register():
         # Verificar que no exista un usuario con el mismo correo o rut
         if users_collection.find_one({"correo": correo}):
             return jsonify({"error": "El correo ya está registrado"}), 400
+        
+        if usuarios_nuevos.find_one({"correo": correo}):
+            return jsonify({"error": "El correo ya está registrado"}), 400
 
         if users_collection.find_one({"rut": rut}):
-            return jsonify({"error": "El usuario ya existe"}), 400
+            return jsonify({"error": "El RUT ya existe en la base de datos"}), 400
+        
+        if usuarios_nuevos.find_one({"rut": rut}):
+            return jsonify({"error": "El RUT ya existe en la base de datos"}), 400
 
         # Verificar que se haya subido el archivo PDF
         if 'archivo' not in request.files:
