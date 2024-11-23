@@ -579,6 +579,21 @@ def obtener_cuentas():
     
     except Exception as e:
         return jsonify({'error': f'Error al obtener cuentas: {str(e)}'}), 500
+    
+@app.route('/api/obtener_cuenta_actual', methods=['GET'])
+@jwt_required()
+def obtener_cuenta_actual():
+    try:
+        identidad = get_jwt_identity()  # Obtiene la identidad del token
+        cuenta = cuentas_admin.find_one({'_id': ObjectId(identidad['id'])}, {'nombre': 1, 'rut': 1, 'correo': 1})
+
+        if not cuenta:
+            return jsonify({'mensaje': 'Cuenta no encontrada'}), 404
+
+        cuenta['_id'] = str(cuenta['_id'])
+        return jsonify({'cuenta': cuenta}), 200
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener cuenta: {str(e)}'}), 500
 
 @app.route('/api/editar_cuenta/<id>', methods=['PUT'])
 @jwt_required()
