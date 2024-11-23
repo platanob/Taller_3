@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 const CrearCitasAdm = () => {
   const [fecha, setFecha] = useState('');
@@ -6,22 +7,42 @@ const CrearCitasAdm = () => {
   const [horaFin, setHoraFin] = useState('');
   const [intervalo, setIntervalo] = useState('');
   const [locacion, setLocacion] = useState('');
-  const [servicio, setServicio] = useState('');
+  const [especialidad, setEspecialidad] = useState('');
   const [colaborador, setColaborador] = useState('');
+  const [especialidades, setEspecialidades] = useState([]);
+  const [colaboradores, setColaboradores] = useState({});
   const [mensaje, setMensaje] = useState('');
-  const [servicios] = useState(['Psicología', 'Peluquería', 'Consulta Médica']);
+
+  useEffect(() => {
+    fetchColaboradores();
+  }, []);
+
+  const fetchColaboradores = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/usuarios_por_especialidad', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const data = await response.json();
+      setColaboradores(data);
+      setEspecialidades(Object.keys(data));
+    } catch (error) {
+      console.error('Error al obtener colaboradores:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Crear el objeto con los datos necesarios
     const nuevaCita = {
       fecha,
       hora_inicio: horaInicio,
       hora_fin: horaFin,
       intervalo,
       locacion,
-      servicio,
+      servicio: especialidad,
       colaborador,
     };
 
@@ -30,21 +51,20 @@ const CrearCitasAdm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(nuevaCita),
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMensaje('Citas creadas con éxito!');
-        // Limpiar los campos del formulario
+        Swal.fire('Éxito', 'Citas creadas con éxito!', 'success');
         setFecha('');
         setHoraInicio('');
         setHoraFin('');
         setIntervalo('');
         setLocacion('');
-        setServicio('');
+        setEspecialidad('');
         setColaborador('');
       } else {
         setMensaje(data.error || 'Error al crear las citas');
@@ -53,6 +73,9 @@ const CrearCitasAdm = () => {
       setMensaje('Error al conectar con el servidor');
     }
   };
+
+  const colaboradoresPorEspecialidad = especialidad ? colaboradores[especialidad] || [] : [];
+
 
   return (
     <div className="min-h-screen bg-gray-100 py-10" style={{
@@ -122,31 +145,35 @@ const CrearCitasAdm = () => {
           </div>
 
           {/* Servicio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">SERVICIO</label>
-            <select
-              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
-              value={servicio}
-              onChange={(e) => setServicio(e.target.value)}
-            >
-              <option value="">Selecciona un servicio</option>
-              {servicios.map((srv, index) => (
-                <option key={index} value={srv}>{srv}</option>
-              ))}
-            </select>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">SERVICIO</label>
+              <select
+                value={especialidad}
+                onChange={(e) => setEspecialidad(e.target.value)}
+                className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+              >
+                <option value="">Selecciona una especialidad</option>
+                {especialidades.map((esp, index) => (
+                  <option key={index} value={esp}>{esp}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Colaborador */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">NOMBRE DEL COLABORADOR</label>
-            <input
-              type="text"
-              placeholder="Ingresa el nombre del colaborador"
-              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
-              value={colaborador}
-              onChange={(e) => setColaborador(e.target.value)}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">COLABORADOR</label>
+              <select
+                value={colaborador}
+                onChange={(e) => setColaborador(e.target.value)}
+                className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+                disabled={!especialidad}
+              >
+                <option value="">Selecciona un colaborador</option>
+                {colaboradoresPorEspecialidad.map((col, index) => (
+                  <option key={index} value={col.rut}>{col.nombre}</option>
+                ))}
+              </select>
+            </div>
+
 
           <button
             type="submit"

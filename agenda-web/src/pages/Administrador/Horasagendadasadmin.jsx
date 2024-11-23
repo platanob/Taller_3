@@ -11,6 +11,13 @@ function HorasAgendadasAdmin() {
 
     const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+    useEffect(() => {
+        const today = new Date();
+        setYear(today.getFullYear());
+        setMonth(today.getMonth());
+        setSelectedDay(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
+    }, []);
+
     const fetchAdminDetails = async () => {
         try {
             const token = localStorage.getItem('token');
