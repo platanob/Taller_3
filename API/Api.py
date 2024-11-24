@@ -627,7 +627,6 @@ def eliminar_cuenta(id):
 
 @app.route('/api/usuarios_por_especialidad', methods=['GET'])
 @jwt_required()
-@admin_required
 def usuarios_por_especialidad():
     try:
         # Consulta a la base de datos para obtener usuarios que no son admin
