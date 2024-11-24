@@ -36,7 +36,7 @@ function Menu2() {
         <img src="/img/logo_muni.jpg" alt="muni logo" className="w-15 h-10 mr-5" />
       </div>
       <div className="flex space-x-6">
-        <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Inicio</Link>
+        <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Calendario</Link>
         <Link to="administrar-colaboradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Colaboradores</Link>
         <Link to="administrar-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Administrar Usuarios</Link>
         <Link to="admision-usuarios" className="text-[#005baa] font-medium hover:text-[#00cfff]">Admision Usuarios</Link>

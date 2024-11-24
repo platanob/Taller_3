@@ -67,9 +67,15 @@ def register():
         # Verificar que no exista un usuario con el mismo correo o rut
         if users_collection.find_one({"correo": correo}):
             return jsonify({"error": "El correo ya está registrado"}), 400
+        
+        if usuarios_nuevos.find_one({"correo": correo}):
+            return jsonify({"error": "El correo ya está registrado"}), 400
 
         if users_collection.find_one({"rut": rut}):
-            return jsonify({"error": "El usuario ya existe"}), 400
+            return jsonify({"error": "El RUT ya existe en la base de datos"}), 400
+        
+        if usuarios_nuevos.find_one({"rut": rut}):
+            return jsonify({"error": "El RUT ya existe en la base de datos"}), 400
 
         # Verificar que se haya subido el archivo PDF
         if 'archivo' not in request.files:
@@ -573,6 +579,21 @@ def obtener_cuentas():
     
     except Exception as e:
         return jsonify({'error': f'Error al obtener cuentas: {str(e)}'}), 500
+    
+@app.route('/api/obtener_cuenta_actual', methods=['GET'])
+@jwt_required()
+def obtener_cuenta_actual():
+    try:
+        identidad = get_jwt_identity()  # Obtiene la identidad del token
+        cuenta = cuentas_admin.find_one({'_id': ObjectId(identidad['id'])}, {'nombre': 1, 'rut': 1, 'correo': 1})
+
+        if not cuenta:
+            return jsonify({'mensaje': 'Cuenta no encontrada'}), 404
+
+        cuenta['_id'] = str(cuenta['_id'])
+        return jsonify({'cuenta': cuenta}), 200
+    except Exception as e:
+        return jsonify({'error': f'Error al obtener cuenta: {str(e)}'}), 500
 
 @app.route('/api/editar_cuenta/<id>', methods=['PUT'])
 @jwt_required()

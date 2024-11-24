@@ -4,7 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import Adminusers from './administrarusuarios';
 import Admincolab from './AdministrarColab';
 import CrearCitasAdm from './CrearCitasAdmin';
-import HorasDisponibles from './HorasDispo';
+import HorasAgendadas from './Horasagendadasadmin';
 import VisualizarGraficos from './Graficos';
 import AdmisionUsuarios from './AdmisionUsuarios';
 import UsuarioInfo from './UsuarioInfo';
@@ -16,7 +16,7 @@ const InicioAdmin = () => {
     <div>
       <Menu2 />
       <Routes>
-        <Route path="/" element={<HorasDisponibles />} /> 
+        <Route path="/" element={<HorasAgendadas />} /> 
         <Route path="/administrar-usuarios" element={<Adminusers />} />
         <Route path="/administrar-colaboradores" element={<Admincolab />} />
         <Route path="/administrar-colaboradores/crear-colaborador" element={<CrearColaborador />} />

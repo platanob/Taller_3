@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -10,7 +10,9 @@ const CrearColaborador = () => {
     contrasena: '',
     confirmarContrasena: '',
     especialidad: '',
+    nuevaEspecialidad: '', 
   });
+  const [especialidades, setEspecialidades] = useState([]); 
 
   const navigate = useNavigate();
 
@@ -19,27 +21,50 @@ const CrearColaborador = () => {
     setForm({ ...form, [name]: value });
   };
 
+  const handleEspecialidadChange = (e) => {
+    setForm({ ...form, especialidad: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación de contraseñas
+    // Validaciones de los campos a ingresar
+
     if (form.contrasena !== form.confirmarContrasena) {
-      Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Las contraseñas no coinciden',
+      });
       return;
     }
 
     const rutRegex = /^[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]$/;
     if (!rutRegex.test(form.rut)) {
-      Swal.fire('Error', 'El RUT no tiene un formato válido', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El RUT no tiene un formato válido',
+      });
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.correo)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor, ingresa un correo válido',
+        });
+        return;
+      }
 
     const nuevoColaborador = {
       nombre: form.nombre,
       rut: form.rut,
       correo: form.correo,
       contrasena: form.contrasena,
-      especialidad: form.especialidad,
+      especialidad: form.especialidad === "Otro" ? form.nuevaEspecialidad : form.especialidad, 
     };
 
     try {
@@ -64,6 +89,24 @@ const CrearColaborador = () => {
       Swal.fire('Error', 'Error al conectar con el servidor', 'error');
     }
   };
+
+  useEffect(() => {
+    // Obtener las especialidades existentes desde la API (puedes adaptar esta parte según tu estructura)
+    const fetchEspecialidades = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/usuarios_por_especialidad', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
+        setEspecialidades(Object.keys(data)); // Asumiendo que las especialidades son las claves
+      } catch (error) {
+        console.error("Error al obtener especialidades", error);
+      }
+    };
+    fetchEspecialidades();
+  }, []);
 
   return (
     <div
@@ -153,16 +196,35 @@ const CrearColaborador = () => {
             <label className="block text-sm font-medium text-gray-700">
               Especialidad
             </label>
-            <input
-              type="text"
+            <select
               name="especialidad"
               value={form.especialidad}
-              onChange={handleChange}
+              onChange={handleEspecialidadChange}
               className="mt-1 text-gray-700 bg-white block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Especialidad"
-              required
-            />
+            >
+              <option value="">Seleccione una especialidad</option>
+              {especialidades.map((especialidad, index) => (
+                <option key={index} value={especialidad}>{especialidad}</option>
+              ))}
+              <option value="Otro">Otro</option>
+            </select>
           </div>
+
+          {form.especialidad === "Otro" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Ingrese la nueva especialidad
+              </label>
+              <input
+                type="text"
+                name="nuevaEspecialidad"
+                value={form.nuevaEspecialidad}
+                onChange={handleChange}
+                className="mt-1 text-gray-700 bg-white block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Nueva Especialidad"
+              />
+            </div>
+          )}
 
           <div className="flex justify-end space-x-4">
             <button
