@@ -418,6 +418,11 @@ def nuevas_horas():
         colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
         if not colaborador:
             return jsonify({'error': 'Colaborador no encontrado'}), 404
+        
+        # Obtener la especialidad del colaborador
+        especialidad = colaborador.get('especialidad', None)
+        if not especialidad:
+            return jsonify({'error': 'El colaborador no tiene una especialidad asignada'}), 400
 
         # Convertir las horas y el intervalo
         fecha = data['fecha']
@@ -445,12 +450,12 @@ def nuevas_horas():
             })
 
             if not cita_existente:
-                # Crear una nueva cita
+                # Crear una nueva cita, incluyendo la especialidad
                 nueva_cita = {
                     'fecha': fecha,
                     'hora': hora_actual.time().strftime("%H:%M"),
                     'locacion': data['locacion'],
-                    'servicio': data['servicio'],
+                    'servicio': especialidad,
                     'colaborador': ObjectId(colaborador_id),
                     'disponible': True
                 }
