@@ -30,6 +30,16 @@ const CrearAdministrador = () => {
       Swal.fire('Error', 'El RUT no tiene un formato válido', 'error');
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.correo)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor, ingresa un correo válido',
+        });
+        return;
+      }
   
     try {
       const response = await fetch('https://taller-3.onrender.com/api/agregar_web', {

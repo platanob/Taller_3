@@ -123,14 +123,18 @@ const CrearCitasAdm = () => {
           {/* Intervalo */}
           <div>
             <label className="block text-sm font-medium text-gray-700">INTERVALO (Minutos)</label>
-            <input
-              type="number"
-              placeholder="Ej: 30"
+            <select
               className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
               value={intervalo}
               onChange={(e) => setIntervalo(e.target.value)}
-            />
+            >
+              <option value="">Selecciona un intervalo</option>
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
           </div>
+
 
           {/* Locación */}
           <div>
