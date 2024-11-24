@@ -68,7 +68,7 @@ const CrearColaborador = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/crear_colaborador', {
+      const response = await fetch('https://taller-3.onrender.com/api/crear_colaborador', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ const CrearColaborador = () => {
     // Obtener las especialidades existentes desde la API (puedes adaptar esta parte según tu estructura)
     const fetchEspecialidades = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/usuarios_por_especialidad', {
+        const response = await fetch('https://taller-3.onrender.com/api/usuarios_por_especialidad', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },

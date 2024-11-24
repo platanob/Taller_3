@@ -9,6 +9,7 @@ import gridfs
 from datetime import datetime, timedelta
 from io import BytesIO  # Para manejar archivos en memoria
 import calendar
+import os 
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
@@ -35,6 +36,8 @@ citas_collection = db['citas']
 usuarios_nuevos = db['usuarios_nuevos']
 cuentas_admin = db['cuentas_admin']
 fs = gridfs.GridFS(db)
+
+port = int(os.environ.get("PORT", 5000))
 
 """
 
@@ -1126,4 +1129,4 @@ def obtener_citas_por_servicio():
         return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=port)

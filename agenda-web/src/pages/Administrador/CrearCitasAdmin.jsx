@@ -19,7 +19,7 @@ const CrearCitasAdm = () => {
 
   const fetchColaboradores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/usuarios_por_especialidad', {
+      const response = await fetch('https://taller-3.onrender.com/api/usuarios_por_especialidad', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -47,7 +47,7 @@ const CrearCitasAdm = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/nuevashoras_admin', {
+      const response = await fetch('https://taller-3.onrender.com/api/nuevashoras_admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ const UsuarioInfo = () => {
   const obtenerArchivoURL = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/obtener_archivo/${id}`, {
+      const response = await fetch(`https://taller-3.onrender.com/api/obtener_archivo/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,7 +76,7 @@ const UsuarioInfo = () => {
   const handlePdfClick = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/obtener_archivo/${usuario.pdf_id}`, {
+      const response = await fetch(`https://taller-3.onrender.com/api/obtener_archivo/${usuario.pdf_id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

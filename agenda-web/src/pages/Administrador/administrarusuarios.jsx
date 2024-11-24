@@ -24,7 +24,7 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/obtener_usuarios', {
+    fetch('https://taller-3.onrender.com/api/obtener_usuarios', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -86,7 +86,7 @@ const AdminUsers = () => {
       if (result.isConfirmed) {
         const { nombre, rut, localidad } = result.value;
 
-        fetch(`http://localhost:5000/api/editar_usuario/${user._id}`, {
+        fetch(`https://taller-3.onrender.com/api/editar_usuario/${user._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ const AdminUsers = () => {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:5000/api/eliminar_usuario/${user._id}`, {
+        fetch(`https://taller-3.onrender.com/api/eliminar_usuario/${user._id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,

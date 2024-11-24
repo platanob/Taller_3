@@ -14,7 +14,7 @@ const MisCitas = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/citas_colab', {
+        const response = await axios.get('https://taller-3.onrender.com/api/citas_colab', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCitas(response.data.citas);

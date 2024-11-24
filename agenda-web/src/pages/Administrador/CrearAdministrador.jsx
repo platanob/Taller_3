@@ -32,7 +32,7 @@ const CrearAdministrador = () => {
     }
   
     try {
-      const response = await fetch('http://localhost:5000/api/agregar_web', {
+      const response = await fetch('https://taller-3.onrender.com/api/agregar_web', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

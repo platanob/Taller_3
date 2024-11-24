@@ -11,7 +11,7 @@ function HorasAgendadas() {
     const loadColaborador = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch("http://localhost:5000/api/colaborador_info", {
+            const response = await fetch("https://taller-3.onrender.com/api/colaborador_info", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -34,7 +34,7 @@ function HorasAgendadas() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/citas_colaborador?fecha=${selectedDay}`, {
+            const response = await fetch(`https://taller-3.onrender.com/api/citas_colaborador?fecha=${selectedDay}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

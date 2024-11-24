@@ -13,7 +13,7 @@ const AdmisionUsuarios = () => {
 
   const cargarUsuarios = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/obtener_usuarios_nuevos', {
+      const response = await fetch('https://taller-3.onrender.com/api/obtener_usuarios_nuevos', {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -51,7 +51,7 @@ const AdmisionUsuarios = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:5000/api/aceptar_usuario/${usuarioId}`, {
+          const response = await fetch(`https://taller-3.onrender.com/api/aceptar_usuario/${usuarioId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const AdmisionUsuarios = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:5000/api/eliminar_usuario_nuevo/${usuarioId}`, {
+          const response = await fetch(`https://taller-3.onrender.com/api/eliminar_usuario_nuevo/${usuarioId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',

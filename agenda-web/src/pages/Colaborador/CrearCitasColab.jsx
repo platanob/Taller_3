@@ -18,7 +18,7 @@ function CrearCitasColab() {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/nuevashoras_colab', {
+      const response = await fetch('https://taller-3.onrender.com/api/nuevashoras_colab', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

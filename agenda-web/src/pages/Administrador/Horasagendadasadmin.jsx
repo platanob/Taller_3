@@ -21,7 +21,7 @@ function HorasAgendadasAdmin() {
     const fetchAdminDetails = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/obtener_cuenta_actual', {
+            const response = await fetch('https://taller-3.onrender.com/api/obtener_cuenta_actual', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -42,7 +42,7 @@ function HorasAgendadasAdmin() {
             const token = localStorage.getItem('token');
             const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
             
-            const response = await fetch('http://localhost:5000/api/citas_por_dia', {
+            const response = await fetch('https://taller-3.onrender.com/api/citas_por_dia', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ function HorasAgendadasAdmin() {
         try {
             const token = localStorage.getItem('token');
             
-            const response = await fetch('http://localhost:5000/api/citas_por_servicio', {
+            const response = await fetch('https://taller-3.onrender.com/api/citas_por_servicio', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -14,7 +14,7 @@ const Aceptarcitas = () => {
           return;
         }
     
-        const response = await axios.get('http://localhost:5000/api/colaborador_info', {
+        const response = await axios.get('https://taller-3.onrender.com/api/colaborador_info', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUsuario(response.data);

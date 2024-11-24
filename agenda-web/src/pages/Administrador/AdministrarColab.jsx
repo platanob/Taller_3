@@ -11,7 +11,7 @@ const AdministradorColab = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/obtener_cuentas', {
+    fetch('https://taller-3.onrender.com/api/obtener_cuentas', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -68,7 +68,7 @@ const AdministradorColab = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:5000/api/editar_cuenta/${user._id}`, {
+        fetch(`https://taller-3.onrender.com/api/editar_cuenta/${user._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const AdministradorColab = () => {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`http://localhost:5000/api/eliminar_cuenta/${user._id}`, {
+        fetch(`https://taller-3.onrender.com/api/eliminar_cuenta/${user._id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
