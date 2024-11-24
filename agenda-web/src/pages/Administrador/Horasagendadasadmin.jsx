@@ -18,6 +18,7 @@ function HorasAgendadasAdmin() {
         setSelectedDay(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
     }, []);
 
+
     const fetchAdminDetails = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -123,12 +124,17 @@ function HorasAgendadasAdmin() {
         }
     };
 
+    useEffect(() => {
+        if (selectedDay) {
+            fetchDayAppointments(selectedDay);
+        }
+    }, [selectedDay]);
+    
     const selectDay = (day) => {
         const formattedDay = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         setSelectedDay(formattedDay);
-        fetchDayAppointments(formattedDay);
     };
-
+    
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
     return (
