@@ -13,14 +13,13 @@ import os
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
-
 # Configuración de CORS
 CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",  
-        "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True  # Permite el envío de credenciales
+    r"/api/*": {  # Permitir solicitudes a cualquier ruta que empiece con /api/
+        "origins": "http://localhost:3000",  # Asegúrate de permitir tu frontend
+        "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],  # Métodos permitidos
+        "allow_headers": ["Content-Type", "Authorization"],  # Encabezados permitidos
+        "supports_credentials": True  # Permite el envío de credenciales (si es necesario)
     }
 })
 
@@ -37,8 +36,8 @@ usuarios_nuevos = db['usuarios_nuevos']
 cuentas_admin = db['cuentas_admin']
 fs = gridfs.GridFS(db)
 
+# Obtener el puerto desde la variable de entorno PORT (por defecto es 5000)
 port = int(os.environ.get("PORT", 5000))
-
 """
 
 ██████╗░░█████╗░██████╗░████████╗███████╗  ███╗░░░███╗░█████╗░██╗░░░██╗██╗██╗░░░░░
