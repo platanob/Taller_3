@@ -961,90 +961,39 @@ def asistencia_cita():
 @jwt_required()
 def obtener_citas_colaborador():
     try:
-        # Obtener los parámetros de la solicitud
+        # Obtener la fecha y el colaborador desde los parámetros de la solicitud
         fecha = request.args.get('fecha')
-        hora_inicio = request.args.get('hora_inicio')
-        hora_final = request.args.get('hora_final')
-        intervalo = int(request.args.get('intervalo', 30))  # Intervalo en minutos (por defecto, 30)
         identity = get_jwt_identity()  # ID del colaborador obtenido del JWT
         colaborador_id = identity['id']
 
         if not fecha:
             return jsonify({'error': 'La fecha es obligatoria'}), 400
 
-        if not hora_inicio or not hora_final:
-            return jsonify({'error': 'La hora de inicio y final son obligatorias'}), 400
-
-        # Verificar el formato de la fecha y las horas
+        # Verificar el formato de la fecha
         try:
             fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
-            hora_inicio_obj = datetime.strptime(hora_inicio, "%H:%M").time()
-            hora_final_obj = datetime.strptime(hora_final, "%H:%M").time()
         except ValueError:
-            return jsonify({'error': 'El formato de fecha debe ser YYYY-MM-DD y el de hora HH:MM'}), 400
+            return jsonify({'error': 'El formato de la fecha debe ser YYYY-MM-DD'}), 400
 
-        if hora_inicio_obj >= hora_final_obj:
-            return jsonify({'error': 'La hora de inicio debe ser menor a la hora final'}), 400
+        # Buscar las citas del colaborador para la fecha específica
+        citas = list(citas_collection.find(
+            {'colaborador': ObjectId(colaborador_id), 'fecha': fecha},
+            {'_id': 1, 'hora': 1, 'locacion': 1, 'servicio': 1, 'usuario': 1}  # Campos relevantes
+        ))
 
-        # Generar los intervalos de citas
-        citas_generadas = []
-        hora_actual = datetime.combine(fecha_obj, hora_inicio_obj)
-        hora_limite = datetime.combine(fecha_obj, hora_final_obj)
+        if not citas:
+            return jsonify({'mensaje': 'No se encontraron citas para la fecha especificada'}), 404
 
-        while hora_actual <= hora_limite:
-            siguiente_hora = hora_actual + timedelta(minutes=intervalo)
-
-            # Crear cita si no existe
-            cita_existente = citas_collection.find_one({
-                'colaborador': ObjectId(colaborador_id),
-                'fecha': fecha,
-                'hora': hora_actual.time().strftime('%H:%M')
-            })
-
-            if not cita_existente:
-                nueva_cita = {
-                    'colaborador': ObjectId(colaborador_id),
-                    'fecha': fecha,
-                    'hora': hora_actual.time().strftime('%H:%M'),
-                    'locacion': None,
-                    'servicio': None,
-                    'usuario': None
-                }
-                result = citas_collection.insert_one(nueva_cita)
-                nueva_cita['_id'] = str(result.inserted_id)
-                citas_generadas.append(nueva_cita)
-            else:
-                citas_generadas.append(cita_existente)
-
-            hora_actual = siguiente_hora
-
-        # Obtener datos del colaborador
-        colaborador = cuentas_admin.find_one(
-            {'_id': ObjectId(colaborador_id)},
-            {'nombre': 1, 'especialidad': 1}
-        )
-
-        if not colaborador:
-            return jsonify({'error': 'No se pudo encontrar información del colaborador'}), 404
-
-        # Preparar la respuesta
-        for cita in citas_generadas:
-            if '_id' in cita:
-                cita['_id'] = str(cita['_id'])
-            if 'usuario' in cita and isinstance(cita['usuario'], ObjectId):
+        # Convertir ObjectId a string y preparar la respuesta
+        for cita in citas:
+            cita['_id'] = str(cita['_id'])
+            if 'usuario' in cita:
                 cita['usuario'] = str(cita['usuario'])
 
-        return jsonify({
-            'colaborador': {
-                'nombre': colaborador['nombre'],
-                'especialidad': colaborador['especialidad']
-            },
-            'citas': citas_generadas
-        }), 200
+        return jsonify({'citas': citas}), 200
 
     except Exception as e:
-        return jsonify({'error': f'Error al obtener y generar las citas: {str(e)}'}), 500
-
+        return jsonify({'error': f'Error al obtener las citas: {str(e)}'}), 500
 
 @app.route('/api/citas_por_dia', methods=['POST'])
 @jwt_required()
