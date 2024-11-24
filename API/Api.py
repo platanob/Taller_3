@@ -558,7 +558,6 @@ def editarcita(cita_id):
 
 @app.route('/api/borrarcita/<cita_id>', methods=['DELETE'])
 @jwt_required()
-@admin_required
 def borrar_cita(cita_id):
     try:
         # Intentar convertir cita_id a ObjectId
