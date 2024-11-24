@@ -168,7 +168,7 @@ export default function Registro() {
     formData.append('carnet_trasero', carnetTraseroBlob, 'carnet_trasero.png');
   
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('https://taller-3.onrender.com/api/register', {
         method: 'POST',
         body: formData,
       });

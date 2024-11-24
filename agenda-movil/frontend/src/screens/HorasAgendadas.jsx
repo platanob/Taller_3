@@ -20,7 +20,7 @@ const HorasAgendadas = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/mis_citas', {
+        const response = await fetch('https://taller-3.onrender.com/api/mis_citas', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -81,7 +81,7 @@ const HorasAgendadas = () => {
         return;
       }
   
-      const response = await fetch(`http://localhost:5000/api/cancelar_cita/${citaId}`, {
+      const response = await fetch(`https://taller-3.onrender.com/api/cancelar_cita/${citaId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

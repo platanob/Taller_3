@@ -31,7 +31,7 @@ const [filterOptions, setFilterOptions] = useState([]);
         return;
       }
   
-      const response = await fetch('http://localhost:5000/api/citas_disponibles', {
+      const response = await fetch('https://taller-3.onrender.com/api/citas_disponibles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -134,7 +134,7 @@ const [filterOptions, setFilterOptions] = useState([]);
           return;
         }
         
-        const response = await fetch('http://localhost:5000/api/agendar', {
+        const response = await fetch('https://taller-3.onrender.com/api/agendar', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
