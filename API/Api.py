@@ -400,48 +400,74 @@ def iniciar_sesion():
 @app.route('/api/nuevashoras_colab', methods=['POST'])
 @jwt_required()
 def nuevas_horas():
-    data = request.get_json()
-    required_fields = ['fecha', 'hora_inicio', 'hora_fin', 'intervalo', 'locacion', 'servicio']
+    try:
+        data = request.get_json()
+        required_fields = ['fecha', 'hora_inicio', 'hora_fin', 'intervalo', 'locacion', 'servicio']
 
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Faltan datos necesarios'}), 400
+        # Validar que todos los campos necesarios estén presentes
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': 'Faltan datos necesarios'}), 400
 
-    # Obtener el ID del colaborador desde el JWT
-    identity = get_jwt_identity()
-    colaborador_id = identity['id']
+        # Obtener el ID del colaborador desde el JWT
+        identity = get_jwt_identity()
+        colaborador_id = identity['id']
 
-    colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
+        # Verificar si el colaborador existe en la base de datos
+        colaborador = cuentas_admin.find_one({'_id': ObjectId(colaborador_id)})
+        if not colaborador:
+            return jsonify({'error': 'Colaborador no encontrado'}), 404
 
-    if not colaborador:
-        return jsonify({'error': 'Colaborador no encontrado'}), 404
+        # Convertir las horas y el intervalo
+        fecha = data['fecha']
+        try:
+            hora_inicio = datetime.strptime(f"{fecha} {data['hora_inicio']}", "%Y-%m-%d %H:%M")
+            hora_fin = datetime.strptime(f"{fecha} {data['hora_fin']}", "%Y-%m-%d %H:%M")
+            intervalo = timedelta(minutes=int(data['intervalo']))
+        except ValueError:
+            return jsonify({'error': 'Formato incorrecto de fecha u hora'}), 400
 
-    # Convertir las horas y el intervalo
-    fecha = data['fecha']
-    hora_inicio = datetime.strptime(f"{fecha} {data['hora_inicio']}", "%Y-%m-%d %H:%M")
-    hora_fin = datetime.strptime(f"{fecha} {data['hora_fin']}", "%Y-%m-%d %H:%M")
-    intervalo = timedelta(minutes=int(data['intervalo']))
+        # Validar que la hora de inicio sea menor a la hora de fin
+        if hora_inicio >= hora_fin:
+            return jsonify({'error': 'La hora de inicio debe ser anterior a la hora de fin'}), 400
 
-    # Verificar que la hora de inicio es menor que la hora de fin
-    if hora_inicio >= hora_fin:
-        return jsonify({'error': 'La hora de inicio debe ser anterior a la hora de fin'}), 400
+        # Crear citas en intervalos
+        citas_creadas = []
+        hora_actual = hora_inicio
 
-    # Crear citas en intervalos
-    citas_creadas = []
-    hora_actual = hora_inicio
-    while hora_actual <= hora_fin:
-        cita = {
-            'fecha': fecha,
-            'hora': hora_actual.time().strftime("%H:%M"),
-            'locacion': data['locacion'],
-            'servicio': data['servicio'],
-            'colaborador': colaborador['_id'],
-            'disponible': True
-        }
-        result = citas_collection.insert_one(cita)
-        citas_creadas.append(str(result.inserted_id))
-        hora_actual += intervalo
+        while hora_actual < hora_fin:
+            # Verificar si ya existe una cita para este horario
+            cita_existente = citas_collection.find_one({
+                'fecha': fecha,
+                'hora': hora_actual.time().strftime("%H:%M"),
+                'colaborador': ObjectId(colaborador_id)
+            })
 
-    return jsonify({'citas_creadas': citas_creadas}), 201
+            if not cita_existente:
+                # Crear una nueva cita
+                nueva_cita = {
+                    'fecha': fecha,
+                    'hora': hora_actual.time().strftime("%H:%M"),
+                    'locacion': data['locacion'],
+                    'servicio': data['servicio'],
+                    'colaborador': ObjectId(colaborador_id),
+                    'disponible': True
+                }
+                result = citas_collection.insert_one(nueva_cita)
+                citas_creadas.append(str(result.inserted_id))
+            else:
+                # Opcional: manejar lógica si ya existe una cita (por ejemplo, ignorar o notificar)
+                continue
+
+            # Avanzar al siguiente intervalo
+            hora_actual += intervalo
+
+        return jsonify({
+            'mensaje': f'Se crearon {len(citas_creadas)} nuevas citas.',
+            'citas_creadas': citas_creadas
+        }), 201
+
+    except Exception as e:
+        return jsonify({'error': f'Error al crear nuevas horas: {str(e)}'}), 500
 
 @app.route('/api/nuevashoras_admin', methods=['POST'])
 @jwt_required()
