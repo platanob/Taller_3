@@ -73,16 +73,82 @@ function HorasAgendadas() {
         setSelectedDay(formattedDay);
     };
 
-    const handleYesAsist = (index) => {
-        console.log(`Cita ${index} - Si Asistió`);
+    const handleYesAsist = async (index) => {
+        const cita = appointments[index];
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("https://taller-3.onrender.com/api/registrar_asistencia", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ cita_id: cita._id, asistencia: true }), // Usamos True aquí
+            });
+    
+            if (response.ok) {
+                setAppointments((prev) =>
+                    prev.map((item, i) =>
+                        i === index ? { ...item, asistencia: true } : item
+                    )
+                );
+                alert("La asistencia de la cita se ha registrado como asistido.");
+            } else {
+                alert("No se pudo registrar la asistencia.");
+            }
+        } catch (error) {
+            alert("Error al conectar con el servidor.");
+        }
+    };
+    
+    const handleNoAsist = async (index) => {
+        const cita = appointments[index];
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("https://taller-3.onrender.com/api/registrar_asistencia", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ cita_id: cita._id, asistencia: false }), // Usamos False aquí
+            });
+    
+            if (response.ok) {
+                setAppointments((prev) =>
+                    prev.map((item, i) =>
+                        i === index ? { ...item, asistencia: false } : item
+                    )
+                );
+                alert("La asistencia de la cita se ha registrado como no asistido.");
+            } else {
+                alert("No se pudo registrar la asistencia.");
+            }
+        } catch (error) {
+            alert("Error al conectar con el servidor.");
+        }
     };
 
-    const handleNoAsist = (index) => {
-        console.log(`Cita ${index} - No Asistió`);
-    };
+    const handleCancel = async (index) => {
+        const cita = appointments[index];
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`https://taller-3.onrender.com/api/cancelar_cita/${cita._id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-    const handleCancel = (index) => {
-        console.log(`Cita ${index} - Cancelada`);
+            if (response.ok) {
+                setAppointments((prev) => prev.filter((_, i) => i !== index));
+                alert("La cita ha sido cancelada y está disponible nuevamente.");
+            } else {
+                alert("No se pudo cancelar la cita.");
+            }
+        } catch (error) {
+            alert("Error al conectar con el servidor.");
+        }
     };
 
     return (
@@ -145,37 +211,38 @@ function HorasAgendadas() {
                                         <p className="text-sm text-black">{appointment.hora}</p>
                                         <p className="text-sm text-black">{appointment.locacion}</p>
                                         {!appointment.disponible && appointment.usuario_id && (
-                                            <p className="text-sm text-black">Usuario ID: {appointment.usuario_id}</p>
+                                            <p className="text-sm text-black">Rut Usuario: {appointment.usuario_id}</p>
                                         )}
                                     </div>
 
-                                    {/* Mostrar botones solo si la cita no está disponible */}
                                     {!appointment.disponible && (
                                         <div className="flex space-x-2">
                                             <button
                                                 onClick={() => handleYesAsist(index)}
-                                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+                                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
                                             >
-                                                Si Asistió
+                                                Sí asistió
                                             </button>
                                             <button
                                                 onClick={() => handleNoAsist(index)}
-                                                className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition"
+                                                className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
                                             >
-                                                No Asistió
+                                                No asistió
                                             </button>
                                             <button
                                                 onClick={() => handleCancel(index)}
-                                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                                             >
-                                                Cancelar
+                                                Cancelar cita
                                             </button>
                                         </div>
                                     )}
                                 </div>
                             ))
                         ) : (
-                            <p className="text-black-500">No hay citas para este día.</p>
+                            <p className="text-black font-bold text-center">
+                                No hay citas agendadas para esta fecha.
+                            </p>
                         )}
                     </div>
                 </div>

@@ -1015,7 +1015,7 @@ def obtener_citas_colaborador():
         # Buscar las citas del colaborador para la fecha específica
         citas = list(citas_collection.find(
             {'colaborador': ObjectId(colaborador_id), 'fecha': fecha},
-            {'_id': 1, 'hora': 1, 'locacion': 1, 'servicio': 1, 'usuario': 1}  # Campos relevantes
+            {'_id': 1, 'hora': 1, 'locacion': 1, 'servicio': 1, 'usuario_id': 1, 'disponible': 1}  # Campos relevantes
         ))
 
         if not citas:
@@ -1023,9 +1023,9 @@ def obtener_citas_colaborador():
 
         # Convertir ObjectId a string y preparar la respuesta
         for cita in citas:
-            cita['_id'] = str(cita['_id'])
-            if 'usuario' in cita:
-                cita['usuario'] = str(cita['usuario'])
+            cita['_id'] = str(cita['_id'])  # Convertir _id a string para JSON
+            cita['usuario_id'] = cita.get('usuario_id', None)  # Asegurar consistencia de usuario_id
+            cita['disponible'] = cita.get('disponible', True)  # Asegurar que disponible tenga un valor
 
         return jsonify({'citas': citas}), 200
 
@@ -1163,5 +1163,34 @@ def citas_colab():
 
     return jsonify({'citas': citas_list}), 200
 
+@app.route('/api/registrar_asistencia', methods=['POST'])
+@jwt_required()
+def registrar_asistencia():
+    data = request.get_json()
+    if 'cita_id' not in data or 'asistencia' not in data:
+        return jsonify({'error': 'Se requieren el ID de la cita y el estado de asistencia'}), 400
+
+    cita_id = data['cita_id']
+    asistencia = data['asistencia'] 
+    
+    try:
+        cita_object_id = ObjectId(cita_id)
+    except:
+        return jsonify({'error': 'ID de cita no válido'}), 400
+
+    cita = citas_collection.find_one({'_id': cita_object_id})
+    if not cita:
+        return jsonify({'error': 'Cita no encontrada'}), 404
+
+    update_result = citas_collection.update_one(
+        {'_id': cita_object_id},
+        {'$set': {'asistencia': asistencia}}
+    )
+
+    if update_result.modified_count == 1:
+        return jsonify({'message': 'Asistencia registrada correctamente'}), 200
+    else:
+        return jsonify({'error': 'No se pudo registrar la asistencia'}), 500
+    
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=port)

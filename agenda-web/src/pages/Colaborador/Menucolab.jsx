@@ -39,7 +39,6 @@ function Menu() {
       <div className="flex space-x-6">
         <Link to="" className="text-[#005baa] font-medium hover:text-[#00cfff]">Calendario</Link>
         <Link to="crear-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link>
-        <Link to="Citas-realizadas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Citas Realizadas</Link>
         <Link to="Historial-citas" className="text-[#005baa] font-medium hover:text-[#00cfff]">Historial</Link>
         <Link to="perfil" className="text-[#005baa] font-medium hover:text-[#00cfff]">Perfil</Link>
 
