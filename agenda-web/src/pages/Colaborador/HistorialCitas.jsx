@@ -14,7 +14,7 @@ const MisCitas = () => {
           return;
         }
 
-        const response = await axios.get('https://taller-3.onrender.com/api/citas_colab', {
+        const response = await axios.get('https://taller-3.onrender.com/api/citas_to', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCitas(response.data.citas);
@@ -25,6 +25,26 @@ const MisCitas = () => {
 
     fetchCitas();
   }, []);
+
+  const borrarCita = async (citaId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No estás autenticado.');
+        return;
+      }
+
+      const response = await axios.delete(`https://taller-3.onrender.com/api/borrarcita/${citaId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200) {
+        setCitas(citas.filter((cita) => cita._id !== citaId)); // Actualiza la lista eliminando la cita
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al borrar la cita.');
+    }
+  };
 
   if (error) {
     return <div className="text-red-600 text-center">{error}</div>;
@@ -50,7 +70,7 @@ const MisCitas = () => {
                 <th className="py-2 px-4 text-left">Cliente</th>
                 <th className="py-2 px-4 text-left">Servicio</th>
                 <th className="py-2 px-4 text-left">Locación</th>
-
+                <th className="py-2 px-4 text-left">Acciones</th>
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm font-light">
@@ -62,7 +82,14 @@ const MisCitas = () => {
                     <td className="py-2 px-4">{cita.cliente}</td>
                     <td className="py-2 px-4">{cita.servicio}</td>
                     <td className="py-2 px-4">{cita.locacion}</td>
-
+                    <td className="py-2 px-4">
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                        onClick={() => borrarCita(cita._id)}
+                      >
+                        Borrar
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (

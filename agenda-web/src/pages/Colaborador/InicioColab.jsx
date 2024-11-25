@@ -5,8 +5,7 @@ import Menu from './Menucolab';
 import Crearcitascolab from './CrearCitasColab';
 import HistorialCitas from './HistorialCitas';
 import HorasAgendadas from './Horasagendadas';
-import CitasRealizadas from './CitasRealizadas';
-import Aceptarcitas from './AceptarCitas';
+import Perfil from './Perfil';
 
 function InicioColaborador() {
   return (
@@ -14,10 +13,9 @@ function InicioColaborador() {
         <Menu />
         <Routes>
           <Route path="/" element={<HorasAgendadas />} /> 
-          <Route path="/Aceptar-Citas" element={<Aceptarcitas />} />
+          <Route path="/perfil" element={<Perfil />} />
           <Route path="/crear-citas" element={<Crearcitascolab />} />
           <Route path="/historial-citas" element={<HistorialCitas />} />
-          <Route path="/citas-realizadas" element={<CitasRealizadas />} />
         </Routes>
       </div>
   );

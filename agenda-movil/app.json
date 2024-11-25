@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "permissions": ["MEDIA_LIBRARY", "READ_EXTERNAL_STORAGE"],
+    "permissions": [
+      "MEDIA_LIBRARY",
+      "READ_EXTERNAL_STORAGE"
+    ],
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
@@ -16,11 +19,17 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.dburgos2016.agendamovil"
     },
     "web": {},
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cd071f6b-cb46-4d25-8d2f-0320d76197a8"
+      }
+    }
   }
 }

@@ -1,47 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function CrearCitasColab() {
-  const [fecha, setFecha] = useState('');
-  const [hora, setHora] = useState('');
-  const [locacion, setLocacion] = useState('');
-  const [servicio, setServicio] = useState('');
-  const [mensaje, setMensaje] = useState(''); // Para mostrar mensajes de éxito o error
+const CrearCitasColab = () => {
+  const [usuario, setUsuario] = useState(null);
+  const [error, setError] = useState(null);
+  const [mensaje, setMensaje] = useState('');
+  const [formData, setFormData] = useState({
+    fecha: '',
+    hora_inicio: '',
+    hora_fin: '',
+    intervalo: '',
+    locacion: '',
+    servicio: '',
+  });
+
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('No estás autenticado.');
+          return;
+        }
+        const response = await axios.get('https://taller-3.onrender.com/api/colaborador_info', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsuario(response.data);
+      } catch (err) {
+        console.error(err.response);
+        setError(err.response?.data?.error || 'Error al obtener la información del usuario.');
+      }
+    };
+    fetchUsuario();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const nuevaCita = {
-      fecha,
-      hora,
-      locacion,
-      servicio,
-    };
+    if (!usuario) {
+      setError('No se pudo obtener los datos del colaborador.');
+      return;
+    }
 
     try {
-      const response = await fetch('https://taller-3.onrender.com/api/nuevashoras_colab', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Autenticación del colaborador
-        },
-        body: JSON.stringify(nuevaCita),
+      const token = localStorage.getItem('token');
+      const response = await axios.post('https://taller-3.onrender.com/api/nuevashoras_colab', {
+        ...formData,
+        colaborador: usuario._id,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setMensaje('Cita creada exitosamente con ID: ' + data.cita_id);
-        // Limpiar el formulario
-        setFecha('');
-        setHora('');
-        setLocacion('');
-        setServicio('');
-      } else {
-        const errorData = await response.json();
-        setMensaje('Error: ' + errorData.error);
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error);
-      setMensaje('Hubo un problema al crear la cita');
+      setMensaje('Citas creadas exitosamente');
+    } catch (err) {
+      console.error(err.response);
+      setMensaje(err.response?.data?.error || 'Error al crear las citas.');
     }
   };
 
@@ -58,44 +78,61 @@ function CrearCitasColab() {
           <div>
             <label className="block text-sm font-medium text-gray-700">FECHA</label>
             <input
-              type="text"
-              placeholder="Ej: 2024-09-16"
-              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
+              type="date"
+              name="fecha"
+              className="mt-1 bg-gray-700 text-white px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              value={formData.fecha}
+              onChange={handleInputChange}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">HORA</label>
+            <label className="block text-sm font-medium text-gray-700">HORA INICIO</label>
             <input
-              type="text"
-              placeholder="Ej: 11:00 AM"
-              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={hora}
-              onChange={(e) => setHora(e.target.value)}
+              type="time"
+              name="hora_inicio"
+              className="mt-1 bg-gray-700 text-white px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              value={formData.hora_inicio}
+              onChange={handleInputChange}
               required
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">HORA FIN</label>
+            <input
+              type="time"
+              name="hora_fin"
+              className="mt-1 bg-gray-700 text-white px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              value={formData.hora_fin}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">INTERVALO (minutos)</label>
+            <select
+              name="intervalo"
+              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              value={formData.intervalo}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="" disabled>Selecciona un intervalo</option>
+              <option value="15">15 minutos</option>
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">LOCACIÓN</label>
             <input
               type="text"
+              name="locacion"
               placeholder="Ej: Oficina 3A"
               className="mt-1 bg-white block text-black w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={locacion}
-              onChange={(e) => setLocacion(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">SERVICIO</label>
-            <input
-              type="text"
-              placeholder="Ej: Consulta Médica"
-              className="mt-1 bg-white text-black block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={servicio}
-              onChange={(e) => setServicio(e.target.value)}
+              value={formData.locacion}
+              onChange={handleInputChange}
               required
             />
           </div>
