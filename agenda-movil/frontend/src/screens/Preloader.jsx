@@ -1,6 +1,6 @@
 import React from "react";
 
-const PreloaderMobile = () => {
+const PreloaderMovil = () => {
   return (
     <div className="relative w-screen h-screen flex items-center justify-center bg-cover bg-center"
          style={{ backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)), url("/img/fondo.jpg")' }}>
@@ -29,4 +29,4 @@ const PreloaderMobile = () => {
   );
 };
 
-export default PreloaderMobile;
+export default PreloaderMovil;

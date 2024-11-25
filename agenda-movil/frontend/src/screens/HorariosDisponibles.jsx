@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient'; 
+import { LinearGradient } from 'expo-linear-gradient';
+import Preloader from './Preloader'; // Importa el Preloader
 
 const Horarios = () => {
   const navigation = useNavigation();
   const [horarios, setHorarios] = useState([]);
   const [horariosOriginales, setHorariosOriginales] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);  // Control de carga
   const [modalVisible, setModalVisible] = useState(false);
-const [filterType, setFilterType] = useState('');
-const [filterOptions, setFilterOptions] = useState([]);
-
+  const [filterType, setFilterType] = useState('');
+  const [filterOptions, setFilterOptions] = useState([]);
   const [filtroActivo, setFiltroActivo] = useState({
     fecha: null,
     hora: null,
@@ -25,25 +25,24 @@ const [filterOptions, setFilterOptions] = useState([]);
   const obtenerHorarios = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token');
-      
       if (!token) {
         Alert.alert("Error", "Usuario no autenticado.");
         return;
       }
-  
+
       const response = await fetch('https://taller-3.onrender.com/api/citas_disponibles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
-  
+
       const result = await response.json();
-      
+
       if (response.status === 200) {
         setHorarios(result.citas_disponibles);
         setHorariosOriginales(result.citas_disponibles);
-        setLoading(false);
+        setLoading(false);  // Deja de mostrar el Preloader
       } else {
         Alert.alert("Error", result.error || "No se pudieron obtener los horarios disponibles");
         setLoading(false);
@@ -57,11 +56,10 @@ const [filterOptions, setFilterOptions] = useState([]);
 
   useEffect(() => {
     obtenerHorarios();
-  }, []); 
+  }, []);
 
   const obtenerOpcionesFiltro = (tipo) => {
     let opciones = new Set();
-    
     horariosOriginales.forEach(horario => {
       switch (tipo) {
         case 'fecha':
@@ -78,7 +76,7 @@ const [filterOptions, setFilterOptions] = useState([]);
           break;
       }
     });
-    
+
     return Array.from(opciones).sort();
   };
 
@@ -93,16 +91,15 @@ const [filterOptions, setFilterOptions] = useState([]);
       ...prev,
       [filterType]: valor
     }));
-    
+
     let resultadosFiltrados = [...horariosOriginales];
-    
-    // Aplicar todos los filtros activos
+
     Object.entries({ ...filtroActivo, [filterType]: valor }).forEach(([tipo, valor]) => {
       if (valor) {
         resultadosFiltrados = resultadosFiltrados.filter(horario => horario[tipo] === valor);
       }
     });
-    
+
     setHorarios(resultadosFiltrados);
     setModalVisible(false);
   };
@@ -125,15 +122,13 @@ const [filterOptions, setFilterOptions] = useState([]);
   const agendarPress = async (cita_id) => {
     try {
       const confirmar = window.confirm("¿Estás seguro de que quieres agendar esta cita?");
-      
       if (confirmar) {
         const token = await AsyncStorage.getItem('access_token');
-        
         if (!token) {
           window.alert("Error: Usuario no autenticado.");
           return;
         }
-        
+
         const response = await fetch('https://taller-3.onrender.com/api/agendar', {
           method: 'POST',
           headers: {
@@ -142,9 +137,9 @@ const [filterOptions, setFilterOptions] = useState([]);
           },
           body: JSON.stringify({ cita_id }),
         });
-    
+
         const result = await response.json();
-    
+
         if (response.status === 200) {
           window.alert("Éxito: Cita agendada correctamente");
           obtenerHorarios();
@@ -156,24 +151,11 @@ const [filterOptions, setFilterOptions] = useState([]);
       console.error(error);
       window.alert("Error: Hubo un problema al agendar la cita.");
     }
-  };  
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image 
-          source={require('../assets/img/fondo.jpg')} 
-          style={styles.backgroundImage} 
-          resizeMode="cover"
-        />
-        <ActivityIndicator size="large" color="#260e86" />
-        <Text style={styles.loadingText}>CARGANDO HORARIOS DISPONIBLES...</Text>
-      </View>
-    );
-  }
+  };
 
   return (
     <View style={styles.gradientContainer}>
+      {loading && <Preloader />} {/* Mostrar el Preloader mientras se cargan los datos */}
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
           colors={['#260e86', '#003B88']} 

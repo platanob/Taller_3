@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient'; 
+import Preloader from './Preloader';  // Importa tu propio Preloader
 
 const HorasAgendadas = () => {
   const navigation = useNavigation();
@@ -103,24 +104,14 @@ const HorasAgendadas = () => {
   };
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image 
-          source={require('../assets/img/fondo.jpg')} 
-          style={styles.backgroundImage} 
-          resizeMode="cover"
-        />
-        <ActivityIndicator size="large" color="#260e86" />
-        <Text style={styles.loadingText}>CARGANDO CITAS...</Text>
-      </View>
-    );
+    return <Preloader />;  // Usa tu Preloader personalizado
   }
 
   return (
     <View style={styles.gradientContainer}>
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
-            colors={['#260e86', '#003B88']} // Degradado para el header
+            colors={['#260e86', '#003B88']}
             style={styles.header}
           >
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -164,6 +155,7 @@ const HorasAgendadas = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   gradientContainer: {
