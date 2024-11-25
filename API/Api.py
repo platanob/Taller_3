@@ -18,11 +18,13 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://localhost:19006",  # Expo Web en desarrollo
-            "http://127.0.0.1:19006",  # Variación de localhost para asegurar compatibilidad
-            "https://agendasenior-z6ii.onrender.com",  # El frontend desplegado en producción
-            "http://localhost:5000",  # Acceso local al backend
+            "http://localhost:19006",  # Expo Web
+            "http://127.0.0.1:19006",  # Variación de Expo Web
+            "http://localhost:3000",  # Frontend en React o similar
+            "http://127.0.0.1:3000",  # Variación de localhost para React
+            "http://localhost:5000",  # Backend local
             "http://127.0.0.1:5000",  # Variación para el backend local
+            "https://agendasenior-z6ii.onrender.com",  # Frontend desplegado
         ],
         "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
