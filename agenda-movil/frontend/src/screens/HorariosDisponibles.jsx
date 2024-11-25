@@ -153,9 +153,12 @@ const Horarios = () => {
     }
   };
 
+  if (loading) {
+    return <Preloader />;  
+  }
+
   return (
     <View style={styles.gradientContainer}>
-      {loading && <Preloader />} {/* Mostrar el Preloader mientras se cargan los datos */}
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
           colors={['#260e86', '#003B88']} 
