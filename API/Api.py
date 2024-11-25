@@ -933,10 +933,12 @@ def obtener_colaborador():
     identidad = get_jwt_identity()
     rut = identidad.get('rut')
 
-    colaborador = cuentas_admin.find_one({"rut": rut}, {"_id": 0, "nombre": 1, "rut": 1})
+    colaborador = cuentas_admin.find_one({"rut": rut}, {"_id": 1, "nombre": 1, "rut": 1, "correo": 1, "especialidad": 1})
 
     if not colaborador:
         return jsonify({'error': 'Colaborador no encontrado'}), 404
+
+    colaborador['_id'] = str(colaborador['_id'])
 
     return jsonify(colaborador), 200
 
