@@ -5,7 +5,22 @@ import Swal from 'sweetalert2';
 const Login = () => {
   const [rut, setRut] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
+  
+  const formatRut = (rut) => {
+    
+    let cleanedRut = rut.replace(/[^0-9kK]/g, '');
+  
+    if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{3})(\d{1,1})$/, '$1.$2.$3-$4');
+    } else if (cleanedRut.length > 4) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{1,1})$/, '$1.$2-$3');
+    } else if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{1,1})$/, '$1.$2');
+    }
+  
+    return cleanedRut;
+  };
 
   const login = async () => {
     if (!rut || !password) {
@@ -81,7 +96,7 @@ const Login = () => {
           type="text"
           placeholder="RUT"
           value={rut}
-          onChange={(e) => setRut(e.target.value)}
+          onChange={(e) => setRut(formatRut(e.target.value))}
           className="w-full text-black p-2 mb-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
