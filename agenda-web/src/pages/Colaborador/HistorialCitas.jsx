@@ -14,7 +14,7 @@ const MisCitas = () => {
           return;
         }
 
-        const response = await axios.get('https://taller-3.onrender.com/api/citas_to', {
+        const response = await axios.get('https://taller-3.onrender.com/api/citas_todas', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCitas(response.data.citas);
