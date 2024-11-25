@@ -19,7 +19,7 @@ CORS(app, resources={
     r"/api/*": {
         "origins": [
             "http://localhost:3000",  # Frontend local
-            "http://localhost:19000"   # Expo móvil
+            "http://localhost:19006"   # Expo móvil
         ],
         "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
         "allow_headers": ["Content-Type", "Authorization"],
