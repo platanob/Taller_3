@@ -22,6 +22,21 @@ export default function Registro() {
   const [isDiscapacitado, setIsDiscapacitado] = useState(false); 
   const [pdfDiscapacidad, setPdfDiscapacidad] = useState(null); 
 
+  const formatRut = (rut) => {
+    
+    let cleanedRut = rut.replace(/[^0-9kK]/g, '');
+  
+    if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{3})(\d{1,1})$/, '$1.$2.$3-$4');
+    } else if (cleanedRut.length > 4) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{1,1})$/, '$1.$2-$3');
+    } else if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{1,1})$/, '$1.$2');
+    }
+  
+    return cleanedRut;
+  };
+
   function base64ToBlob(base64Data, contentType = 'image/jpeg') {
     const byteCharacters = atob(base64Data.split(',')[1]);
     const byteNumbers = new Array(byteCharacters.length);
@@ -43,21 +58,18 @@ export default function Registro() {
     const register = async () => {
       if (!nombre || !rut || !correo || !password || !confirmPassword || !localidad) {
         Alert.alert('Error', 'Por favor, completa todos los campos');
-        alert('Error: Por favor, completa todos los campos');
         return;
       }
 
       const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
       if (!rutRegex.test(rut)) {
         Alert.alert('Error', 'El RUT debe seguir el formato X.XXX.XXX-X o XX.XXX.XXX-X');
-        alert('Error: El RUT debe seguir el formato X.XXX.XXX-X o XX.XXX.XXX-X');
         return;
       }
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(correo)) {
         Alert.alert('Error', 'Por favor, ingresa un correo válido');
-        alert('Error: Por favor, ingresa un correo válido');
         return;
       }
 
@@ -72,7 +84,6 @@ export default function Registro() {
         fechaIngresada.getDate() !== day
       ) {
         Alert.alert('Error', 'La fecha ingresada no es válida');
-        alert('Error: La fecha ingresada no es válida');
         return;
       }
 
@@ -80,7 +91,6 @@ export default function Registro() {
       const fechaActual = new Date();
       if (fechaIngresada > fechaActual) {
         Alert.alert('Error', 'La fecha de nacimiento no puede ser una fecha futura');
-        alert('Error: La fecha de nacimiento no puede ser una fecha futura');
         return;
       }
 
@@ -94,7 +104,6 @@ export default function Registro() {
 
       if (fechaIngresada > fechaLim) {
         Alert.alert('Error', `La fecha de nacimiento indica que tienes menos de ${edadMinima} años. Solo adultos mayores pueden registrarse.`);
-        alert(`Error: La fecha de nacimiento indica que tienes menos de ${edadMinima} años. Solo adultos mayores pueden registrarse.`);
         return;
       }
 
@@ -103,39 +112,33 @@ export default function Registro() {
       const fechaLimite = new Date(fechaActual.getFullYear() - edadMaxima, fechaActual.getMonth(), fechaActual.getDate());
       if (fechaIngresada < fechaLimite) {
         Alert.alert('Error', `La fecha de nacimiento no puede ser anterior a ${edadMaxima} años`);
-        alert(`Error: La fecha de nacimiento no puede ser anterior a ${edadMaxima} años`);
         return;
       }
 
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Las contraseñas no coinciden');
-      alert('Error: Las contraseñas no coinciden');
       return;
     }
 
     if (password.length < 6) {
       Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-      alert('Error: La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     if(!pdfFile){
       Alert.alert('Error', 'Por favor, selecciona un archivo PDF válido para el registro social de hogares');
-      alert('Error: Por favor, selecciona un archivo PDF válido para el registro social de hogares');
       return;
     }
   
   
     if (!carnetFrontal || !carnetTrasero) {
       Alert.alert('Error', 'Por favor, selecciona ambas imágenes del carnet (frontal y trasero)');
-      alert('Error: Por favor, selecciona ambas imágenes del carnet (frontal y trasero)')
       return;
     }
 
     // Validar que, si el usuario marca el switch de discapacidad, suba el archivo correspondiente
     if (isDiscapacitado && !pdfDiscapacidad) {
       Alert.alert('Error', 'Por favor, adjunta un archivo que certifique tu discapacidad');
-      alert('Error: Por favor, adjunta un archivo que certifique tu discapacidad');
       return;
     }
   
@@ -194,7 +197,6 @@ export default function Registro() {
       navigation.navigate('Login');
     } catch (error) {
       Alert.alert('Error', 'Error al registrar usuario', error.message);
-      alert('Error al registrar usuario', error.message);
       console.error('Error detallado del servidor:', error.message);
     }
   };
@@ -213,13 +215,11 @@ export default function Registro() {
         if (!resultado2.endsWith('.pdf')) {
           Alert.alert('Error', 'Solo se permiten archivos PDF.');
           console.log('Error: Solo se permiten archivos PDF.'); 
-          alert('Error: Solo se permiten archivos PDF.');
           return;
         }
         if (resultado.size > 10 * 1024 * 1024) { // 10 MB
           Alert.alert('Error', 'El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
           console.log('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
-          alert('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.')
           return;
         }
         setPdfFile(result);
@@ -246,13 +246,11 @@ export default function Registro() {
         if (!resultado2.endsWith('.pdf')) {
           Alert.alert('Error', 'Solo se permiten archivos PDF.');
           console.log('Error: Solo se permiten archivos PDF.'); 
-          alert('Error: Solo se permiten archivos PDF.');
           return;
         } 
         if (resultado.size > 10 * 1024 * 1024) { // 10 MB
             Alert.alert('Error', 'El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
             console.log('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.');
-            alert('Error: El archivo PDF seleccionado excede el tamaño máximo de 10 MB.')
             return;
           }
         setPdfDiscapacidad(result);
@@ -281,7 +279,6 @@ export default function Registro() {
         if (!resultado2.endsWith('.jpg') && !resultado2.endsWith('.png') ) {
           Alert.alert('Error', 'Solo se permiten archivos JPG o PNG.');
           console.log('Error: Solo se permiten archivos JPG o PNG.'); 
-          alert('Error: Solo se permiten archivos JPG o PNG.');
           return;
         }
         const fileUri = result.assets[0].uri;
@@ -296,7 +293,6 @@ export default function Registro() {
             'La imagen seleccionada excede el tamaño máximo de 5 MB.'
           );
           console.log('Error: La imagen seleccionada excede el tamaño máximo de 5 MB'); 
-          alert('Error: La imagen seleccionada excede el tamaño máximo de 5 MB');
           return;
         }
         setCarnetFrontal(result);
@@ -323,7 +319,6 @@ export default function Registro() {
         if (!resultado2.endsWith('.jpg') && !resultado2.endsWith('.png') ) {
           Alert.alert('Error', 'Solo se permiten archivos JPG o PNG.');
           console.log('Error: Solo se permiten archivos JPG o PNG.'); 
-          alert('Error: Solo se permiten archivos JPG o PNG.');
           return;
         }
         const fileUri = result.assets[0].uri;
@@ -338,7 +333,6 @@ export default function Registro() {
             'La imagen seleccionada excede el tamaño máximo de 5 MB.'
           );
           console.log('Error: La imagen seleccionada excede el tamaño máximo de 5 MB'); 
-          alert('Error: La imagen seleccionada excede el tamaño máximo de 5 MB');
           return;
         }
         setCarnetTrasero(result);
@@ -375,12 +369,12 @@ export default function Registro() {
           />
 
           <Text style={styles.label}>RUT</Text>
-          <TextInput
-            placeholder="Ej: X.XXX.XXX-X"
-            placeholderTextColor="#000"
-            style={styles.input}
-            value={rut}
-            onChangeText={setRut}
+            <TextInput
+              placeholder="Ej: X.XXX.XXX-X"
+              placeholderTextColor="#000"
+              style={styles.input}
+              value={rut}
+              onChangeText={(text) => setRut(formatRut(text))}
           />
 
           <Text style={styles.label}>Correo Electrónico</Text>

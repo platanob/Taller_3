@@ -10,6 +10,21 @@ export default function Login() {
   const [rut, setRut] = useState('');
   const [password, setPassword] = useState('');
 
+  const formatRut = (rut) => {
+    
+    let cleanedRut = rut.replace(/[^0-9kK]/g, '');
+  
+    if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{3})(\d{1,1})$/, '$1.$2.$3-$4');
+    } else if (cleanedRut.length > 4) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{3})(\d{1,1})$/, '$1.$2-$3');
+    } else if (cleanedRut.length > 1) {
+      cleanedRut = cleanedRut.replace(/^(\d{1,2})(\d{1,1})$/, '$1.$2');
+    }
+  
+    return cleanedRut;
+  };
+
   const login = async () => {
     if (!rut || !password) {
       Alert.alert('Error', 'Por favor, ingresa tu RUT y contraseña.');
@@ -61,7 +76,7 @@ export default function Login() {
           placeholderTextColor="#000"
           style={styles.input}
           value={rut}
-          onChangeText={setRut}  // Actualiza el estado con lo que escriba el usuario
+          onChangeText={(text) => setRut(formatRut(text))} 
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -71,7 +86,7 @@ export default function Login() {
           secureTextEntry
           style={styles.input}
           value={password}
-          onChangeText={setPassword}  // Actualiza el estado con lo que escriba el usuario
+          onChangeText={setPassword}    
         />
 
         <TouchableOpacity style={styles.button} onPress={login}>
