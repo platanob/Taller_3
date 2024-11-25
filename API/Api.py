@@ -16,16 +16,20 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 # Configuración de CORS
 # Configuración de CORS para permitir solicitudes desde tu frontend web y móvil (Expo)
 CORS(app, resources={
-    r"/api/*": {  # Asegura que el backend permita solicitudes a cualquier ruta /api/
+    r"/api/*": {
         "origins": [
-            "http://localhost:19006",  # Si estás usando Expo Web (ajusta según tu URL frontend)
-            "https://agendasenior-z6ii.onrender.com",  # El frontend que está desplegado
+            "http://localhost:19006",  # Expo Web en desarrollo
+            "http://127.0.0.1:19006",  # Variación de localhost para asegurar compatibilidad
+            "https://agendasenior-z6ii.onrender.com",  # El frontend desplegado en producción
+            "http://localhost:5000",  # Acceso local al backend
+            "http://127.0.0.1:5000",  # Variación para el backend local
         ],
-        "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],  # Métodos permitidos
-        "allow_headers": ["Content-Type", "Authorization"],  # Encabezados permitidos
-        "supports_credentials": True  # Permite el envío de credenciales (si es necesario)
+        "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
+
 # Configuración de Flask-JWT-Extended
 app.config['JWT_SECRET_KEY'] = 'supersecretjwtkey'  # Cambia esto por una clave secreta más segura en producción
 jwt = JWTManager(app)
