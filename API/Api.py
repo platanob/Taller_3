@@ -14,15 +14,20 @@ import os
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segura en producción
 # Configuración de CORS
+# Configuración de CORS para permitir solicitudes desde tu frontend web y móvil (Expo)
 CORS(app, resources={
     r"/api/*": {  # Permitir solicitudes a cualquier ruta que empiece con /api/
-        "origins": "http://localhost:3000",  # Asegúrate de permitir tu frontend
+        "origins": [
+            "http://localhost:3000",  # Origen de tu frontend web
+            "http://localhost:19000",  # Origen de la app móvil en Expo (ajusta esto según sea necesario)
+            "https://tusitio.com",  # Si tienes una URL de producción
+            # Puedes agregar otros orígenes si es necesario
+        ],
         "methods": ["GET", "POST", "PUT", "OPTIONS", "DELETE"],  # Métodos permitidos
         "allow_headers": ["Content-Type", "Authorization"],  # Encabezados permitidos
         "supports_credentials": True  # Permite el envío de credenciales (si es necesario)
     }
 })
-
 # Configuración de Flask-JWT-Extended
 app.config['JWT_SECRET_KEY'] = 'supersecretjwtkey'  # Cambia esto por una clave secreta más segura en producción
 jwt = JWTManager(app)
