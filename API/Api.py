@@ -18,7 +18,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://localhost:8081/",
+            "http://localhost:8081",
             "http://localhost:19006",  # Expo Web
             "http://127.0.0.1:19006",  # Variación de Expo Web
             "http://localhost:3000",  # Frontend en React o similar
