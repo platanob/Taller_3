@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 function Menu2() {
   const navigate = useNavigate();
@@ -11,22 +13,44 @@ function Menu2() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-        credentials: 'include' 
+        credentials: 'include',
       });
 
       if (response.ok) {
-        localStorage.removeItem('token'); 
-        alert('Has cerrado sesión con éxito.');
-        navigate('/'); 
+        localStorage.removeItem('token');
+
+        // SweetAlert2 para éxito
+        Swal.fire({
+          icon: 'success',
+          title: 'Sesión cerrada',
+          text: 'Has cerrado sesión con éxito.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate('/'); // Navegar al inicio después de la alerta
+        });
       } else {
         const errorData = await response.json();
-        alert(`Error al cerrar sesión: ${errorData.message}`);
+
+        // SweetAlert2 para error del servidor
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cerrar sesión',
+          text: errorData.message || 'Algo salió mal.',
+        });
       }
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
-      alert('Hubo un error al cerrar sesión.');
+
+      // SweetAlert2 para error general
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al cerrar sesión. Por favor, inténtalo de nuevo.',
+      });
     }
   };
 
@@ -43,7 +67,6 @@ function Menu2() {
         <Link to="crear-citas-administradores" className="text-[#005baa] font-medium hover:text-[#00cfff]">Crear Citas</Link> 
         <Link to="visualizar-graficos" className="text-[#005baa] font-medium hover:text-[#00cfff]">Visualizar Graficos</Link>
       </div>
-
       <div className="flex space-x-4">
         <button 
           className="flex items-center space-x-2 bg-[#005baa] text-white px-5 py-2 rounded-full hover:opacity-90"
