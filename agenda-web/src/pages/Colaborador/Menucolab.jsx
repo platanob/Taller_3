@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 
 function Menu() {
   const navigate = useNavigate();
@@ -18,15 +21,33 @@ function Menu() {
 
       if (response.ok) {
         localStorage.removeItem('token'); 
-        alert('Has cerrado sesión con éxito.');
-        navigate('/'); 
+        Swal.fire({
+          icon: 'success',
+          title: 'Sesión cerrada',
+          text: 'Has cerrado sesión con éxito.',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate('/'); 
+        });
       } else {
         const errorData = await response.json();
-        alert(`Error al cerrar sesión: ${errorData.message}`);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cerrar sesión',
+          text: errorData.message || 'Algo salió mal.',
+        });
       }
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
-      alert('Hubo un error al cerrar sesión.');
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al cerrar sesión. Por favor, inténtalo de nuevo.',
+      });
     }
   };
 
