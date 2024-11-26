@@ -1,4 +1,3 @@
-from flask import Flask, jsonify, request, send_file
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -18,6 +17,7 @@ app.secret_key = 'supersecretkey'  # Cambia esto por una clave secreta más segu
 CORS(app, resources={
     r"/api/*": {
         "origins": [
+            "http://localhost:8081",
             "http://localhost:19006",  # Expo Web
             "http://127.0.0.1:19006",  # Variación de Expo Web
             "http://localhost:3000",  # Frontend en React o similar
