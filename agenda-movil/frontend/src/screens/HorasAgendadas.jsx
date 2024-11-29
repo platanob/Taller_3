@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform, Modal, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,6 +11,7 @@ const HorasAgendadas = () => {
   const navigation = useNavigation();
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(false);
 
   useEffect(() => {
     const obtenerCitas = async () => {
@@ -75,10 +76,12 @@ const HorasAgendadas = () => {
   };
   
   const cancelarCita = async (citaId) => {
+    setLoading2(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) {
         Alert.alert('Error', 'No se encontró el token de autenticación.');
+        setLoading2(false);
         return;
       }
   
@@ -100,6 +103,8 @@ const HorasAgendadas = () => {
       }
     } catch (error) {
       Alert.alert('Error', 'Hubo un problema al conectar con la API.');
+    } finally {
+      setLoading2(false);
     }
   };
 
@@ -109,6 +114,7 @@ const HorasAgendadas = () => {
 
   return (
     <View style={styles.gradientContainer}>
+      {loading2 && <LoadingModal visible={loading2} />}
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
             colors={['#260e86', '#003B88']}
@@ -156,6 +162,21 @@ const HorasAgendadas = () => {
   );
 };
 
+const LoadingModal = ({ visible }) => (
+  <Modal
+    animationType="fade"
+    transparent={true}
+    visible={visible}
+    onRequestClose={() => {}}
+  >
+    <View style={styles.loadingModalContainer}>
+      <View style={styles.loadingModalContent}>
+        <ActivityIndicator size="large" color="#1565C0" />
+        <Text style={styles.loadingModalText}>Cancelando Cita...</Text>
+      </View>
+    </View>
+  </Modal>
+);
 
 const styles = StyleSheet.create({
   gradientContainer: {
@@ -290,6 +311,28 @@ const styles = StyleSheet.create({
     height: '100%',
     opacity: 0.1,
   },
+  loadingModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo translúcido
+  },
+  loadingModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '80%',
+    elevation: 10,
+  },
+  loadingModalText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#1565C0',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },  
 });
 
 export default HorasAgendadas;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, FlatList, ActivityIndicator, Platform} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -12,6 +12,7 @@ const Horarios = () => {
   const [horarios, setHorarios] = useState([]);
   const [horariosOriginales, setHorariosOriginales] = useState([]);
   const [loading, setLoading] = useState(true);  // Control de carga
+  const [loading2, setLoading2] = useState(false);  
   const [modalVisible, setModalVisible] = useState(false);
   const [filterType, setFilterType] = useState('');
   const [filterOptions, setFilterOptions] = useState([]);
@@ -43,14 +44,17 @@ const Horarios = () => {
         setHorarios(result.citas_disponibles);
         setHorariosOriginales(result.citas_disponibles);
         setLoading(false);  // Deja de mostrar el Preloader
+        setLoading2(false);
       } else {
         Alert.alert("Error", result.error || "No se pudieron obtener los horarios disponibles");
         setLoading(false);
+        setLoading2(false);
       }
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Hubo un problema al obtener los horarios disponibles.");
       setLoading(false);
+      setLoading2(false);
     }
   };
 
@@ -120,51 +124,70 @@ const Horarios = () => {
   };
 
   const agendarPress = async (cita_id) => {
+    const confirmacion = 
+      Platform.OS === 'web' 
+        ? window.confirm("¿Estás seguro de que quieres agendar esta cita?") 
+        : await new Promise((resolve) =>
+            Alert.alert(
+              "Confirmación de cita",
+              "¿Estás seguro de que quieres agendar esta cita?",
+              [
+                { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
+                { text: "Aceptar", onPress: () => resolve(true) },
+              ],
+              { cancelable: false }
+            )
+          );
+  
+    if (!confirmacion) return;
+  
     try {
-      // Mostrar confirmación usando Alert
-      Alert.alert(
-        "Confirmación",
-        "¿Estás seguro de que quieres agendar esta cita?",
-        [
-          {
-            text: "Cancelar",
-            style: "cancel",
-          },
-          {
-            text: "Aceptar",
-            onPress: async () => {
-              // Obtiene el token del almacenamiento
-              const token = await AsyncStorage.getItem('access_token');
-              if (!token) {
-                Alert.alert("Error", "Usuario no autenticado.");
-                return;
-              }
+      setLoading2(true);
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        if (Platform.OS === 'web') {
+          window.alert("Usuario no autenticado.");
+        } else {
+          Alert.alert("Error", "Usuario no autenticado.");
+        }
+        setLoading2(false);
+        return;
+      }
   
-              // Llamada a la API
-              const response = await fetch('https://taller-3.onrender.com/api/agendar', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ cita_id }),
-              });
+      const response = await fetch('https://taller-3.onrender.com/api/agendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ cita_id }),
+      });
   
-              const result = await response.json();
+      const result = await response.json();
   
-              if (response.status === 200) {
-                Alert.alert("Éxito", "Cita agendada correctamente.");
-                obtenerHorarios(); // Asegúrate de que esta función esté definida en tu código
-              } else {
-                Alert.alert("Error", result.error || "No se pudo agendar la cita.");
-              }
-            },
-          },
-        ]
-      );
+      if (response.status === 200) {
+        if (Platform.OS === 'web') {
+          window.alert("Cita agendada correctamente.");
+        } else {
+          Alert.alert("Éxito", "Cita agendada correctamente.");
+        }
+        await obtenerHorarios();
+      } else {
+        if (Platform.OS === 'web') {
+          window.alert(result.error || "No se pudo agendar la cita.");
+        } else {
+          Alert.alert("Error", result.error || "No se pudo agendar la cita.");
+        }
+        setLoading2(false);
+      }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Hubo un problema al agendar la cita.");
+      if (Platform.OS === 'web') {
+        window.alert("Hubo un problema al agendar la cita.");
+      } else {
+        Alert.alert("Error", "Hubo un problema al agendar la cita.");
+      }
+      setLoading2(false);
     }
   };
 
@@ -172,8 +195,10 @@ const Horarios = () => {
     return <Preloader />;  
   }
 
+
   return (
     <View style={styles.gradientContainer}>
+      {loading2 && <LoadingModal visible={loading2} />}
       <ScrollView contentContainerStyle={styles.container}>
         <LinearGradient
           colors={['#260e86', '#003B88']} 
@@ -306,6 +331,24 @@ const Horarios = () => {
     </View>
   );
 };
+
+const LoadingModal = ({ visible }) => (
+  <Modal
+    animationType="fade"
+    transparent={true}
+    visible={visible}
+    onRequestClose={() => {}}
+  >
+    <View style={styles.loadingModalContainer}>
+      <View style={styles.loadingModalContent}>
+        <ActivityIndicator size="large" color="#1565C0" />
+        <Text style={styles.loadingModalText}>Espere un momento...</Text>
+      </View>
+    </View>
+  </Modal>
+);
+
+
 const styles = StyleSheet.create({
     modalContainer: {
     flex: 1,
@@ -531,6 +574,28 @@ const styles = StyleSheet.create({
     height: '100%',
     opacity: 0.1,
   },
+  loadingModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo translúcido
+  },
+  loadingModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '80%',
+    elevation: 10,
+  },
+  loadingModalText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#1565C0',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },  
 });
 
 export default Horarios;
